@@ -30,7 +30,7 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
             return new ExtensionComponentDescription(
                 "Import an artifact named ",
                 new Hilite(this.ArtifactName),
-                "from TFS"
+                " from TFS"
             );
         }
     }
