@@ -8,19 +8,20 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
 {
     internal sealed class TfsBuildImporterEditor : BuildImporterEditorBase<TfsBuildImporterTemplate>
     {
-        private ValidatingTextBox txtFileMasks;
         private ValidatingTextBox txtArtifactName;
         private ValidatingTextBox txtTeamProject;
         private ValidatingTextBox txtBuildDefinition;
+        private ValidatingTextBox txtBuildNumber;
 
         public override BuildImporterBase CreateFromForm()
         {
             return new TfsBuildImporter
             {
                 ArtifactName = this.txtArtifactName.Text,
-                FileMasks = this.txtFileMasks.Text.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries),
                 TeamProject = this.txtTeamProject.Text,
-                BuildDefinition = this.txtBuildDefinition.Text
+                BuildDefinition = this.txtBuildDefinition.Text,
+                BuildNumber = (this.txtBuildNumber.Text != "last succeeded build" && this.txtBuildNumber.Text != "last completed build") ? this.txtBuildNumber.Text : null,
+                IncludeUnsuccessful = this.txtBuildNumber.Text == "last completed build"
             };
         }
 
@@ -30,14 +31,6 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
             {
                 Text = this.Template.ArtifactName,
                 Enabled = !this.Template.ArtifactNameLocked
-            };
-
-            this.txtFileMasks = new ValidatingTextBox
-            {
-                TextMode = TextBoxMode.MultiLine,
-                Rows = 3,
-                Text = "*",
-                Enabled = !this.Template.FileMasksLocked
             };
 
             this.txtTeamProject = new ValidatingTextBox
@@ -52,9 +45,16 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
                 Enabled = !this.Template.BuildDefinitionLocked
             };
 
+            this.txtBuildNumber = new ValidatingTextBox
+            {
+                AutoCompleteValues = new[] { "last completed build", "last succeeded build" },
+                Text = this.Template.BuildNumberLocked ? (this.Template.IncludeUnsuccessful ? "last completed build" : "last succeeded build") : string.Empty,
+                Enabled = !this.Template.BuildNumberLocked
+            };
+
             this.Controls.Add(
+                new SlimFormField("Build number:", this.txtBuildNumber),
                 new SlimFormField("Artifact name:", this.txtArtifactName),
-                new SlimFormField("File masks:", this.txtFileMasks),
                 new SlimFormField("Team project:", this.txtTeamProject),
                 new SlimFormField("Build definition:", this.txtBuildDefinition)
             );

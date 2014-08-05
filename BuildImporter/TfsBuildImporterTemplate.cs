@@ -24,6 +24,10 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
         public string BuildDefinition { get; set; }
         [Persistent]
         public bool BuildDefinitionLocked { get; set; }
+        [Persistent]
+        public bool BuildNumberLocked { get; set; }
+        [Persistent]
+        public bool IncludeUnsuccessful { get; set; }
 
         public override ExtensionComponentDescription GetDescription()
         {

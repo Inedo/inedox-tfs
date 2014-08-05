@@ -9,39 +9,37 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
 {
     internal sealed class TfsBuildImporterTemplateEditor : BuildImporterTemplateEditorBase
     {
-        private ValidatingTextBox txtFileMasks;
-        private CheckBox chkFileMasksLocked;
         private ValidatingTextBox txtArtifactName;
         private CheckBox chkArtifactNameLocked;
         private ValidatingTextBox txtTeamProject;
         private CheckBox chkTeamProjectLocked;
         private ValidatingTextBox txtBuildDefinition;
         private CheckBox chkBuildDefinitionLocked;
+        private DropDownList ddlBuildNumber;
 
         public override void BindToForm(BuildImporterTemplateBase extension)
         {
             var template = (TfsBuildImporterTemplate)extension;
-            this.txtFileMasks.Text = string.Join(Environment.NewLine, template.FileMasks);
-            this.chkFileMasksLocked.Checked = template.FileMasksLocked;
             this.txtArtifactName.Text = template.ArtifactName;
             this.chkArtifactNameLocked.Checked = template.ArtifactNameLocked;
             this.txtTeamProject.Text = template.TeamProject;
             this.chkTeamProjectLocked.Checked = template.TeamProjectLocked;
             this.txtBuildDefinition.Text = template.BuildDefinition;
             this.chkBuildDefinitionLocked.Checked = template.BuildDefinitionLocked;
+            this.ddlBuildNumber.SelectedValue = template.BuildNumberLocked ? (template.IncludeUnsuccessful ? "last" : "success") : string.Empty;
         }
         public override BuildImporterTemplateBase CreateFromForm()
         {
             return new TfsBuildImporterTemplate
             {
-                FileMasks = this.txtFileMasks.Text.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries),
-                FileMasksLocked = this.chkFileMasksLocked.Checked,
                 ArtifactName = this.txtArtifactName.Text,
                 ArtifactNameLocked = this.chkArtifactNameLocked.Checked,
                 TeamProject = this.txtTeamProject.Text,
                 TeamProjectLocked = this.chkTeamProjectLocked.Checked,
                 BuildDefinition = this.txtBuildDefinition.Text,
-                BuildDefinitionLocked = this.chkBuildDefinitionLocked.Checked
+                BuildDefinitionLocked = this.chkBuildDefinitionLocked.Checked,
+                IncludeUnsuccessful = this.ddlBuildNumber.SelectedValue == "last",
+                BuildNumberLocked = !string.IsNullOrEmpty(this.ddlBuildNumber.SelectedValue)
             };
         }
 
@@ -50,15 +48,6 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
             this.txtArtifactName = new ValidatingTextBox();
 
             this.chkArtifactNameLocked = new CheckBox { Text = "Allow selection at build time" };
-
-            this.txtFileMasks = new ValidatingTextBox
-            {
-                TextMode = TextBoxMode.MultiLine,
-                Rows = 3,
-                Text = "*"
-            };
-
-            this.chkFileMasksLocked = new CheckBox { Text = "Allow selection at build time" };
 
             this.txtTeamProject = new ValidatingTextBox();
 
@@ -70,11 +59,21 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
 
             var fldSingleFileArtifactName = new SlimFormField("Artifact name:", new Div(new Div(this.txtArtifactName), new Div(this.chkArtifactNameLocked)));
 
+            this.ddlBuildNumber = new DropDownList
+            {
+                Items =
+                {
+                    new ListItem("allow selection at build time", string.Empty),
+                    new ListItem("last succeeeded build", "success"),
+                    new ListItem("last completed build", "last")
+                }
+            };
+
             this.Controls.Add(
                 fldSingleFileArtifactName,
-                new SlimFormField("File masks:", new Div(new Div(this.txtFileMasks), new Div(this.chkFileMasksLocked))),
                 new SlimFormField("Team project:", new Div(new Div(this.txtTeamProject), new Div(this.chkTeamProjectLocked))),
-                new SlimFormField("Build definition:", new Div(new Div(this.txtBuildDefinition), new Div(this.chkBuildDefinitionLocked)))
+                new SlimFormField("Build definition:", new Div(new Div(this.txtBuildDefinition), new Div(this.chkBuildDefinitionLocked))),
+                new SlimFormField("Build number:", this.ddlBuildNumber)
             );
         }
     }

@@ -24,7 +24,9 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
         [Persistent]
         public string TeamProject { get; set; }
         [Persistent]
-        public string[] FileMasks { get; set; }
+        public string BuildNumber { get; set; }
+        [Persistent]
+        public bool IncludeUnsuccessful { get; set; }
 
         public override void Import(IBuildImporterContext context)
         {
@@ -33,15 +35,15 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
                 var buildService = collection.GetService<IBuildServer>();
 
                 var spec = buildService.CreateBuildDetailSpec(this.TeamProject, string.IsNullOrEmpty(this.BuildDefinition) ? "*" : this.BuildDefinition);
-                spec.BuildNumber = context.BuildNumber;
+                spec.BuildNumber = this.BuildNumber;
                 spec.MaxBuildsPerDefinition = 1;
                 spec.QueryOrder = BuildQueryOrder.FinishTimeDescending;
-                spec.Status = BuildStatus.All;
+                spec.Status = this.IncludeUnsuccessful ? (BuildStatus.Failed | BuildStatus.Succeeded | BuildStatus.PartiallySucceeded) : BuildStatus.Succeeded;
 
                 var result = buildService.QueryBuilds(spec);
                 var build = result.Builds.FirstOrDefault();
                 if (build == null)
-                    throw new InvalidOperationException(string.Format("Build {0} for team project {1} definition {2} did not return any builds.", context.BuildNumber, this.TeamProject, this.BuildDefinition));
+                    throw new InvalidOperationException(string.Format("Build {0} for team project {1} definition {2} did not return any builds.", build.BuildNumber, this.TeamProject, this.BuildDefinition));
 
                 this.LogDebug("Build number {0} drop location: {1}", build.BuildNumber, build.DropLocation);
 
@@ -58,7 +60,7 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
                         }
                     ).Entry;
 
-                    var matches = Util.Files.Comparison.GetMatches(build.DropLocation, directoryResult, this.FileMasks);
+                    var matches = Util.Files.Comparison.GetMatches(build.DropLocation, directoryResult, new[] { "*" });
 
                     var artifactId = new ArtifactIdentifier(context.ApplicationId, context.ReleaseNumber, context.BuildNumber, context.DeployableId, this.ArtifactName);
                     using (var artifact = new ArtifactBuilder(artifactId))
