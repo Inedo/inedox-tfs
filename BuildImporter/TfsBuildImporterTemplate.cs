@@ -9,10 +9,6 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
     internal sealed class TfsBuildImporterTemplate : BuildImporterTemplateBase<TfsBuildImporter>
     {
         [Persistent]
-        public string[] FileMasks { get; set; }
-        [Persistent]
-        public bool FileMasksLocked { get; set; }
-        [Persistent]
         public string ArtifactName { get; set; }
         [Persistent]
         public bool ArtifactNameLocked { get; set; }

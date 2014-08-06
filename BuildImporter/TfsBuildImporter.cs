@@ -6,6 +6,7 @@ using Inedo.BuildMaster.Extensibility;
 using Inedo.BuildMaster.Extensibility.Agents;
 using Inedo.BuildMaster.Extensibility.BuildImporters;
 using Inedo.BuildMaster.Files;
+using Inedo.BuildMaster.Web;
 using Microsoft.TeamFoundation.Build.Client;
 using Microsoft.TeamFoundation.Client;
 
@@ -15,6 +16,7 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
         "TFS",
         "Imports artifacts from TFS.",
         typeof(TfsBuildImporterTemplate))]
+    [CustomEditor(typeof(TfsBuildImporterEditor))]
     public sealed class TfsBuildImporter : BuildImporterBase
     {
         [Persistent]
