@@ -12,15 +12,13 @@ namespace Inedo.BuildMasterExtensions.TFS
     [CustomEditor(typeof(TfsConfigurerEditor))]
     public sealed class TfsConfigurer : ExtensionConfigurerBase
     {
+        public static readonly string TypeQualifiedName = typeof(TfsConfigurer).FullName + "," + typeof(TfsConfigurer).Assembly.GetName().Name;
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="TfsConfigurer"/> class.
+        /// Gets or sets the server identifier.
         /// </summary>
-        public TfsConfigurer()
-        {
-        }
-
-        public static readonly string ConfigurerName = typeof(TfsConfigurer).FullName + "," + typeof(TfsConfigurer).Assembly.GetName().Name;
-
+        [Persistent]
+        public int? ServerId { get; set; }
         /// <summary>
         /// The base url of the TFS store, should not include collection name, e.g. "http://server:port/tfs"
         /// </summary>
@@ -58,22 +56,6 @@ namespace Inedo.BuildMasterExtensions.TFS
         public override string ToString()
         {
             return string.Empty;
-        }
-
-        internal static TfsConfigurer GetConfigurer(string profileName = null)
-        {
-            var profiles = StoredProcs
-                .ExtensionConfiguration_GetConfigurations(TfsConfigurer.ConfigurerName)
-                .Execute();
-
-            var configurer =
-                profiles.FirstOrDefault(p => string.Equals(profileName, p.Profile_Name, System.StringComparison.OrdinalIgnoreCase)) ??
-                    profiles.FirstOrDefault(p => p.Default_Indicator.Equals(Domains.YN.Yes));
-
-            if (configurer == null)
-                return null;
-
-            return (TfsConfigurer)Util.Persistence.DeserializeFromPersistedObjectXml(configurer.Extension_Configuration);
         }
     }
 }

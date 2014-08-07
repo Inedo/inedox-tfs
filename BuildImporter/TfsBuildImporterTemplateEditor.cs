@@ -10,70 +10,68 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
     internal sealed class TfsBuildImporterTemplateEditor : BuildImporterTemplateEditorBase
     {
         private ValidatingTextBox txtArtifactName;
-        private CheckBox chkArtifactNameLocked;
-        private ValidatingTextBox txtTeamProject;
-        private CheckBox chkTeamProjectLocked;
-        private ValidatingTextBox txtBuildDefinition;
-        private CheckBox chkBuildDefinitionLocked;
+        private TeamProjectPicker txtTeamProject;
+        private BuildDefinitionPicker txtBuildDefinition;
         private DropDownList ddlBuildNumber;
+        private ValidatingTextBox txtBuildNumberPattern;
 
         public override void BindToForm(BuildImporterTemplateBase extension)
         {
             var template = (TfsBuildImporterTemplate)extension;
             this.txtArtifactName.Text = template.ArtifactName;
-            this.chkArtifactNameLocked.Checked = template.ArtifactNameLocked;
             this.txtTeamProject.Text = template.TeamProject;
-            this.chkTeamProjectLocked.Checked = template.TeamProjectLocked;
             this.txtBuildDefinition.Text = template.BuildDefinition;
-            this.chkBuildDefinitionLocked.Checked = template.BuildDefinitionLocked;
+            this.txtBuildDefinition.TeamProject = template.TeamProject;
             this.ddlBuildNumber.SelectedValue = template.BuildNumberLocked ? (template.IncludeUnsuccessful ? "last" : "success") : string.Empty;
+            this.txtBuildNumberPattern.Text = template.BuildNumberPattern;
         }
         public override BuildImporterTemplateBase CreateFromForm()
         {
+            var config = (TfsConfigurer)this.GetExtensionConfigurer();
+
             return new TfsBuildImporterTemplate
             {
                 ArtifactName = this.txtArtifactName.Text,
-                ArtifactNameLocked = this.chkArtifactNameLocked.Checked,
                 TeamProject = this.txtTeamProject.Text,
-                TeamProjectLocked = this.chkTeamProjectLocked.Checked,
                 BuildDefinition = this.txtBuildDefinition.Text,
-                BuildDefinitionLocked = this.chkBuildDefinitionLocked.Checked,
                 IncludeUnsuccessful = this.ddlBuildNumber.SelectedValue == "last",
-                BuildNumberLocked = !string.IsNullOrEmpty(this.ddlBuildNumber.SelectedValue)
+                BuildNumberLocked = !string.IsNullOrEmpty(this.ddlBuildNumber.SelectedValue),
+                BuildNumberPattern = this.txtBuildNumberPattern.Text,
+                ServerId = config.ServerId.GetValueOrDefault()
             };
         }
 
         protected override void CreateChildControls()
         {
-            this.txtArtifactName = new ValidatingTextBox();
+            var config = (TfsConfigurer)this.GetExtensionConfigurer();
 
-            this.chkArtifactNameLocked = new CheckBox { Text = "Allow selection at build time" };
-
-            this.txtTeamProject = new ValidatingTextBox();
-
-            this.chkTeamProjectLocked = new CheckBox { Text = "Allow selection at build time" };
-
-            this.txtBuildDefinition = new ValidatingTextBox();
-
-            this.chkBuildDefinitionLocked = new CheckBox { Text = "Allow selection at build time" };
-
-            var fldSingleFileArtifactName = new SlimFormField("Artifact name:", new Div(new Div(this.txtArtifactName), new Div(this.chkArtifactNameLocked)));
-
+            this.txtArtifactName = new ValidatingTextBox { DefaultText = "Same as project name" };
+            this.txtTeamProject = new TeamProjectPicker(config);
+            this.txtBuildDefinition = new BuildDefinitionPicker(config);
+            this.txtTeamProject.SelectedIndexChanged += (s, e) => { this.txtBuildDefinition.TeamProject = this.txtTeamProject.SelectedValue; };
             this.ddlBuildNumber = new DropDownList
             {
                 Items =
                 {
                     new ListItem("allow selection at build time", string.Empty),
-                    new ListItem("last succeeeded build", "success"),
+                    new ListItem("last succeeded build", "success"),
                     new ListItem("last completed build", "last")
                 }
             };
+            this.txtBuildNumberPattern = new ValidatingTextBox { Text = "_(?<num>[^_]+)$" };
 
             this.Controls.Add(
-                fldSingleFileArtifactName,
-                new SlimFormField("Team project:", new Div(new Div(this.txtTeamProject), new Div(this.chkTeamProjectLocked))),
-                new SlimFormField("Build definition:", new Div(new Div(this.txtBuildDefinition), new Div(this.chkBuildDefinitionLocked))),
-                new SlimFormField("Build number:", this.ddlBuildNumber)
+                new SlimFormField("Artifact name:", this.txtArtifactName),
+                new SlimFormField("Team project:", this.txtTeamProject),
+                new SlimFormField("Build definition:", txtBuildDefinition),
+                new SlimFormField("Build number:", this.ddlBuildNumber),
+                new SlimFormField("Capture pattern:", this.txtBuildNumberPattern)
+                {
+                    HelpText = "When importing a build, you can opt to use the TFS build number; however, because TFS build numbers "
+                    + "can be 1,000 characters (or more), up to 10 characters must be extracted to fit the BuildMaster build number"
+                    + "using a Regex capture group named \"num\". The default TFS Build Number Format is $(BuildDefinitionName)_$(Date:yyyyMMdd)$(Rev:.r); "
+                    + " and thus the pattern _(?<num>[^_]+)$ will extract the date and revision."
+                }
             );
         }
     }

@@ -11,27 +11,22 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
         [Persistent]
         public string ArtifactName { get; set; }
         [Persistent]
-        public bool ArtifactNameLocked { get; set; }
-        [Persistent]
         public string TeamProject { get; set; }
         [Persistent]
-        public bool TeamProjectLocked { get; set; }
-        [Persistent]
         public string BuildDefinition { get; set; }
-        [Persistent]
-        public bool BuildDefinitionLocked { get; set; }
         [Persistent]
         public bool BuildNumberLocked { get; set; }
         [Persistent]
         public bool IncludeUnsuccessful { get; set; }
+        [Persistent]
+        public string BuildNumberPattern { get; set; }
 
         public override ExtensionComponentDescription GetDescription()
         {
-            return new ExtensionComponentDescription(
-                "Import an artifact named ",
-                new Hilite(this.ArtifactName),
-                " from TFS"
-            );
+            var desc = new ExtensionComponentDescription("Import ");
+            desc.AppendContent(" from ", new Hilite(this.TeamProject));
+
+            return desc;
         }
     }
 }

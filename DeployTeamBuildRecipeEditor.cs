@@ -11,7 +11,7 @@ using Inedo.Web.Controls.SimpleHtml;
 
 namespace Inedo.BuildMasterExtensions.TFS
 {
-    public sealed class DeployTeamBuildRecipeEditor : RecipeEditorBase
+    internal sealed class DeployTeamBuildRecipeEditor : RecipeEditorBase
     {
         private sealed class DeployTeamBuildRecipeWizardSteps : RecipeWizardSteps
         {
@@ -81,14 +81,15 @@ namespace Inedo.BuildMasterExtensions.TFS
         private void CreateAboutControls()
         {
             this.wizardSteps.About.Controls.Add(
-                new H2("About the Deploy Team Build Wizard"),
+                new H2("About the ", new I("Deploy TFS/TeamBuild") ," Wizard"),
                 new P(
-                    "This wizard will create a basic application for creating an importing a build in Team Build. Like many wizards, this is meant as a starting point. ",
-                    "After the wizard completes, you can change the servers, drop locations, deployment targets, or any other aspects of the application by editing the Deployment Plan."
+                    "This wizard will create a basic application that imports build artifact from a TeamBuild's drop folder then deploys that artifact to a target folder. ",
+                    "It's meant to be a starting point and, once the wizard completes, you can add additional actions to the deployment plan that can ",
+                    "do all sorts of things, such as deploying to multiple servers, stopping/starting service, etc."
                 ),
                 new P(
                     "To learn more about BuildMaster integration, see the ",
-                    new A("TFS2012 Extension") { Href = "http://inedo.com/buildmaster/extensions/tfs2012", Target = "_blank" },
+                    new A("TFS Extension") { Href = "http://inedo.com/buildmaster/extensions/tfs", Target = "_blank" },
                     " for more details."
                 )
             );
@@ -96,7 +97,7 @@ namespace Inedo.BuildMasterExtensions.TFS
 
         private void CreateTfsConnectionControls()
         {
-            var defaultCfg = TfsConfigurer.GetConfigurer(null) ?? new TfsConfigurer();
+            var defaultCfg = (TfsConfigurer)this.GetExtensionConfigurer();
             var ctlError = new InfoBox { BoxType = InfoBox.InfoBoxTypes.Error, Visible = false };
 
             var txtBaseUrl = new ValidatingTextBox
@@ -169,7 +170,7 @@ namespace Inedo.BuildMasterExtensions.TFS
                 defaultCfg.UserName = txtUserName.Text;
                 defaultCfg.Password = txtPassword.Text;
                 var defaultProfile = StoredProcs
-                        .ExtensionConfiguration_GetConfigurations(TfsConfigurer.ConfigurerName)
+                        .ExtensionConfiguration_GetConfigurations(TfsConfigurer.TypeQualifiedName)
                         .Execute()
                         .Where(p => p.Default_Indicator == Domains.YN.Yes)
                         .FirstOrDefault() ?? new Tables.ExtensionConfigurations();
@@ -177,7 +178,7 @@ namespace Inedo.BuildMasterExtensions.TFS
                 StoredProcs
                     .ExtensionConfiguration_SaveConfiguration(
                         Util.NullIf(defaultProfile.ExtensionConfiguration_Id, 0),
-                        TfsConfigurer.ConfigurerName,
+                        TfsConfigurer.TypeQualifiedName,
                         defaultProfile.Profile_Name ?? "Default",
                         Util.Persistence.SerializeToPersistedObjectXml(defaultCfg),
                         Domains.YN.Yes)
@@ -187,11 +188,11 @@ namespace Inedo.BuildMasterExtensions.TFS
 
         private void CreateSelectProjectControls()
         {
-            var ddlTeamProject = new TeamProjectPicker();
-            ddlTeamProject.PreRender += (s, e) => ddlTeamProject.FillItems(null);
+            var config = (TfsConfigurer)this.GetExtensionConfigurer();
 
-            var ddlBuildDefinition = new BuildDefinitionPicker();
-            ddlBuildDefinition.PreRender += (s, e) => ddlBuildDefinition.FillItems(null);
+            var ddlTeamProject = new TeamProjectPicker(config);
+
+            var ddlBuildDefinition = new BuildDefinitionPicker(config);
             ddlTeamProject.SelectedIndexChanged += (s, e) => { ddlBuildDefinition.TeamProject = ddlTeamProject.SelectedValue; };
 
             this.wizardSteps.TfsBuildDefinition.Controls.Add(
@@ -221,7 +222,9 @@ namespace Inedo.BuildMasterExtensions.TFS
             var ctlTargetDeploymentPath = new SourceControlFileFolderPicker()
             {
                 DisplayMode = SourceControlBrowser.DisplayModes.Folders,
-                ServerId = 1
+                ServerId = 1,
+                Width = 350,
+                Text = @"C:\TfsTestDeploys\"
             };
 
 

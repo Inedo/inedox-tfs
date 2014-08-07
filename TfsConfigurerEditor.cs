@@ -3,6 +3,7 @@ using Inedo.BuildMaster.Extensibility.Configurers.Extension;
 using Inedo.BuildMaster.Web.Controls;
 using Inedo.BuildMaster.Web.Controls.Extensions;
 using Inedo.Web.Controls;
+using Inedo.Web.Controls.SimpleHtml;
 
 namespace Inedo.BuildMasterExtensions.TFS
 {
@@ -13,16 +14,18 @@ namespace Inedo.BuildMasterExtensions.TFS
         private PasswordTextBox txtPassword;
         private ValidatingTextBox txtDomain;
         private DropDownList ddlAuthentication;
+        private ActionServerPicker ctlServerPicker;
 
         public override void BindToForm(ExtensionConfigurerBase extension)
         {
             var configurer = (TfsConfigurer)extension;
 
             if (configurer.UseSystemCredentials)
-                ddlAuthentication.SelectedValue = "system";
+                this.ddlAuthentication.SelectedValue = "system";
             else
-                ddlAuthentication.SelectedValue = "specify";
+                this.ddlAuthentication.SelectedValue = "specify";
 
+            this.ctlServerPicker.ServerId = configurer.ServerId;
             this.txtBaseUrl.Text = configurer.BaseUrl;
             this.txtUserName.Text = configurer.UserName;
             this.txtPassword.Text = configurer.Password;
@@ -33,6 +36,7 @@ namespace Inedo.BuildMasterExtensions.TFS
         {
             return new TfsConfigurer
             {
+                ServerId = this.ctlServerPicker.ServerId,
                 BaseUrl = this.txtBaseUrl.Text,
                 UserName = this.txtUserName.Text,
                 Password = this.txtPassword.Text,
@@ -48,6 +52,8 @@ namespace Inedo.BuildMasterExtensions.TFS
 
         protected override void CreateChildControls()
         {
+            this.ctlServerPicker = new ActionServerPicker { ServerId = 1, ID = "ctlServerPicker" };
+
             this.txtBaseUrl = new ValidatingTextBox();
 
             this.txtUserName = new ValidatingTextBox();
@@ -56,51 +62,38 @@ namespace Inedo.BuildMasterExtensions.TFS
 
             this.txtPassword = new PasswordTextBox();
 
-            ddlAuthentication = new DropDownList();
-            ddlAuthentication.Items.Add(new ListItem("System", "system"));
-            ddlAuthentication.Items.Add(new ListItem("Specify account...", "specify"));
+            this.ddlAuthentication = new DropDownList { ID = "ddlAuthentication" };
+            this.ddlAuthentication.Items.Add(new ListItem("System", "system"));
+            this.ddlAuthentication.Items.Add(new ListItem("Specify account...", "specify"));
 
-            var ffgAuthentication = new FormFieldGroup("Authentication",
-                    "The method used for authenticating a connection to Team Foundation Server",
-                    false,
-                    new StandardFormField("Authentication:", ddlAuthentication)
-                );
+            var sffAuthentication = new SlimFormField("Authentication:", this.ddlAuthentication) { ID = "sffAuthentication" };
 
-            var ffgCredentials = new FormFieldGroup("Credentials",
-                    "Specify the credentials of the account you would like to use to connect to Team Foundation Server",
-                    false,
-                    new StandardFormField("Username:", txtUserName),
-                    new StandardFormField("Password:", txtPassword),
-                    new StandardFormField("Domain:", txtDomain)
-                );
+            var sffCredentials = new SlimFormField("Credentials:",
+                new Div(new Div("Username:"), new Div(this.txtUserName)),
+                new Div(new Div("Password:"), new Div(this.txtPassword)),
+                new Div(new Div("Domain:"), new Div(this.txtDomain))
+                ) { ID = "sffCredentials" };
 
             this.Controls.Add(
-                new FormFieldGroup("TFS Server Name",
-                    "The name of the Team Foundation Server to connect to, e.g. http://tfsserver:8080/tfs",
-                    false,
-                    new StandardFormField(
-                        "Server Name:",
-                        txtBaseUrl,
-                        new RenderClientScriptDelegator(w =>
+                new SlimFormField("TFS client:", this.ctlServerPicker){ HelpText = "The server where the TFS Client (Visual Studio or Team Explorer) is installed." },
+                new SlimFormField("TFS collection url:", this.txtBaseUrl){ HelpText = "The is the api of the TFS Collection to use, e.g. http://tfsserver:8080/tfs" },
+                sffAuthentication,
+                sffCredentials,
+                new RenderJQueryDocReadyDelegator(w =>
                         {
                             w.WriteLine(
-@"$().ready(function(){
-    var onAuthorizationChange = function(){
+@"  var onAuthorizationChange = function(){
         if($('#" + ddlAuthentication.ClientID + @" option:selected').val() == 'system') {
-            $('#" + ffgCredentials.ClientID + @"').hide();
+            $('#" + sffCredentials.ClientID + @"').hide();
         }
         else {
-            $('#" + ffgCredentials.ClientID + @"').show();
+            $('#" + sffCredentials.ClientID + @"').show();
         }
     };
     onAuthorizationChange();
-    $('#" + ddlAuthentication.ClientID + @"').change(onAuthorizationChange);
-});");
+    $('#" + this.ddlAuthentication.ClientID + @"').change(onAuthorizationChange);
+");
                         })
-                    )
-                ),
-                ffgAuthentication,
-                ffgCredentials
               );
         }
     }
