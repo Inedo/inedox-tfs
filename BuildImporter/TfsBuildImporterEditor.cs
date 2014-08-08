@@ -19,7 +19,7 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
                 ArtifactName = Util.CoalesceStr(this.Template.ArtifactName, this.Template.TeamProject),
                 TeamProject = this.Template.TeamProject,
                 BuildDefinition = this.Template.BuildDefinition,
-                TfsBuildNumber = (this.txtBuildNumber.Text != "last succeeded build" && this.txtBuildNumber.Text != "last completed build") ? this.txtBuildNumber.Text : null, 
+                TfsBuildNumber = (this.txtBuildNumber.Text != "last succeeded build" && this.txtBuildNumber.Text != "last completed build") ? this.txtBuildNumber.Text : null,
                 IncludeUnsuccessful = this.txtBuildNumber.Text == "last completed build",
                 ServerId = this.Template.ServerId
             };
@@ -27,31 +27,19 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
             if (InedoLib.Util.Int.ParseN(importer.TfsBuildNumber) == null)
             {
                 var config = (TfsConfigurer)this.GetExtensionConfigurer();
-                
-                string tfsBuildNumber;
-                using (var agent = Util.Agents.CreateAgentFromId(config.ServerId))
-                {
-                    
-                    tfsBuildNumber = agent.GetService<IRemoteMethodExecuter>().InvokeFunc((cfg,i) =>
-                        {
-                            var helper = new TfsHelper(cfg);
-                            var build = helper.GetBuild(i.TeamProject, i.BuildDefinition, i.TfsBuildNumber, i.IncludeUnsuccessful);
-                            return build == null ? null : build.BuildNumber;
-                        }, config, importer);
-                }
 
-                var grp = Regex.Match(tfsBuildNumber, this.Template.BuildNumberPattern).Groups["num"];
-                if (grp == null || !grp.Success || string.IsNullOrEmpty(grp.Value))
-                    throw new InvalidOperationException(
-                        "A build number could not be extracted using "
-                        + this.Template.BuildNumberPattern + " from TFS build number " + tfsBuildNumber);
+                var tfsBuild = config.GetBuildInfo(importer.TeamProject, importer.BuildDefinition, importer.TfsBuildNumber, importer.IncludeUnsuccessful);
+                if (tfsBuild == null)
+                    throw new InvalidOperationException("There were matching builds found in TFS.");
 
-                if (grp.Value.Length > 10)
-                    throw new InvalidOperationException(
-                        "The extracted build number (" + grp.Value + ") is longer than 10 characters.");
+                var group = Regex.Match(tfsBuild.BuildNumber, this.Template.BuildNumberPattern).Groups["num"];
+                if (!group.Success || string.IsNullOrEmpty(group.Value))
+                    throw new InvalidOperationException("A build number could not be extracted using " + this.Template.BuildNumberPattern + " from TFS build number " + tfsBuild.BuildNumber);
 
-                importer.BuildNumber = grp.Value;
+                if (group.Value.Length > 10)
+                    throw new InvalidOperationException("The extracted build number (" + group.Value + ") is longer than 10 characters.");
 
+                importer.BuildNumber = group.Value;
             }
 
             return importer;

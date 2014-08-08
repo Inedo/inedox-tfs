@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Linq;
 using Inedo.BuildMaster;
-using Inedo.BuildMaster.Data;
+using Inedo.BuildMaster.Extensibility.Agents;
 using Inedo.BuildMaster.Extensibility.Configurers.Extension;
 using Inedo.BuildMaster.Web;
+using Microsoft.TeamFoundation.Build.Client;
 
 [assembly: ExtensionConfigurer(typeof(Inedo.BuildMasterExtensions.TFS.TfsConfigurer))]
 
@@ -56,6 +57,35 @@ namespace Inedo.BuildMasterExtensions.TFS
         public override string ToString()
         {
             return string.Empty;
+        }
+
+        internal TfsBuildInfo GetBuildInfo(string teamProject, string buildDefinition, string buildNumber, bool includeUnsuccessful)
+        {
+            using (var agent = Util.Agents.CreateAgentFromId(this.ServerId))
+            {
+                var methodExecuter = agent.GetService<IRemoteMethodExecuter>();
+                return methodExecuter.InvokeFunc(GetBuildInfoInternal, teamProject, buildDefinition, buildNumber, includeUnsuccessful);
+            }
+        }
+
+        private TfsBuildInfo GetBuildInfoInternal(string teamProject, string buildDefinition, string buildNumber, bool includeUnsuccessful)
+        {
+            using (var collection = TfsActionBase.GetTeamProjectCollection(this))
+            {
+                var buildService = collection.GetService<IBuildServer>();
+
+                var spec = buildService.CreateBuildDetailSpec(teamProject, InedoLib.Util.CoalesceStr(buildDefinition, "*"));
+                spec.BuildNumber = InedoLib.Util.CoalesceStr(buildNumber, "*");
+                spec.MaxBuildsPerDefinition = 1;
+                spec.QueryOrder = BuildQueryOrder.FinishTimeDescending;
+                spec.Status = includeUnsuccessful ? (BuildStatus.Failed | BuildStatus.Succeeded | BuildStatus.PartiallySucceeded) : BuildStatus.Succeeded;
+
+                var result = buildService.QueryBuilds(spec).Builds.FirstOrDefault();
+                if (result != null)
+                    return new TfsBuildInfo(result);
+                else
+                    return null;
+            }
         }
     }
 }
