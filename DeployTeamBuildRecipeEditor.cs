@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Web.UI;
 using Inedo.BuildMaster;
 using Inedo.BuildMaster.Data;
@@ -81,7 +80,7 @@ namespace Inedo.BuildMasterExtensions.TFS
         private void CreateAboutControls()
         {
             this.wizardSteps.About.Controls.Add(
-                new H2("About the ", new I("Deploy TFS/TeamBuild") ," Wizard"),
+                new H2("About the ", new I("Deploy TFS/TeamBuild"), " Wizard"),
                 new P(
                     "This wizard will create a basic application that imports build artifact from a TeamBuild's drop folder then deploys that artifact to a target folder. ",
                     "It's meant to be a starting point and, once the wizard completes, you can add additional actions to the deployment plan that can ",
@@ -124,27 +123,25 @@ namespace Inedo.BuildMasterExtensions.TFS
                 Width = 350
             };
 
-            txtBaseUrl.ServerValidate += (s, e) =>
-            {
-                var configurer = new TfsConfigurer
+            txtBaseUrl.ServerValidate +=
+                (s, e) =>
                 {
-                    BaseUrl = txtBaseUrl.Text,
-                    UserName = txtUserName.Text,
-                    Password = txtPassword.Text,
-                    UseSystemCredentials = string.IsNullOrWhiteSpace(txtUserName.Text)
+                    var configurer = new TfsConfigurer
+                    {
+                        BaseUrl = txtBaseUrl.Text,
+                        UserName = txtUserName.Text,
+                        Password = txtPassword.Text,
+                        UseSystemCredentials = string.IsNullOrWhiteSpace(txtUserName.Text)
+                    };
+
+                    var errorMessage = configurer.TestConnection();
+                    if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        e.IsValid = false;
+                        ctlError.Visible = true;
+                        ctlError.Controls.Add(new P("An error occurred while attempting to connect: " + errorMessage));
+                    }
                 };
-                try
-                {
-                    var collection = TfsActionBase.GetTeamProjectCollection(configurer);
-                    collection.EnsureAuthenticated();
-                }
-                catch (Exception _e)
-                {
-                    e.IsValid = false;
-                    ctlError.Visible = true;
-                    ctlError.Controls.Add(new P("An error occurred while attempting to connect: " + _e.Message));
-                }
-            };
 
             this.wizardSteps.TfsConnection.Controls.Add(
                 ctlError,
@@ -164,7 +161,8 @@ namespace Inedo.BuildMasterExtensions.TFS
 
             this.WizardStepChange += (s, e) =>
             {
-                if (e.CurrentStep != this.wizardSteps.TfsConnection) return;
+                if (e.CurrentStep != this.wizardSteps.TfsConnection)
+                    return;
 
                 defaultCfg.BaseUrl = txtBaseUrl.Text;
                 defaultCfg.UserName = txtUserName.Text;
@@ -236,10 +234,12 @@ namespace Inedo.BuildMasterExtensions.TFS
                     new StandardFormField("Target Directory:", ctlTargetDeploymentPath)
                 )
             );
+
             this.WizardStepChange += (s, e) =>
             {
                 if (e.CurrentStep != this.wizardSteps.SelectDeploymentPath)
                     return;
+
                 this.TargetDeploymentPath = ctlTargetDeploymentPath.Text;
             };
         }

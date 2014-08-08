@@ -65,7 +65,7 @@ namespace Inedo.BuildMasterExtensions.TFS
             using (var agent = Util.Agents.CreateAgentFromId(this.ServerId))
             {
                 var methodExecuter = agent.GetService<IRemoteMethodExecuter>();
-                return methodExecuter.InvokeFunc(GetBuildInfoInternal, teamProject, buildDefinition, buildNumber, includeUnsuccessful);
+                return methodExecuter.InvokeFunc(this.GetBuildInfoInternal, teamProject, buildDefinition, buildNumber, includeUnsuccessful);
             }
         }
         internal string[] GetBuildDefinitions(string teamProject)
@@ -73,7 +73,7 @@ namespace Inedo.BuildMasterExtensions.TFS
             using (var agent = Util.Agents.CreateAgentFromId(this.ServerId))
             {
                 var methodExecuter = agent.GetService<IRemoteMethodExecuter>();
-                return methodExecuter.InvokeFunc(GetBuildDefinitionsInternal, teamProject);
+                return methodExecuter.InvokeFunc(this.GetBuildDefinitionsInternal, teamProject);
             }
         }
         internal string[] GetTeamProjects()
@@ -81,10 +81,34 @@ namespace Inedo.BuildMasterExtensions.TFS
             using (var agent = Util.Agents.CreateAgentFromId(this.ServerId))
             {
                 var methodExecuter = agent.GetService<IRemoteMethodExecuter>();
-                return methodExecuter.InvokeFunc(GetTeamProjectsInternal);
+                return methodExecuter.InvokeFunc(this.GetTeamProjectsInternal);
+            }
+        }
+        internal string TestConnection()
+        {
+            using (var agent = Util.Agents.CreateAgentFromId(this.ServerId))
+            {
+                var methodExecuter = agent.GetService<IRemoteMethodExecuter>();
+                return methodExecuter.InvokeFunc(this.TestConnectionInternal);
             }
         }
 
+        private string TestConnectionInternal()
+        {
+            try
+            {
+                using (var collection = TfsActionBase.GetTeamProjectCollection(this))
+                {
+                    collection.EnsureAuthenticated();
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+        }
         private string[] GetTeamProjectsInternal()
         {
             using (var collection = TfsActionBase.GetTeamProjectCollection(this))
