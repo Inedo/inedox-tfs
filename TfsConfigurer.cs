@@ -5,6 +5,7 @@ using Inedo.BuildMaster.Extensibility.Agents;
 using Inedo.BuildMaster.Extensibility.Configurers.Extension;
 using Inedo.BuildMaster.Web;
 using Microsoft.TeamFoundation.Build.Client;
+using Microsoft.TeamFoundation.Server;
 
 [assembly: ExtensionConfigurer(typeof(Inedo.BuildMasterExtensions.TFS.TfsConfigurer))]
 
@@ -67,7 +68,39 @@ namespace Inedo.BuildMasterExtensions.TFS
                 return methodExecuter.InvokeFunc(GetBuildInfoInternal, teamProject, buildDefinition, buildNumber, includeUnsuccessful);
             }
         }
+        internal string[] GetBuildDefinitions(string teamProject)
+        {
+            using (var agent = Util.Agents.CreateAgentFromId(this.ServerId))
+            {
+                var methodExecuter = agent.GetService<IRemoteMethodExecuter>();
+                return methodExecuter.InvokeFunc(GetBuildDefinitionsInternal, teamProject);
+            }
+        }
+        internal string[] GetTeamProjects()
+        {
+            using (var agent = Util.Agents.CreateAgentFromId(this.ServerId))
+            {
+                var methodExecuter = agent.GetService<IRemoteMethodExecuter>();
+                return methodExecuter.InvokeFunc(GetTeamProjectsInternal);
+            }
+        }
 
+        private string[] GetTeamProjectsInternal()
+        {
+            using (var collection = TfsActionBase.GetTeamProjectCollection(this))
+            {
+                var structureService = collection.GetService<ICommonStructureService>();
+                return structureService.ListProjects().Select(p => p.Name).ToArray();
+            }
+        }
+        private string[] GetBuildDefinitionsInternal(string teamProject)
+        {
+            using (var collection = TfsActionBase.GetTeamProjectCollection(this))
+            {
+                var buildService = collection.GetService<IBuildServer>();
+                return buildService.QueryBuildDefinitions(teamProject).Select(d => d.Name).ToArray();
+            }
+        }
         private TfsBuildInfo GetBuildInfoInternal(string teamProject, string buildDefinition, string buildNumber, bool includeUnsuccessful)
         {
             using (var collection = TfsActionBase.GetTeamProjectCollection(this))

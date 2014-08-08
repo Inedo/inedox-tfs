@@ -76,6 +76,5 @@ namespace Inedo.BuildMasterExtensions.TFS
 
             Util.Recipes.CreateSetupRelease(this.ApplicationId, Domains.ReleaseNumberSchemes.MajorMinor, this.WorkflowId, new[] { deployableId });
         }
-
     }
 }

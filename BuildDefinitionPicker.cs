@@ -1,9 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Web.UI.WebControls;
-using Inedo.BuildMaster;
-using Inedo.BuildMaster.Extensibility.Agents;
-using Microsoft.TeamFoundation.Build.Client;
-using Microsoft.TeamFoundation.Server;
 
 namespace Inedo.BuildMasterExtensions.TFS
 {
@@ -18,27 +15,17 @@ namespace Inedo.BuildMasterExtensions.TFS
 
         public string TeamProject { get; set; }
 
-        protected override void OnPreRender(System.EventArgs e)
+        protected override void OnPreRender(EventArgs e)
         {
             base.OnPreRender(e);
 
-            if (string.IsNullOrEmpty(this.TeamProject)) return;
-
-            string[] buildDefinitions;
-            using (var agent = Util.Agents.CreateAgentFromId(config.ServerId))
+            if (!string.IsNullOrEmpty(this.TeamProject))
             {
-                buildDefinitions = agent.GetService<IRemoteMethodExecuter>().InvokeFunc((cfg,proj) =>
-                {
-                    using (var collection = TfsActionBase.GetTeamProjectCollection(cfg))
-                    {
-                        var buildService = collection.GetService<IBuildServer>();
-                        return buildService.QueryBuildDefinitions(proj).Select(d => d.Name).ToArray();
-                    }
-                }, config, this.TeamProject);
-            }
+                var buildDefinitions = config.GetBuildDefinitions(this.TeamProject);
 
-            this.Items.Clear();
-            this.Items.AddRange(buildDefinitions.Select(d => new ListItem(d)).ToArray());
+                this.Items.Clear();
+                this.Items.AddRange(buildDefinitions.Select(d => new ListItem(d)).ToArray());
+            }
         }
     }
 }
