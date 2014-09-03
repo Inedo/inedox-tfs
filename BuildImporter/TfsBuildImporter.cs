@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Inedo.BuildMaster;
 using Inedo.BuildMaster.Artifacts;
 using Inedo.BuildMaster.Data;
@@ -61,7 +62,10 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
                     }
                 ).Entry;
 
-                var matches = Util.Files.Comparison.GetMatches(tfsBuild.DropLocation, directoryResult, new[] { "*" });
+                var matches = Util.Files.Comparison.GetMatches(tfsBuild.DropLocation, directoryResult, new[] { "*" })
+                    .Where(e => !IsSamePath(e.Path, tfsBuild.DropLocation))
+                    .ToList();
+
                 if (!matches.Any())
                 {
                     this.LogWarning("No files were found in the drop folder.");
@@ -95,6 +99,26 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
                 Value_Text: tfsBuild.BuildNumber,
                 Sensitive_Indicator: YNIndicator.No
             ).Execute();
+        }
+
+        private static bool IsSamePath(string path1, string path2)
+        {
+            if (object.ReferenceEquals(path1, path2))
+                return true;
+            if (object.ReferenceEquals(path1, null) || object.ReferenceEquals(path2, null))
+                return false;
+
+            if (Math.Abs(path1.Length - path2.Length) > 1)
+                return false;
+
+            var pathA = path1;
+            if (pathA.EndsWith("\\") || pathA.EndsWith("/"))
+                pathA = pathA.Substring(0, pathA.Length - 1);
+            var pathB = path2;
+            if (pathB.EndsWith("\\") || pathB.EndsWith("/"))
+                pathB = pathB.Substring(0, pathB.Length - 1);
+
+            return string.Equals(pathA.Replace('/', '\\'), pathB.Replace('/', '\\'), StringComparison.OrdinalIgnoreCase);
         }
     }
 }
