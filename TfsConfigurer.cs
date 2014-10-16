@@ -34,7 +34,7 @@ namespace Inedo.BuildMasterExtensions.TFS
         /// <summary>
         /// The password used to connect to the server
         /// </summary>
-        [Persistent]
+        [Persistent(Encrypted = true)]
         public string Password { get; set; }
         /// <summary>
         /// The domain of the server
