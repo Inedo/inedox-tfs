@@ -79,6 +79,28 @@ namespace Inedo.BuildMasterExtensions.TFS
 
         private void CreateAboutControls()
         {
+            var config = (TfsConfigurer)this.GetExtensionConfigurer();
+
+            if (config == null || config.BaseUrl == null)
+            {
+                this.wizardSteps.About.Controls.Add(
+                    new H2("Before we get started..."),
+                    new InfoBox(
+                        InfoBox.InfoBoxTypes.Warning,
+                        new P("The TFS extension's connection information must be configured before BuildMaster can create this example application. ", 
+                            "You can configure the URL, user, and more on the ",
+                            new A("extension details page") { Target = "_blank", Href = "/administration/extensions/configure?extensionName=TFS" },
+                            "; just click the \"Create Configuration Profile\" button and fill in the connection details. Also make sure that ",
+                            "if you create one or more configuration profiles, ",
+                            new B("at least one of them is specified as the default profile "),
+                            "because  BuildMaster will use that default for this example application.")
+                    ),
+                    new RenderJQueryDocReadyDelegator(w => w.Write("$(function(){{ $('.buttonMinor').hide(); }});"))
+                );
+                
+                return;
+            }
+
             this.wizardSteps.About.Controls.Add(
                 new H2("About the ", new I("Deploy TFS/TeamBuild"), " Wizard"),
                 new P(

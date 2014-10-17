@@ -83,27 +83,43 @@
   <ItemGroup>
     <Compile Include="BuildDefinitionPicker.cs" />
     <Compile Include="BuildImporter\TfsBuildImporter.cs" />
-    <Compile Include="BuildImporter\TfsBuildImporterEditor.cs" />
+    <Compile Include="BuildImporter\TfsBuildImporterEditor.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
     <Compile Include="BuildImporter\TfsBuildImporterTemplate.cs" />
     <Compile Include="Actions\CreateTfsBuildAction.cs" />
-    <Compile Include="Actions\CreateTfsBuildActionEditor.cs" />
-    <Compile Include="Actions\CreateTfsBuildOutputArtifactActionEditor.cs" />
-    <Compile Include="BuildImporter\TfsBuildImporterTemplateEditor.cs" />
+    <Compile Include="Actions\CreateTfsBuildActionEditor.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Actions\CreateTfsBuildOutputArtifactActionEditor.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="BuildImporter\TfsBuildImporterTemplateEditor.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
     <Compile Include="DeployTeamBuildRecipe.cs" />
-    <Compile Include="DeployTeamBuildRecipeEditor.cs" />
+    <Compile Include="DeployTeamBuildRecipeEditor.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
     <Compile Include="Actions\CreateTfsBuildOutputArtifactAction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TeamProjectPicker.cs" />
     <Compile Include="Providers\TfsCategory.cs" />
     <Compile Include="Providers\TfsIssue.cs" />
     <Compile Include="Providers\TfsIssueTrackingProvider.cs" />
-    <Compile Include="Providers\TfsIssueTrackingProviderEditor.cs" />
+    <Compile Include="Providers\TfsIssueTrackingProviderEditor.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
     <Compile Include="Actions\TfsActionBase.cs" />
     <Compile Include="TfsBuildInfo.cs" />
     <Compile Include="TfsConfigurer.cs" />
-    <Compile Include="TfsConfigurerEditor.cs" />
+    <Compile Include="TfsConfigurerEditor.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
     <Compile Include="Providers\TfsSourceControlProvider.cs" />
-    <Compile Include="Providers\TfsSourceControlProviderEditor.cs" />
+    <Compile Include="Providers\TfsSourceControlProviderEditor.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

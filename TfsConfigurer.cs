@@ -47,7 +47,7 @@ namespace Inedo.BuildMasterExtensions.TFS
         [Persistent]
         public bool UseSystemCredentials { get; set; }
 
-        public Uri BaseUri { get { return new Uri(this.BaseUrl); } }
+        public Uri BaseUri { get { return this.BaseUrl == null ? null : new Uri(this.BaseUrl); } }
 
         /// <summary>
         /// Returns a <see cref="System.String" /> that represents this instance.
