@@ -45,7 +45,14 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
                 return;
             }
 
-            this.LogInformation("Tfs Build Number: {0}", tfsBuild.BuildNumber);
+            this.LogInformation("TFS Build Number: {0}", tfsBuild.BuildNumber);
+
+            if (string.IsNullOrWhiteSpace(tfsBuild.DropLocation))
+            {
+                this.LogError("TFS configuration error: the selected build definition does not have a drop location specified.");
+                return;
+            }
+
             this.LogInformation("Drop location: {0}", tfsBuild.DropLocation);
 
             using (var agent = Util.Agents.CreateAgentFromId(configurer.ServerId))
