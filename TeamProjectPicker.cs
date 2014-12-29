@@ -21,7 +21,7 @@ namespace Inedo.BuildMasterExtensions.TFS
             this.Items.Add(string.Empty);
             if (this.config == null || this.config.BaseUrl == null)
                 return;
-            var projectNames = config.GetTeamProjects();
+            var projectNames = config.GetTeamProjects().OrderBy(name => name);
             this.Items.AddRange(projectNames.Select(p => new ListItem(p)).ToArray());
         }
     }

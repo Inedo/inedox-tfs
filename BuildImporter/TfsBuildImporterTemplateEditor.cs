@@ -68,7 +68,7 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
                 new SlimFormField("Capture pattern:", this.txtBuildNumberPattern)
                 {
                     HelpText = "When importing a build, you can opt to use the TFS build number; however, because TFS build numbers "
-                    + "can be 1,000 characters (or more), up to 10 characters must be extracted to fit the BuildMaster build number"
+                    + "can be 1,000 characters (or more), up to 10 characters must be extracted to fit the BuildMaster build number "
                     + "using a Regex capture group named \"num\". The default TFS Build Number Format is $(BuildDefinitionName)_$(Date:yyyyMMdd)$(Rev:.r); "
                     + " and thus the pattern _(?<num>[^_]+)$ will extract the date and revision."
                 }

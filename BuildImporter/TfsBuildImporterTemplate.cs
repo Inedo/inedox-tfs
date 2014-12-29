@@ -24,8 +24,10 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
         public override ExtensionComponentDescription GetDescription()
         {
             var desc = new ExtensionComponentDescription("Import ");
+            if (this.BuildNumberLocked)
+                desc.AppendContent(this.IncludeUnsuccessful ? "last completed build" : "last succeeded build");
             desc.AppendContent(" from ", new Hilite(this.TeamProject));
-
+            
             return desc;
         }
     }

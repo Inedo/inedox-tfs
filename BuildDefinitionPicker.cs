@@ -21,7 +21,7 @@ namespace Inedo.BuildMasterExtensions.TFS
 
             if (!string.IsNullOrEmpty(this.TeamProject))
             {
-                var buildDefinitions = config.GetBuildDefinitions(this.TeamProject);
+                var buildDefinitions = config.GetBuildDefinitions(this.TeamProject).OrderBy(def => def);
 
                 this.Items.Clear();
                 this.Items.AddRange(buildDefinitions.Select(d => new ListItem(d)).ToArray());
