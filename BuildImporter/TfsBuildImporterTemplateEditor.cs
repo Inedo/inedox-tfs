@@ -20,7 +20,7 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
             var template = (TfsBuildImporterTemplate)extension;
             this.txtArtifactName.Text = template.ArtifactName;
             this.txtTeamProject.Text = template.TeamProject;
-            this.txtBuildDefinition.Text = template.BuildDefinition;
+            this.txtBuildDefinition.InitialSelection = template.BuildDefinition;
             this.txtBuildDefinition.TeamProject = template.TeamProject;
             this.ddlBuildNumber.SelectedValue = template.BuildNumberLocked ? (template.IncludeUnsuccessful ? "last" : "success") : string.Empty;
             this.txtBuildNumberPattern.Text = template.BuildNumberPattern;

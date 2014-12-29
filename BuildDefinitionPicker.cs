@@ -14,6 +14,7 @@ namespace Inedo.BuildMasterExtensions.TFS
         }
 
         public string TeamProject { get; set; }
+        public string InitialSelection { get; set; }
 
         protected override void OnPreRender(EventArgs e)
         {
@@ -24,7 +25,12 @@ namespace Inedo.BuildMasterExtensions.TFS
                 var buildDefinitions = config.GetBuildDefinitions(this.TeamProject).OrderBy(def => def);
 
                 this.Items.Clear();
-                this.Items.AddRange(buildDefinitions.Select(d => new ListItem(d)).ToArray());
+                this.Items.AddRange(
+                    buildDefinitions.Select(d => new ListItem(d) 
+                        { 
+                            Selected = string.Equals(this.InitialSelection, d, StringComparison.OrdinalIgnoreCase)
+                        }).ToArray()
+                    );
             }
         }
     }

@@ -26,7 +26,10 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
             var desc = new ExtensionComponentDescription("Import ");
             if (this.BuildNumberLocked)
                 desc.AppendContent(this.IncludeUnsuccessful ? "last completed build" : "last succeeded build");
-            desc.AppendContent(" from ", new Hilite(this.TeamProject));
+            else
+                desc.AppendContent("a specific build number");
+            desc.AppendContent(" using build definition ", new Hilite(this.BuildDefinition));
+            desc.AppendContent(" from the ", new Hilite(this.TeamProject), " team project");
             
             return desc;
         }
