@@ -261,8 +261,12 @@ namespace Inedo.BuildMasterExtensions.TFS
 
                 try
                 {
+                    Workstation.Current.RemoveCachedWorkspaceInfo(versionControlServer);
+
                     workspace = GetMappedWorkspace(versionControlServer, sourcePath, targetPath);
-                    workspace.Get(VersionSpec.ParseSingleSpec("L" + label, versionControlServer.AuthenticatedUser), GetOptions.GetAll | GetOptions.Overwrite);
+                    GetRequest newReq = new GetRequest(new ItemSpec(sourcePath, RecursionType.Full), VersionSpec.ParseSingleSpec("L" + label, versionControlServer.AuthorizedUser));
+
+                    GetStatus status = workspace.Get(newReq, GetOptions.Overwrite | GetOptions.GetAll);
                 }
                 finally
                 {
