@@ -50,7 +50,7 @@ namespace Inedo.BuildMasterExtensions.TFS
 
             this.txtPassword = new PasswordTextBox();
 
-            ddlAuthentication = new DropDownList();
+            ddlAuthentication = new DropDownList() { ID = "ddlAuthentication" };
             ddlAuthentication.Items.Add(new ListItem("System", "system"));
             ddlAuthentication.Items.Add(new ListItem("Specify account...", "specify"));
 
