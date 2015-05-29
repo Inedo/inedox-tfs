@@ -15,6 +15,8 @@ namespace Inedo.BuildMasterExtensions.TFS
         private PasswordTextBox txtPassword;
         private DropDownList ddlAuthentication;
         private CheckBox chkAllowHtml;
+        private DropDownList ddlUseWiql;
+        private ValidatingTextBox txtWiql;
 
         public override void BindToForm(ProviderBase extension)
         {
@@ -26,33 +28,43 @@ namespace Inedo.BuildMasterExtensions.TFS
             this.txtPassword.Text = provider.Password;
             this.txtDomain.Text = provider.Domain;
             this.chkAllowHtml.Checked = provider.AllowHtmlIssueDescriptions;
+            this.txtWiql.Text = provider.CustomWiql;
 
             if (provider.UseSystemCredentials)
                 this.ddlAuthentication.SelectedValue = "system";
             else
                 this.ddlAuthentication.SelectedValue = "specify";
-        }
 
+            if (string.IsNullOrWhiteSpace(provider.CustomWiql))
+                this.ddlUseWiql.SelectedValue = "False";
+            else
+                this.ddlUseWiql.SelectedValue = "True";
+        }
         public override ProviderBase CreateFromForm()
         {
             return new TfsIssueTrackingProvider
             {
-                BaseUrl = this.txtBaseUrl.Text,
-                CustomReleaseNumberFieldName = this.txtCustomReleaseNumberFieldName.Text,
-                UserName = this.txtUserName.Text,
+                BaseUrl = this.txtBaseUrl.Text.Trim(),
+                CustomReleaseNumberFieldName = this.txtCustomReleaseNumberFieldName.Text.Trim(),
+                UserName = this.txtUserName.Text.Trim(),
                 Password = this.txtPassword.Text,
-                Domain = this.txtDomain.Text,
+                Domain = this.txtDomain.Text.Trim(),
                 UseSystemCredentials = (this.ddlAuthentication.SelectedValue == "system"),
-                AllowHtmlIssueDescriptions = this.chkAllowHtml.Checked
+                AllowHtmlIssueDescriptions = this.chkAllowHtml.Checked,
+                CustomWiql = bool.Parse(this.ddlUseWiql.SelectedValue) ? this.txtWiql.Text : null
             };
         }
 
         protected override void CreateChildControls()
         {
-            this.txtBaseUrl = new ValidatingTextBox { DefaultText = "ex: http://tfsserver:80/tfs", Required = true };
+            this.txtBaseUrl = new ValidatingTextBox
+            {
+                DefaultText = "ex: http://tfsserver:80/tfs",
+                Required = true
+            };
 
             this.txtCustomReleaseNumberFieldName = new ValidatingTextBox { DefaultText = "iteration" };
-            
+
             this.txtUserName = new ValidatingTextBox();
 
             this.txtDomain = new ValidatingTextBox();
@@ -60,10 +72,19 @@ namespace Inedo.BuildMasterExtensions.TFS
             this.txtPassword = new PasswordTextBox();
 
             this.chkAllowHtml = new CheckBox { Text = "Allow HTML in issue descriptions" };
-            
+
             ddlAuthentication = new DropDownList();
             ddlAuthentication.Items.Add(new ListItem("System", "system"));
             ddlAuthentication.Items.Add(new ListItem("Specify account...", "specify"));
+
+            this.ddlUseWiql = new DropDownList
+            {
+                Items =
+                {
+                    new ListItem("Not using a custom query", "False"),
+                    new ListItem("Custom WIQL query", "True")
+                }
+            };
 
             var ffgAuthentication = new SlimFormField("Authentication:", ddlAuthentication);
 
@@ -73,20 +94,41 @@ namespace Inedo.BuildMasterExtensions.TFS
                 new SlimFormField("Domain:", this.txtDomain)
             );
 
+            this.txtWiql = new ValidatingTextBox
+            {
+                TextMode = TextBoxMode.MultiLine,
+                Rows = 5
+            };
+
+            var ctlWiql = new SlimFormField("WIQL query:", this.txtWiql)
+            {
+                HelpText = "This will be sent to TFS directly, after BuildMaster variables have been replaced. This WIQL query should return all issues "
+                         + "for the current BuildMaster release. Any release-level or higher BuildMaster variables may be used in this query."
+            };
+
+            var ctlNoWiql = new SlimFormField("Release number field:", this.txtCustomReleaseNumberFieldName)
+            {
+                HelpText = HelpText.FromHtml("If you store your TFS work item release numbers in a custom field, enter the full field \"refname\" of the custom field here - otherwise leave this field blank and \"Iteration\" will be used to retrieve them.<br /><br />For more information on custom work item types, visit <a href=\"http://msdn.microsoft.com/en-us/library/ms400654.aspx\" target=\"_blank\">http://msdn.microsoft.com/en-us/library/ms400654.aspx</a>")
+            };
+
             this.Controls.Add(
                 new SlimFormField("TFS URL:", this.txtBaseUrl),
                 ffgAuthentication,
                 ffgCredentials,
-                new SlimFormField("Release number field:", this.txtCustomReleaseNumberFieldName)
-                {
-                    HelpText = HelpText.FromHtml("If you store your TFS work item release numbers in a custom field, enter the full field \"refname\" of the custom field here - otherwise leave this field blank and \"Iteration\" will be used to retrieve them.<br /><br />For more information on custom work item types, visit <a href=\"http://msdn.microsoft.com/en-us/library/ms400654.aspx\" target=\"_blank\">http://msdn.microsoft.com/en-us/library/ms400654.aspx</a>")
-                },
+                new SlimFormField("Query mode:", this.ddlUseWiql),
+                ctlNoWiql,
+                ctlWiql,
                 new SlimFormField("Options:", this.chkAllowHtml),
                 new RenderJQueryDocReadyDelegator(
                     w =>
                     {
                         w.Write("$('#{0}').change(function(){{", this.ddlAuthentication.ClientID);
                         w.Write("if($(this).val() == 'system') $('#{0}').hide(); else $('#{0}').show();", ffgCredentials.ClientID);
+                        w.Write("});");
+                        w.Write("$('#{0}').change();", this.ddlAuthentication.ClientID);
+
+                        w.Write("$('#{0}').change(function(){{", this.ddlUseWiql.ClientID);
+                        w.Write("if($(this).val() == 'False') {{ $('#{0}').hide(); $('#{1}').show(); }} else {{ $('#{0}').show(); $('#{1}').hide(); }}", ctlWiql.ClientID, ctlNoWiql.ClientID);
                         w.Write("});");
                         w.Write("$('#{0}').change();", this.ddlAuthentication.ClientID);
                     }
