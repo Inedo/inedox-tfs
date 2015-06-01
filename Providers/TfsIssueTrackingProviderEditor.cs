@@ -73,12 +73,19 @@ namespace Inedo.BuildMasterExtensions.TFS
 
             this.chkAllowHtml = new CheckBox { Text = "Allow HTML in issue descriptions" };
 
-            ddlAuthentication = new DropDownList();
-            ddlAuthentication.Items.Add(new ListItem("System", "system"));
-            ddlAuthentication.Items.Add(new ListItem("Specify account...", "specify"));
+            ddlAuthentication = new DropDownList
+            {
+                ID = "ddlAuthentication",
+                Items =
+                {
+                    new ListItem("System", "system"),
+                    new ListItem("Specify account...", "specify")
+                }
+            };
 
             this.ddlUseWiql = new DropDownList
             {
+                ID = "ddlUseWiql",
                 Items =
                 {
                     new ListItem("Not using a custom query", "False"),
@@ -130,7 +137,7 @@ namespace Inedo.BuildMasterExtensions.TFS
                         w.Write("$('#{0}').change(function(){{", this.ddlUseWiql.ClientID);
                         w.Write("if($(this).val() == 'False') {{ $('#{0}').hide(); $('#{1}').show(); }} else {{ $('#{0}').show(); $('#{1}').hide(); }}", ctlWiql.ClientID, ctlNoWiql.ClientID);
                         w.Write("});");
-                        w.Write("$('#{0}').change();", this.ddlAuthentication.ClientID);
+                        w.Write("$('#{0}').change();", this.ddlUseWiql.ClientID);
                     }
                 )
             );

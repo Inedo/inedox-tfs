@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Web.UI.WebControls;
 using Inedo.BuildMaster;
 using Inedo.BuildMaster.Data;
-using Inedo.BuildMaster.Extensibility.Agents;
 using Inedo.BuildMaster.Extensibility.IssueTrackerConnections;
 using Inedo.BuildMaster.Extensibility.Providers.IssueTracking;
 using Inedo.BuildMaster.Web.Controls;
@@ -98,6 +95,17 @@ namespace Inedo.BuildMasterExtensions.TFS.Providers
                 select new ListItem(c.Name, c.Id.ToString())
             );
 
+            if (this.HasProviderWiql())
+            {
+                this.Controls.Add(
+                    new InfoBox(
+                        InfoBox.InfoBoxTypes.Info,
+                        new P("There is a custom WIQL query defined at the provider level. That query will override any project or area filtering here."),
+                        new P("However, you may still specify a custom WIQL query here to override the provider's WIQL query.")
+                    )
+                );
+            }
+
             this.ddlUseWiql = new ComboSelect
             {
                 Items =
@@ -168,6 +176,20 @@ namespace Inedo.BuildMasterExtensions.TFS.Providers
                 .First();
 
             return (TfsIssueTrackingProvider)Util.Providers.CreateProviderFromId<IssueTrackingProviderBase>(application.IssueTracking_Provider_Id.Value);
+        }
+        private bool HasProviderWiql()
+        {
+            try
+            {
+                using (var provider = this.GetProvider())
+                {
+                    return !string.IsNullOrWhiteSpace(provider.CustomWiql);
+                }
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         [AjaxMethod]

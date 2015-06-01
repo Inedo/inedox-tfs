@@ -15,7 +15,7 @@ namespace Inedo.BuildMasterExtensions.TFS
 {
     [ProviderProperties(
         "Team Foundation Server",
-        "Supports TFS 2010-2013; requires that Visual Studio Team System is installed.",
+        "Supports TFS 2010-2013; requires that Visual Studio is installed.",
         RequiresTransparentProxy = true)]
     [CustomEditor(typeof(TfsSourceControlProviderEditor))]
     public class TfsSourceControlProvider : SourceControlProviderBase, ILabelingProvider, IRevisionProvider

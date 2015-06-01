@@ -1,19 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Text;
 using Inedo.BuildMaster;
 using Inedo.BuildMaster.Extensibility;
 using Inedo.BuildMaster.Extensibility.Agents;
 using Inedo.BuildMaster.Extensibility.IssueTrackerConnections;
 using Inedo.BuildMaster.Extensibility.Providers;
-using Inedo.BuildMaster.Extensibility.Providers.IssueTracking;
 using Inedo.BuildMaster.Web;
 using Inedo.BuildMasterExtensions.TFS.Providers;
-using Microsoft.TeamFoundation.Client;
-using Microsoft.TeamFoundation.Framework.Client;
-using Microsoft.TeamFoundation.WorkItemTracking.Client;
 
 namespace Inedo.BuildMasterExtensions.TFS
 {
@@ -22,7 +16,7 @@ namespace Inedo.BuildMasterExtensions.TFS
     /// </summary>
     [ProviderProperties(
         "Team Foundation Server",
-        "Supports TFS 2012 and earlier; requires that Visual Studio 2012 (or greater) is installed.")]
+        "Supports TFS 2010-2013 and earlier; requires that Visual Studio is installed.")]
     [CustomEditor(typeof(TfsIssueTrackingProviderEditor))]
     public sealed partial class TfsIssueTrackingProvider : IssueTrackerConnectionBase, IIssueStatusUpdater, IIssueCloser
     {
@@ -88,7 +82,11 @@ namespace Inedo.BuildMasterExtensions.TFS
             var remoteAgent = this.Agent.GetService<IRemoteMethodExecuter>();
             var filter = (TfsIssueTrackingApplicationFilter)context.ApplicationConfiguration ?? this.legacyFilter;
 
-            var issues = remoteAgent.InvokeFunc(remote.GetIssues, filter.CollectionId, filter.CollectionName, wiql);
+            string iteration = null;
+            if (string.IsNullOrWhiteSpace(this.CustomReleaseNumberFieldName) && string.IsNullOrWhiteSpace(this.CustomWiql) && string.IsNullOrWhiteSpace(filter.CustomWiql))
+                iteration = context.ReleaseNumber;
+
+            var issues = remoteAgent.InvokeFunc(remote.GetIssues, filter.CollectionId, filter.CollectionName, wiql, iteration);
             foreach (var issue in issues)
                 issue.RenderAsHtml = this.AllowHtmlIssueDescriptions;
 
@@ -131,26 +129,19 @@ namespace Inedo.BuildMasterExtensions.TFS
             if (!string.IsNullOrWhiteSpace(filter.AreaPath))
             {
                 buffer.Append(" AND [System.AreaPath] under '");
+                buffer.Append(filter.ProjectName.Replace("'", "''"));
+                buffer.Append('\\');
                 buffer.Append(filter.AreaPath.Replace("'", "''"));
                 buffer.Append('\'');
             }
 
-            if (!string.IsNullOrWhiteSpace(context.ReleaseNumber))
+            if (!string.IsNullOrWhiteSpace(context.ReleaseNumber) && !string.IsNullOrWhiteSpace(this.CustomReleaseNumberFieldName))
             {
-                if (!string.IsNullOrWhiteSpace(this.CustomReleaseNumberFieldName))
-                {
-                    buffer.Append(" AND [");
-                    buffer.Append(this.CustomReleaseNumberFieldName);
-                    buffer.Append("] = '");
-                    buffer.Append(context.ReleaseNumber.Replace("'", "''"));
-                    buffer.Append('\'');
-                }
-                else
-                {
-                    buffer.Append(" AND [System.IterationPath] under '");
-                    buffer.Append(context.ReleaseNumber.Replace("'", "''"));
-                    buffer.Append('\'');
-                }
+                buffer.Append(" AND [");
+                buffer.Append(this.CustomReleaseNumberFieldName);
+                buffer.Append("] = '");
+                buffer.Append(context.ReleaseNumber.Replace("'", "''"));
+                buffer.Append('\'');
             }
 
             return buffer.ToString();

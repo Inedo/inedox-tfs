@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
 using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.Framework.Client;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
@@ -68,16 +67,22 @@ namespace Inedo.BuildMasterExtensions.TFS.Providers
                 return this.GetAreas(project).ToArray();
             }
         }
-        public TfsIssue[] GetIssues(Guid? collectionId, string collectionName, string wiql)
+        public TfsIssue[] GetIssues(Guid? collectionId, string collectionName, string wiql, string iteration)
         {
             using (var tfs = this.GetTeamProjectCollection())
             {
                 var tfsProjectCollection = FindCollection(tfs.ConfigurationServer, collectionId, collectionName);
                 var workItemStore = tfsProjectCollection.GetService<WorkItemStore>();
                 var hyperlinkService = tfsProjectCollection.GetService<TswaClientHyperlinkService>();
-                var results = workItemStore.Query(wiql);
+                var results = workItemStore.Query(wiql).Cast<WorkItem>();
+
+                if (!string.IsNullOrWhiteSpace(iteration))
+                {
+                    var endsWith = "\\" + iteration;
+                    results = results.Where(i => i.IterationPath.EndsWith(endsWith, StringComparison.OrdinalIgnoreCase));
+                }
+
                 return results
-                    .Cast<WorkItem>()
                     .Select(i => new TfsIssue(i, ClosedStates, hyperlinkService))
                     .ToArray();
             }
