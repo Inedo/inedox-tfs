@@ -15,15 +15,13 @@ namespace Inedo.BuildMasterExtensions.TFS
 {
     [ProviderProperties(
         "Team Foundation Server",
-        "Supports TFS 2010-2013; requires that Visual Studio is installed.",
+        "Supports TFS 2010-2015; requires that Visual Studio Team System is installed.",
         RequiresTransparentProxy = true)]
     [CustomEditor(typeof(TfsSourceControlProviderEditor))]
-    public class TfsSourceControlProvider : SourceControlProviderBase, ILabelingProvider, IRevisionProvider
+    public class TfsSourceControlProvider : SourceControlProviderBase, ILocalWorkspaceProvider, ILabelingProvider, IRevisionProvider
     {
-        private const string EmptyPathString = "$/";
-
         /// <summary>
-        /// The base url of the TFS store, should not include collection name, e.g. "http://server:port/tfs"
+        /// The base url of the TFS store, e.g. "http://server:port/tfs"
         /// </summary>
         [Persistent]
         public string BaseUrl { get; set; }
@@ -70,141 +68,93 @@ namespace Inedo.BuildMasterExtensions.TFS
         /// <param name="targetPath">target file path</param>
         public override void GetLatest(string sourcePath, string targetPath)
         {
-            if (string.IsNullOrEmpty(sourcePath)) throw new ArgumentNullException("sourcePath");
-            if (string.IsNullOrEmpty(targetPath)) throw new ArgumentNullException("targetPath");
-            if (!Directory.Exists(targetPath)) throw new DirectoryNotFoundException("targetPath not found: " + targetPath);
-
-            sourcePath = BuildSourcePath(sourcePath);
-            using (var tfs = this.GetTeamProjectCollection())
-            {
-                var versionControlServer = tfs.GetService<VersionControlServer>();
-
-                // create workspace in the target directory
-                Workspace workspace = null;
-                try
-                {
-                    workspace = GetMappedWorkspace(versionControlServer, sourcePath, targetPath);
-                    workspace.Get(VersionSpec.Latest, GetOptions.GetAll | GetOptions.Overwrite);
-                }
-                finally
-                {
-                    try { workspace.Delete(); }
-                    catch { }
-                }
-            }
+            var context = (TfsSourceControlContext)this.CreateSourceControlContext(sourcePath);
+            this.GetLatest(context, targetPath);
         }
+
+        private void GetLatest(TfsSourceControlContext context, string targetPath)
+            {
+            this.EnsureLocalWorkspace(context);
+            this.UpdateLocalWorkspace(context);
+            this.ExportFiles(context, targetPath);
+                }
+
         /// <summary>
         /// Returns a string representation of this provider.
         /// </summary>
         /// <returns>String representation of this provider.</returns>
         public override string ToString()
         {
-            return "Provides functionality for getting files and browsing folders in TFS 2012 and earlier.";
+            return "Provides functionality for getting files and browsing folders in TFS 2010-2015.";
         }
-        /// <summary>
-        /// Returns a loaded <see cref="DirectoryEntryInfo"/> object from the sourcePath
-        /// </summary>
-        /// <param name="sourcePath">provider source path</param>
-        /// <param name="recurse">indicates whether to recurse</param>
-        /// <returns>
-        /// loaded <see cref="DirectoryEntryInfo"/> object
-        /// </returns>
+        
         public override DirectoryEntryInfo GetDirectoryEntryInfo(string sourcePath)
         {
-            sourcePath = BuildSourcePath(sourcePath);
+            var context = (TfsSourceControlContext)this.CreateSourceControlContext(sourcePath);
+            return this.GetDirectoryEntryInfo(context);
+        }
 
+        private DirectoryEntryInfo GetDirectoryEntryInfo(TfsSourceControlContext context)
+        {
             using (var tfs = this.GetTeamProjectCollection())
             {
-                // validate/clean sourcePath (should be $/SomeDir/SomePathNoTrailingSlash)
                 var sourceControl = tfs.GetService<VersionControlServer>();
-
-                sourcePath = sourceControl.GetItem(sourcePath).ServerItem; // matches the sourcePath with the base path returned by TFS
-
-                // working lists
-                var subDirs = new List<DirectoryEntryInfo>();
-                var files = new List<FileEntryInfo>();
-
-                // get the items
-                ItemSet items = sourceControl.GetItems(sourcePath, RecursionType.OneLevel);
-                foreach (Item item in items.Items)
-                {
-                    // don't add self to subdirectories
-                    if (item.ServerItem == sourcePath) continue;
-
-                    // files and directories do not have trailing slashes
-                    string itemName = item.ServerItem.Substring(item.ServerItem.LastIndexOf("/") + 1);
-
-                    switch (item.ItemType)
-                    {
-                        case ItemType.Any:
-                            throw new ArgumentOutOfRangeException("ItemType returned was Any; expected File or Folder.");
-
-                        case ItemType.File:
-                            files.Add(new ExtendedFileEntryInfo(
-                                itemName,
-                                item.ServerItem,
-                                item.ContentLength,
-                                item.CheckinDate,
-                                FileAttributes.Normal));
-                            break;
-
-                        case ItemType.Folder:
-                            subDirs.Add(new DirectoryEntryInfo(
-                                itemName,
-                                item.ServerItem,
-                                null,
-                                null));
-                            break;
-                    }
-                }
-
-                if (sourcePath == EmptyPathString)
-                    return new DirectoryEntryInfo(string.Empty, string.Empty, subDirs.ToArray(), files.ToArray());
-                else
+                var itemSet = sourceControl.GetItems(context.SourcePath, RecursionType.OneLevel);
                     return new DirectoryEntryInfo(
-                        sourcePath.Substring(sourcePath.LastIndexOf("/") + 1),
-                        "",
-                        subDirs.ToArray(),
-                        files.ToArray());
+                        context.LastSubDirectoryName,
+                        context.SourcePath,
+                        itemSet.Items.Where(i => i.ServerItem != context.SourcePath).Select(i => context.CreateSystemEntryInfo(i))
+                );
             }
         }
+
         /// <summary>
-        /// Returns the contents of the specified file
+        /// When implemented in a derived class, returns the contents of the specified file.
         /// </summary>
-        /// <param name="filePath">provider file path</param>
+        /// <param name="filePath">Provider file path.</param>
         /// <returns>
-        /// loaded <see cref="DirectoryEntryInfo"/> object
+        /// Contents of the file as an array of bytes.
         /// </returns>
         public override byte[] GetFileContents(string filePath)
         {
-            // validate arguments
-            if (string.IsNullOrEmpty(filePath)) throw new ArgumentNullException("filePath");
+            var context = (TfsSourceControlContext)this.CreateSourceControlContext(filePath);
+            return this.GetFileContents(context);
+        }
 
-            // handle root path
-            filePath = BuildSourcePath(filePath);
-
-            // create temp file which we can overwrite with downloaded file in TFS source control
+        private byte[] GetFileContents(TfsSourceControlContext context)
+        {
             var tempFile = Path.GetTempFileName();
             using (var tfs = this.GetTeamProjectCollection())
             {
                 var versionControlServer = tfs.GetService<VersionControlServer>();
-                var item = versionControlServer.GetItem(filePath);
+                var item = versionControlServer.GetItem(context.SourcePath);
                 item.DownloadFile(tempFile);
 
                 return File.ReadAllBytes(tempFile);
             }
         }
+
         /// <summary>
-        /// Indicates whether the provider is installed and available for use in the current execution context
+        /// When implemented in a derived class, indicates whether the provider
+        /// is installed and available for use in the current execution context.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>
+        /// Value indicating whether the provider is available in the current context.
+        /// </returns>
         public override bool IsAvailable()
         {
             return IsAvailable2();
         }
+
         /// <summary>
-        /// Attempts to connect with the current configuration and, if not successful, throws a <see cref="NotAvailableException"/>
+        /// When implemented in a derived class, attempts to connect with the
+        /// current configuration and throws an exception if unsuccessful.
         /// </summary>
+        /// <exception cref="NotAvailableException">
+        /// Could not connect to TFS. Verify that Visual Studio 2010-2015 or Team Explorer 2010-2015 is installed on the server.
+        /// or
+        /// Could not connect to TFS:  + ex.ToString()
+        /// </exception>
         public override void ValidateConnection()
         {
             try
@@ -213,89 +163,96 @@ namespace Inedo.BuildMasterExtensions.TFS
             }
             catch (TypeLoadException)
             {
-                throw new NotAvailableException("Could not connect to TFS. Verify that Visual Studio 2012 or Team Explorer 2012 is installed on the server.");
+                throw new NotAvailableException("Could not connect to TFS. Verify that Visual Studio 2010-2015 or Team Explorer 2010-2015 is installed on the server.");
             }
             catch (Exception ex)
             {
                 throw new NotAvailableException("Could not connect to TFS: " + ex.ToString());
             }
         }
+
         /// <summary>
-        /// Applies the specified label to the specified source path
+        /// When implemented in a derived class, applies the specified label to the specified
+        /// source path.
         /// </summary>
-        /// <param name="label">label to apply</param>
-        /// <param name="sourcePath">path to apply label to</param>
+        /// <param name="label">Label to apply.</param>
+        /// <param name="sourcePath">Path to apply label to.</param>
+        /// <exception cref="ArgumentNullException">sourcePath</exception>
         public void ApplyLabel(string label, string sourcePath)
         {
-            // verify sourcePath
-            if (string.IsNullOrEmpty(sourcePath)) throw new ArgumentNullException("sourcePath");
-            sourcePath = BuildSourcePath(sourcePath);
+            var context = (TfsSourceControlContext)this.CreateSourceControlContext(sourcePath);
+            this.ApplyLabel(context, label);
+        }
 
+        private void ApplyLabel(TfsSourceControlContext context, string label)
+        {
             using (var tfs = this.GetTeamProjectCollection())
             {
                 var versionControlService = tfs.GetService<VersionControlServer>();
 
-                var versionControlLabel = new VersionControlLabel(versionControlService, label, versionControlService.AuthenticatedUser, sourcePath, "Label applied by BuildMaster");
-                versionControlService.CreateLabel(versionControlLabel, new[] { new LabelItemSpec(new ItemSpec(sourcePath, RecursionType.Full), VersionSpec.Latest, false) }, LabelChildOption.Replace);
+                var versionControlLabel = new VersionControlLabel(versionControlService, label, versionControlService.AuthorizedUser, context.SourcePath, "Label applied by BuildMaster");
+                versionControlService.CreateLabel(versionControlLabel, new[] { new LabelItemSpec(new ItemSpec(context.SourcePath, RecursionType.Full), VersionSpec.Latest, false) }, LabelChildOption.Replace);
             }
         }
+
         /// <summary>
-        /// Retrieves labeled the source code from the provider's sourcePath into the target path
+        /// When implemented in a derived class, retrieves labeled
+        /// source code from the provider's source path into the target path.
         /// </summary>
-        /// <param name="label"></param>
-        /// <param name="sourcePath">provider source path</param>
-        /// <param name="targetPath">target file path</param>
+        /// <param name="label">Label of source files to get.</param>
+        /// <param name="sourcePath">Provider source path.</param>
+        /// <param name="targetPath">Target file path.</param>
+        /// <exception cref="ArgumentNullException">
+        /// sourcePath
+        /// or
+        /// targetPath
+        /// </exception>
+        /// <exception cref="DirectoryNotFoundException">targetPath not found:  + targetPath</exception>
         public void GetLabeled(string label, string sourcePath, string targetPath)
         {
-            if (string.IsNullOrEmpty(sourcePath)) throw new ArgumentNullException("sourcePath");
-            if (string.IsNullOrEmpty(targetPath)) throw new ArgumentNullException("targetPath");
-            if (!Directory.Exists(targetPath)) throw new DirectoryNotFoundException("targetPath not found: " + targetPath);
-
-            sourcePath = BuildSourcePath(sourcePath);
-            using (var tfs = this.GetTeamProjectCollection())
-            {
-                var versionControlServer = tfs.GetService<VersionControlServer>();
-
-                // create workspace in the target directory
-                Workspace workspace = null;
-
-                try
-                {
-                    workspace = GetMappedWorkspace(versionControlServer, sourcePath, targetPath);
-                    workspace.Get(VersionSpec.ParseSingleSpec("L" + label, versionControlServer.AuthenticatedUser), GetOptions.GetAll | GetOptions.Overwrite);
+            var context = new TfsSourceControlContext(this, sourcePath, label);
+            this.GetLabeled(context, label, targetPath);
                 }
-                finally
+
+        private void GetLabeled(TfsSourceControlContext context, string label, string targetDirectory)
                 {
-                    try { workspace.Delete(); }
-                    catch { }
-                }
-            }
+            this.EnsureLocalWorkspace(context);
+            this.UpdateLocalWorkspace(context);
+            this.ExportFiles(context, targetDirectory);
         }
+
         /// <summary>
-        /// Returns a "fingerprint" that represents the current revision on the source control repository.
+        /// Returns a fingerprint that represents the current revision on the source control repository.
         /// </summary>
-        /// <param name="path">The source control path to monitor.</param>
+        /// <param name="path">The source control path whos revision is returned.</param>
         /// <returns>
         /// A representation of the current revision in source control.
         /// </returns>
+        /// <remarks>
+        /// <para>Notes to implementers:</para>
+        /// <para>
+        /// The object returned by this method should implement <see cref="M:System.Object.Equals(System.Object)" />.
+        /// </para>
+        /// </remarks>
         public object GetCurrentRevision(string path)
         {
-            var sourcePath = BuildSourcePath(path);
+            var context = (TfsSourceControlContext)this.CreateSourceControlContext(path);
+            return this.GetCurrentRevision(context);
+        }
 
-            // validate/clean sourcePath (should be $/SomeDir/SomePathNoTrailingSlash)
+        private object GetCurrentRevision(TfsSourceControlContext context)
+        {
             using (var tfs = this.GetTeamProjectCollection())
             {
                 var sourceControl = tfs.GetService<VersionControlServer>();
 
-                sourcePath = sourceControl.GetItem(sourcePath).ServerItem; // matches the sourcePath with the base path returned by TFS
+                string sourcePath = sourceControl.GetItem(context.SourcePath).ServerItem; // matches the sourcePath with the base path returned by TFS
 
-                // get the items
-                ItemSet items = sourceControl.GetItems(sourcePath, VersionSpec.Latest, RecursionType.Full, DeletedState.Any, ItemType.Any);
-                if (items == null || items.Items == null || items.Items.Length == 0)
+                var itemSet = sourceControl.GetItems(sourcePath, VersionSpec.Latest, RecursionType.Full, DeletedState.Any, ItemType.Any);
+                if (itemSet == null || itemSet.Items == null || itemSet.Items.Length == 0)
                     return new byte[0];
 
-                // return the highest change set id
-                return items.Items.Max(i => i.ChangesetId);
+                return itemSet.Items.Max(i => i.ChangesetId);
             }
         }
 
@@ -320,44 +277,40 @@ namespace Inedo.BuildMasterExtensions.TFS
         }
 
         /// <summary>
-        /// Normalizes a source control path to be handled by this class.
-        /// </summary>
-        /// <param name="sourcePath">The source path.</param>
-        private string BuildSourcePath(string sourcePath)
-        {
-            if (string.IsNullOrEmpty(sourcePath))
-                return EmptyPathString;
-
-            return sourcePath.TrimStart(DirectorySeparator);
-        }
-        /// <summary>
-        /// Gets a TFS workspace mapped to the specified target path (i.e. generally the /SRC temporary directory)
+        /// Gets a TFS workspace mapped to the specified target path
         /// </summary>
         /// <param name="server">The server.</param>
         /// <param name="sourcePath">The source path.</param>
         /// <param name="targetPath">The target path.</param>
-        private Workspace GetMappedWorkspace(VersionControlServer server, string sourcePath, string targetPath)
+        private Workspace GetMappedWorkspace(VersionControlServer server, TfsSourceControlContext context)
         {
-            string workspaceName = "BuildMaster" + Guid.NewGuid().ToString().Replace("-", "");
-
-            var workspaces = server.QueryWorkspaces(workspaceName, server.AuthorizedUser, Environment.MachineName);
-            var workspace = workspaces.SingleOrDefault(ws => ws.Name == workspaceName);
-            if (workspace != null)
+            var workspaces = server.QueryWorkspaces(context.WorkspaceName, server.AuthorizedUser, Environment.MachineName);
+            var workspace = workspaces.FirstOrDefault();
+            if (workspace == null) 
+        {
+                this.LogDebug("Existing workspace not found, creating workspace \"{0}\"...", context.WorkspaceName);
+                workspace = server.CreateWorkspace(context.WorkspaceName);
+            }
+            else 
             {
-                workspace.Delete();
+                this.LogDebug("Workspace found: " + workspace.Name);
             }
 
-            workspace = server.CreateWorkspace(workspaceName);
+            this.LogDebug("Workspace mappings: \r\n" + string.Join(Environment.NewLine, workspace.Folders.Select(m => m.LocalItem + "\t->\t" + m.ServerItem)));
 
-            workspace.CreateMapping(new WorkingFolder(sourcePath, targetPath));
+            if (!workspace.IsLocalPathMapped(context.WorkspaceDiskPath))
+            {
+                this.LogDebug("Local path is not mapped, creating mapping to \"{0}\"...", context.WorkspaceDiskPath);
+                this.DeleteWorkspace(context);
+                workspace.Map(context.SourcePath, context.WorkspaceDiskPath);
+            }
 
             if (!workspace.HasReadPermission)
-            {
-                throw new System.Security.SecurityException(string.Format("{0} does not have read permission for {1}", server.AuthorizedUser, targetPath));
-            }
+                throw new System.Security.SecurityException(string.Format("{0} does not have read permission for {1}", server.AuthorizedUser, context.WorkspaceDiskPath));
 
             return workspace;
         }
+
         private static bool IsAvailable2()
         {
             try
@@ -370,10 +323,81 @@ namespace Inedo.BuildMasterExtensions.TFS
                 return false;
             }
         }
+
         private void ValidateConnection2()
         {
             using (var tfs = this.GetTeamProjectCollection())
             {
+            }
+        }
+
+        public override SourceControlContext CreateSourceControlContext(object contextData)
+        {
+            return new TfsSourceControlContext(this, (string)contextData);
+        }
+
+        public void DeleteWorkspace(SourceControlContext context)
+        {
+            Util.Files.ClearFolder(context.WorkspaceDiskPath);
+        }
+
+        public void EnsureLocalWorkspace(SourceControlContext context)
+        {
+            this.LogDebug("Ensuring local workspace disk path: " + context.WorkspaceDiskPath);
+            if (!Directory.Exists(context.WorkspaceDiskPath))
+            {
+                this.LogDebug("Creating workspace disk path...");
+                Directory.CreateDirectory(context.WorkspaceDiskPath);
+            }
+            else
+            {
+                this.LogDebug("Workspace disk path exists.");
+            }
+        }
+
+        public void ExportFiles(SourceControlContext context, string targetDirectory)
+        {
+            var tfsContext = (TfsSourceControlContext)context;
+            this.LogDebug("Exporting files from \"{0}\" to \"{1}\"...", tfsContext.WorkspaceDiskPath, targetDirectory);
+            this.CopyNonTfsFiles(tfsContext.WorkspaceDiskPath, targetDirectory);
+        }
+
+        private void CopyNonTfsFiles(string sourceDir, string targetDir)
+        {
+            if (!Directory.Exists(sourceDir))
+                return;
+            if (!Directory.Exists(targetDir))
+                Directory.CreateDirectory(targetDir);
+
+            var sourceDirInfo = new DirectoryInfo(sourceDir);
+            
+            foreach (var file in sourceDirInfo.GetFiles())
+            {
+                file.CopyTo(Path.Combine(targetDir, file.Name), true);
+            }
+
+            foreach (var subDir in sourceDirInfo.GetDirectories().Where(d => d.Name != "$tf"))
+            {
+                this.CopyNonTfsFiles(subDir.FullName, Path.Combine(targetDir, subDir.Name));
+            }
+        }
+
+        public string GetWorkspaceDiskPath(SourceControlContext context)
+        {
+            return context.WorkspaceDiskPath;
+        }
+
+        public void UpdateLocalWorkspace(SourceControlContext context)
+        {
+            using (var tfs = this.GetTeamProjectCollection())
+            {
+                var versionControlServer = tfs.GetService<VersionControlServer>();
+
+                var workspace = this.GetMappedWorkspace(versionControlServer, (TfsSourceControlContext)context);
+                if (context.Label != null)
+                    workspace.Get(VersionSpec.ParseSingleSpec("L" + context.Label, versionControlServer.AuthorizedUser), GetOptions.Overwrite);
+                else
+                    workspace.Get(VersionSpec.Latest, GetOptions.Overwrite);
             }
         }
     }
