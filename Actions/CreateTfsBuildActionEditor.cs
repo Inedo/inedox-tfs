@@ -11,6 +11,7 @@ namespace Inedo.BuildMasterExtensions.TFS
         private ValidatingTextBox txtTeamProject;
         private ValidatingTextBox txtBuildDefinition;
         private CheckBox chkWaitForCompletion;
+        private CheckBox chkValidateBuild;
 
         public override void BindToForm(ActionBase extension)
         {
@@ -19,6 +20,7 @@ namespace Inedo.BuildMasterExtensions.TFS
             this.txtTeamProject.Text = action.TeamProject;
             this.txtBuildDefinition.Text = action.BuildDefinition;
             this.chkWaitForCompletion.Checked = action.WaitForCompletion;
+            this.chkValidateBuild.Checked = action.ValidateBuild;
         }
 
         public override ActionBase CreateFromForm()
@@ -27,7 +29,8 @@ namespace Inedo.BuildMasterExtensions.TFS
             {
                 TeamProject = this.txtTeamProject.Text,
                 BuildDefinition = this.txtBuildDefinition.Text,
-                WaitForCompletion = this.chkWaitForCompletion.Checked
+                WaitForCompletion = this.chkWaitForCompletion.Checked,
+                ValidateBuild = this.chkValidateBuild.Checked
             };
         }
 
@@ -48,6 +51,7 @@ namespace Inedo.BuildMasterExtensions.TFS
             };
 
             this.chkWaitForCompletion = new CheckBox() { Text = "Wait For Completion" };
+            this.chkValidateBuild = new CheckBox() { Text = "Validate Build Success" };
 
             this.Controls.Add(
                 new FormFieldGroup(
@@ -67,6 +71,12 @@ namespace Inedo.BuildMasterExtensions.TFS
                     "If checked, the BuildMaster execution will wait until the build is completed before continuing to the next action.",
                     true,
                     new StandardFormField("", this.chkWaitForCompletion)
+                ),
+                new FormFieldGroup(
+                    "Validate Build Status",
+                    "If checked, the BuildMaster execution will validate the TFS Build Status and fail if the build has failed.",
+                    true,
+                    new StandardFormField("", this.chkValidateBuild)
                 )
             );
         }
