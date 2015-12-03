@@ -75,6 +75,10 @@
     <Reference Include="Microsoft.TeamFoundation.WorkItemTracking.Client, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
+    <Reference Include="Microsoft.TeamFoundation.WorkItemTracking.Common, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\Microsoft.TeamFoundation.WorkItemTracking.Common.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Web" />
     <Reference Include="System.Data" />
@@ -134,15 +138,21 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="lib\Microsoft.TeamFoundation.Build.Client.dll" />
+    <Content Include="lib\Microsoft.TeamFoundation.Client.dll" />
+    <Content Include="lib\Microsoft.TeamFoundation.Common.dll" />
+    <Content Include="lib\Microsoft.TeamFoundation.VersionControl.Client.dll" />
+    <Content Include="lib\Microsoft.TeamFoundation.WorkItemTracking.Client.dll" />
+    <Content Include="lib\Microsoft.TeamFoundation.WorkItemTracking.Common.dll" />
     <Content Include="TfsIssueTrackingApplicationFilterEditor.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>if exist $(SolutionDir) cmd /c "del $(SolutionDir)..\..\BuildMaster-4.7\ExtensionLib\$(TargetName).bmx"
-if exist $(SolutionDir) $(SolutionDir)..\zip -r $(SolutionDir)..\..\BuildMaster-4.7\ExtensionLib\$(TargetName).bmx *.*
-if exist $(SolutionDir) echo hdars &gt; $(SolutionDir)..\..\BuildMaster-4.7\BuildMasterSolution\Web\BuildMaster.Web.WebApplication\bin\hsirs</PostBuildEvent>
+    <PostBuildEvent>if exist $(SolutionDir) cmd /c "del $(SolutionDir)..\..\BuildMaster\ExtensionLib\$(TargetName).bmx"
+if exist $(SolutionDir) $(SolutionDir)..\zip -r $(SolutionDir)..\..\BuildMaster\ExtensionLib\$(TargetName).bmx *.*
+if exist $(SolutionDir) echo hdars &gt; $(SolutionDir)..\..\BuildMaster\BuildMasterSolution\Web\BuildMaster.Web.WebApplication\bin\hsirs</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
