@@ -143,6 +143,7 @@
     <Content Include="lib\Microsoft.TeamFoundation.Client.dll" />
     <Content Include="lib\Microsoft.TeamFoundation.Common.dll" />
     <Content Include="lib\Microsoft.TeamFoundation.VersionControl.Client.dll" />
+    <Content Include="lib\Microsoft.TeamFoundation.VersionControl.Common.dll" />
     <Content Include="lib\Microsoft.TeamFoundation.WorkItemTracking.Client.dll" />
     <Content Include="lib\Microsoft.TeamFoundation.WorkItemTracking.Common.dll" />
     <Content Include="lib\Microsoft.VisualStudio.Services.Client.dll" />
