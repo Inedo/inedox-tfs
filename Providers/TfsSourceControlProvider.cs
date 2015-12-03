@@ -395,9 +395,15 @@ namespace Inedo.BuildMasterExtensions.TFS
 
                 var workspace = this.GetMappedWorkspace(versionControlServer, (TfsSourceControlContext)context);
                 if (context.Label != null)
-                    workspace.Get(VersionSpec.ParseSingleSpec("L" + context.Label, versionControlServer.AuthorizedUser), GetOptions.Overwrite);
+                {
+                    string sourcePath = ((TfsSourceControlContext)context).SourcePath;
+                    var getRequest = new GetRequest(new ItemSpec(sourcePath, RecursionType.Full), VersionSpec.ParseSingleSpec("L" + context.Label, versionControlServer.AuthorizedUser));
+                    workspace.Get(getRequest, GetOptions.Overwrite);
+                }
                 else
+                {
                     workspace.Get(VersionSpec.Latest, GetOptions.Overwrite);
+                }
             }
         }
     }
