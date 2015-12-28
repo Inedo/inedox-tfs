@@ -8,6 +8,7 @@ using Inedo.BuildMaster.Extensibility.Providers;
 using Inedo.BuildMaster.Extensibility.Providers.SourceControl;
 using Inedo.BuildMaster.Files;
 using Inedo.BuildMaster.Web;
+using Inedo.IO;
 using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.VersionControl.Client;
 
@@ -338,7 +339,7 @@ namespace Inedo.BuildMasterExtensions.TFS
 
         public void DeleteWorkspace(SourceControlContext context)
         {
-            Util.Files.ClearFolder(context.WorkspaceDiskPath);
+            DirectoryEx.Clear(context.WorkspaceDiskPath);
         }
 
         public void EnsureLocalWorkspace(SourceControlContext context)

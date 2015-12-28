@@ -9,6 +9,7 @@ using Inedo.BuildMaster.Extensibility.BuildImporters;
 using Inedo.BuildMaster.Files;
 using Inedo.BuildMaster.Web;
 using Inedo.Data;
+using Inedo.Diagnostics;
 
 namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
 {

@@ -44,21 +44,21 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BuildMaster.Web.Controls">
-      <HintPath>packages\Inedo.BuildMaster.SDK.4.7\lib\net40\BuildMaster.Web.Controls.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="BuildMaster.Web.Controls, Version=4.9.0.156, Culture=neutral, PublicKeyToken=112cfb71329714a6, processorArchitecture=MSIL">
+      <HintPath>packages\Inedo.BuildMaster.SDK.4.9\lib\net40\BuildMaster.Web.Controls.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="BuildMasterCore">
-      <HintPath>packages\Inedo.BuildMaster.SDK.4.7\lib\net40\BuildMasterCore.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="BuildMasterCore, Version=4.9.0.156, Culture=neutral, PublicKeyToken=112cfb71329714a6, processorArchitecture=MSIL">
+      <HintPath>packages\Inedo.BuildMaster.SDK.4.9\lib\net40\BuildMasterCore.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="ICSharpCode.SharpZipLib">
       <HintPath>packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="InedoLib">
-      <HintPath>packages\Inedo.BuildMaster.SDK.4.7\lib\net40\InedoLib.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="InedoLib, Version=257.1.0.0, Culture=neutral, PublicKeyToken=112cfb71329714a6, processorArchitecture=MSIL">
+      <HintPath>packages\Inedo.BuildMaster.SDK.4.9\lib\net40\InedoLib.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.TeamFoundation.Build.Client, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -151,13 +151,23 @@
     <Content Include="lib\Microsoft.TeamFoundation.Common.dll" />
     <Content Include="lib\Microsoft.TeamFoundation.VersionControl.Client.dll" />
     <Content Include="lib\Microsoft.TeamFoundation.VersionControl.Common.dll" />
+    <Content Include="lib\Microsoft.TeamFoundation.WorkItemTracking.Client.DataStoreLoader.dll" />
     <Content Include="lib\Microsoft.TeamFoundation.WorkItemTracking.Client.dll" />
+    <Content Include="lib\Microsoft.TeamFoundation.WorkItemTracking.Client.QueryLanguage.dll" />
     <Content Include="lib\Microsoft.TeamFoundation.WorkItemTracking.Common.dll" />
     <Content Include="lib\Microsoft.TeamFoundation.WorkItemTracking.Proxy.dll" />
     <Content Include="lib\Microsoft.VisualStudio.Services.Client.dll" />
     <Content Include="lib\Microsoft.VisualStudio.Services.Common.dll" />
     <Content Include="lib\Microsoft.VisualStudio.Services.WebApi.dll" />
     <None Include="lib\readme.txt" />
+    <None Include="lib\Microsoft.WITDataStore32.dll">
+      <Link>Microsoft.WITDataStore32.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="lib\Microsoft.WITDataStore64.dll">
+      <Link>Microsoft.WITDataStore64.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <Content Include="TfsIssueTrackingApplicationFilterEditor.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
