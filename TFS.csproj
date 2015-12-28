@@ -46,10 +46,12 @@
   <ItemGroup>
     <Reference Include="BuildMaster.Web.Controls, Version=4.9.0.156, Culture=neutral, PublicKeyToken=112cfb71329714a6, processorArchitecture=MSIL">
       <HintPath>packages\Inedo.BuildMaster.SDK.4.9\lib\net40\BuildMaster.Web.Controls.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
     </Reference>
     <Reference Include="BuildMasterCore, Version=4.9.0.156, Culture=neutral, PublicKeyToken=112cfb71329714a6, processorArchitecture=MSIL">
       <HintPath>packages\Inedo.BuildMaster.SDK.4.9\lib\net40\BuildMasterCore.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
     </Reference>
     <Reference Include="ICSharpCode.SharpZipLib">
@@ -58,6 +60,7 @@
     </Reference>
     <Reference Include="InedoLib, Version=257.1.0.0, Culture=neutral, PublicKeyToken=112cfb71329714a6, processorArchitecture=MSIL">
       <HintPath>packages\Inedo.BuildMaster.SDK.4.9\lib\net40\InedoLib.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.TeamFoundation.Build.Client, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
