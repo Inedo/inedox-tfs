@@ -146,12 +146,14 @@
   <ItemGroup>
     <None Include="lib\license.txt" />
     <Content Include="lib\Microsoft.TeamFoundation.Build.Client.dll" />
+    <Content Include="lib\Microsoft.TeamFoundation.Build.Common.dll" />
     <Content Include="lib\Microsoft.TeamFoundation.Client.dll" />
     <Content Include="lib\Microsoft.TeamFoundation.Common.dll" />
     <Content Include="lib\Microsoft.TeamFoundation.VersionControl.Client.dll" />
     <Content Include="lib\Microsoft.TeamFoundation.VersionControl.Common.dll" />
     <Content Include="lib\Microsoft.TeamFoundation.WorkItemTracking.Client.dll" />
     <Content Include="lib\Microsoft.TeamFoundation.WorkItemTracking.Common.dll" />
+    <Content Include="lib\Microsoft.TeamFoundation.WorkItemTracking.Proxy.dll" />
     <Content Include="lib\Microsoft.VisualStudio.Services.Client.dll" />
     <Content Include="lib\Microsoft.VisualStudio.Services.Common.dll" />
     <Content Include="lib\Microsoft.VisualStudio.Services.WebApi.dll" />
