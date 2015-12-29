@@ -12,8 +12,8 @@ namespace Inedo.BuildMasterExtensions.TFS
     /// Gets or sets the build number if not empty, or includes all builds in the search.
     /// </summary>
     [ActionProperties(
-        "Create TFS Build",
-        "Creates a new build in TFS.",
+        "Queue TFS Build",
+        "Queues a new build in TFS.",
         DefaultToLocalServer = true)]
     [RequiresInterface(typeof(IFileOperationsExecuter))]
     [RequiresInterface(typeof(IRemoteZip))]

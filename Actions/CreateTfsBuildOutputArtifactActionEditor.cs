@@ -1,6 +1,5 @@
 ﻿using System.Web.UI.WebControls;
 using Inedo.BuildMaster.Extensibility.Actions;
-using Inedo.BuildMaster.Web.Controls;
 using Inedo.BuildMaster.Web.Controls.Extensions;
 using Inedo.Web.Controls;
 
@@ -41,62 +40,21 @@ namespace Inedo.BuildMasterExtensions.TFS
         {
             base.CreateChildControls();
 
-            this.txtTeamProject = new ValidatingTextBox()
-            {
-                Required = true,
-                Width = 300
-            };
-
-            this.txtArtifactName = new ValidatingTextBox()
-            {
-                DefaultText = "Use name of build definition",
-                Width = 300
-            };
-
-            this.txtBuildNumber = new ValidatingTextBox()
-            {
-                DefaultText = "Last successful"
-            };
-
-            this.txtBuildDefinition = new ValidatingTextBox()
-            {
-                DefaultText = "Any",
-                Width = 300
-            };
-
-            this.chkIncludeUnsuccessful = new CheckBox() { Text = "Include Unsuccessful Builds" };
+            this.txtTeamProject = new ValidatingTextBox() { Required = true };
+            this.txtArtifactName = new ValidatingTextBox() { DefaultText = "use name of build definition" };
+            this.txtBuildNumber = new ValidatingTextBox() { DefaultText = "last successful" };
+            this.txtBuildDefinition = new ValidatingTextBox() { DefaultText = "any" };
+            this.chkIncludeUnsuccessful = new CheckBox() { Text = "Only include builds that are \"succeeded\"", Checked = true };
 
             this.Controls.Add(
-                new FormFieldGroup(
-                    "Team Project", 
-                    "The name of the team project to import the build output.", 
-                    false, 
-                    new StandardFormField("Team Project:", this.txtTeamProject)
-                ),
-                new FormFieldGroup(
-                    "Artifact Name", 
-                    "Optionally specify the name of the artifact once imported to BuildMaster.", 
-                    false, 
-                    new StandardFormField("Artifact Name:", this.txtArtifactName)
-                ),
-                new FormFieldGroup(
-                    "Build Definition", 
-                    "Optionally filter the import by build definition.", 
-                    false, 
-                    new StandardFormField("Build Definition:", this.txtBuildDefinition)
-                ),
-                new FormFieldGroup(
-                    "Build Number", 
-                    "Optionally filter the import by build number.", 
-                    false, 
-                    new StandardFormField("Build Number:", this.txtBuildNumber)
-                ),
-                new FormFieldGroup(
-                    "Include Unsuccessful Builds",
-                    "If checked, the latest successful, failed, or partially completed build will be imported. Otherwise, only a successful build will be imported.",
-                    true,
-                    new StandardFormField("", this.chkIncludeUnsuccessful)
-                )
+                new SlimFormField("Team project:", this.txtTeamProject),
+                new SlimFormField("Build definition:", this.txtBuildDefinition),
+                new SlimFormField("Build number:", this.txtBuildNumber),
+                new SlimFormField("Artifact name:", this.txtArtifactName)
+                {
+                    HelpText = "By default, the BuildMaster build artifact created from the output will use the name of the build definition. To use a different name, specify one here."
+                },
+                new SlimFormField("Options:", this.chkIncludeUnsuccessful)
             );
         }
     }

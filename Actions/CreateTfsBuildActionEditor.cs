@@ -1,8 +1,8 @@
 ﻿using System.Web.UI.WebControls;
 using Inedo.BuildMaster.Extensibility.Actions;
-using Inedo.BuildMaster.Web.Controls;
 using Inedo.BuildMaster.Web.Controls.Extensions;
 using Inedo.Web.Controls;
+using Inedo.Web.Controls.SimpleHtml;
 
 namespace Inedo.BuildMasterExtensions.TFS
 {
@@ -38,45 +38,25 @@ namespace Inedo.BuildMasterExtensions.TFS
         {
             base.CreateChildControls();
 
-            this.txtTeamProject = new ValidatingTextBox()
-            {
-                Required = true,
-                Width = 300
-            };
+            this.txtTeamProject = new ValidatingTextBox() { Required = true };
+            this.txtBuildDefinition = new ValidatingTextBox() { Required = true };
 
-            this.txtBuildDefinition = new ValidatingTextBox()
-            {
-                Required = true,
-                Width = 300
-            };
-
-            this.chkWaitForCompletion = new CheckBox() { Text = "Wait For Completion" };
-            this.chkValidateBuild = new CheckBox() { Text = "Validate Build Success" };
+            this.chkWaitForCompletion = new CheckBox() { Text = "Wait until the TFS build completes", Checked = true };
+            this.chkValidateBuild = new CheckBox() { Text = "Fail if the TFS build does not succeed", Checked = true };
 
             this.Controls.Add(
-                new FormFieldGroup(
-                    "Team Project",
-                    "The name of the team project for which to create the build.",
-                    false,
-                    new StandardFormField("Team Project:", this.txtTeamProject)
+                new SlimFormField(
+                    "Team project:",
+                    this.txtTeamProject
                 ),
-                new FormFieldGroup(
-                    "Build Definition",
-                    "The name of the build definition used to create the build.",
-                    false,
-                    new StandardFormField("Build Definition:", this.txtBuildDefinition)
+                new SlimFormField(
+                    "Build definition:",
+                    this.txtBuildDefinition
                 ),
-                new FormFieldGroup(
-                    "Wait for Completion",
-                    "If checked, the BuildMaster execution will wait until the build is completed before continuing to the next action.",
-                    true,
-                    new StandardFormField("", this.chkWaitForCompletion)
-                ),
-                new FormFieldGroup(
-                    "Validate Build Status",
-                    "If checked, the BuildMaster execution will validate the TFS Build Status and fail if the build has failed.",
-                    true,
-                    new StandardFormField("", this.chkValidateBuild)
+                new SlimFormField(
+                    "Options:",
+                    new Div(this.chkWaitForCompletion),
+                    new Div(this.chkValidateBuild)
                 )
             );
         }

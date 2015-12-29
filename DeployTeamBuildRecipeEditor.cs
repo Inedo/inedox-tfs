@@ -87,7 +87,7 @@ namespace Inedo.BuildMasterExtensions.TFS
                     new H2("Before we get started..."),
                     new InfoBox(
                         InfoBox.InfoBoxTypes.Warning,
-                        new P("The TFS extension's connection information must be configured before BuildMaster can create this example application. ", 
+                        new P("The TFS extension's connection information must be configured before BuildMaster can create this example application. ",
                             "You can configure the URL, user, and more on the ",
                             new A("extension details page") { Target = "_blank", Href = "/administration/extensions/configure?extensionName=TFS" },
                             "; just click the \"Create Configuration Profile\" button and fill in the connection details. Also make sure that ",
@@ -97,7 +97,7 @@ namespace Inedo.BuildMasterExtensions.TFS
                     ),
                     new RenderJQueryDocReadyDelegator(w => w.Write("$(function(){{ $('.buttonMinor').hide(); }});"))
                 );
-                
+
                 return;
             }
 
@@ -125,24 +125,21 @@ namespace Inedo.BuildMasterExtensions.TFS
             {
                 Required = true,
                 Text = defaultCfg.BaseUrl,
-                Width = 350
+                DefaultText = "ex. http://tfsserver:8080/tfs"
             };
 
             var txtUserName = new ValidatingTextBox
             {
-                DefaultText = "System credentials",
-                Text = defaultCfg.UserName,
-                Width = 350
+                DefaultText = "use system credentials",
+                Text = defaultCfg.UserName
             };
             var txtPassword = new PasswordTextBox
             {
-                Text = defaultCfg.Password,
-                Width = 350
+                Text = defaultCfg.Password
             };
             var txtDomain = new ValidatingTextBox
             {
-                Text = defaultCfg.Domain,
-                Width = 350
+                Text = defaultCfg.Domain
             };
 
             txtBaseUrl.ServerValidate +=
@@ -167,18 +164,14 @@ namespace Inedo.BuildMasterExtensions.TFS
 
             this.wizardSteps.TfsConnection.Controls.Add(
                 ctlError,
-                new FormFieldGroup("TFS Server Name",
-                    "The name of the Team Foundation Server to connect to, e.g. http://tfsserver:8080/tfs",
-                    false,
-                    new StandardFormField("Server Name:", txtBaseUrl)
-                ),
-                new FormFieldGroup("Credentials",
-                    "Specify the credentials of the account you would like to use to connect to Team Foundation Server",
-                    false,
-                    new StandardFormField("Username:", txtUserName),
-                    new StandardFormField("Password:", txtPassword),
-                    new StandardFormField("Domain:", txtDomain)
+                new SlimFormField("TFS collection URL:", txtBaseUrl
                 )
+                {
+                    HelpText = "To use a specific collection, use http://tfsserver:8080/tfs/CollectionName as an example URL. The collection name may be omitted if the TFS server is configured to use the DefaultCollection at /tfs."
+                },
+                new SlimFormField("Username:", txtUserName),
+                new SlimFormField("Password:", txtPassword),
+                new SlimFormField("Domain:", txtDomain)
             );
 
             this.WizardStepChange += (s, e) =>
@@ -216,16 +209,8 @@ namespace Inedo.BuildMasterExtensions.TFS
             ddlTeamProject.SelectedIndexChanged += (s, e) => { ddlBuildDefinition.TeamProject = ddlTeamProject.SelectedValue; };
 
             this.wizardSteps.TfsBuildDefinition.Controls.Add(
-                new FormFieldGroup("Team Project",
-                    "The name of the team project.",
-                    false,
-                    new StandardFormField("Team Project:", ddlTeamProject)
-                ),
-                new FormFieldGroup("Build Definition",
-                    "The name of the build definition used to create a build.",
-                    false,
-                    new StandardFormField("Build Definition:", ddlBuildDefinition)
-                )
+                new SlimFormField("Team project:", ddlTeamProject),
+                new SlimFormField("Build definition:", ddlBuildDefinition)
             );
 
             this.WizardStepChange += (s, e) =>
@@ -249,12 +234,10 @@ namespace Inedo.BuildMasterExtensions.TFS
 
 
             this.wizardSteps.SelectDeploymentPath.Controls.Add(
-                new FormFieldGroup(
-                    "Deployment Target",
-                    "Select a directory where the artifact will be deployed. You can change the server/path in which this gets deployed to later.",
-                    true,
-                    new StandardFormField("Target Directory:", ctlTargetDeploymentPath)
-                )
+                new SlimFormField("Deployment target:", ctlTargetDeploymentPath)
+                {
+                    HelpText = "Select a directory where the artifact will be deployed. You can change the server/path in which this gets deployed to later."
+                }
             );
 
             this.WizardStepChange += (s, e) =>
@@ -269,13 +252,10 @@ namespace Inedo.BuildMasterExtensions.TFS
         private void CreateSummaryControls()
         {
             this.wizardSteps.Summary.Controls.Add(
-                new FormFieldGroup(
-                    "Summary",
-                    "This is a summary of the Deploy Build from TFS wizard application - once created, you can change it to customize it however you'd like "
-                        + "by editing the application's deployment plan.",
-                    true,
-                    new StandardFormField("", new Summary(this))
-                )
+                new H2("Summary"),
+                new P("This is a summary of the Deploy Build from TFS wizard application. Once created, you ",
+                      "can change it to customize it however you'd like by editing the application's deployment plan."),
+                new Summary(this)
             );
         }
 
