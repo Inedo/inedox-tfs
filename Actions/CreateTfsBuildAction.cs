@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Linq;
 using Inedo.BuildMaster;
+using Inedo.BuildMaster.Data;
 using Inedo.BuildMaster.Extensibility.Actions;
 using Inedo.BuildMaster.Extensibility.Agents;
 using Inedo.BuildMaster.Web;
+using Inedo.Data;
 using Microsoft.TeamFoundation.Build.Client;
 
 namespace Inedo.BuildMasterExtensions.TFS
@@ -39,23 +41,18 @@ namespace Inedo.BuildMasterExtensions.TFS
         [Persistent]
         public bool ValidateBuild{ get; set; }
 
-        /// <summary>
-        /// Returns a <see cref="System.String" /> that represents this instance.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="System.String" /> that represents this instance.
-        /// </returns>
-        /// <remarks>
-        /// This should return a user-friendly string describing what the Action does
-        /// and the state of its important persistent properties.
-        /// </remarks>
-        public override string ToString()
+        public override ActionDescription GetActionDescription()
         {
-            return string.Format(
-                "Create a build of project \"{0}\" using the build definition \"{1}\" in TFS{2}.",
-                this.TeamProject,
-                this.BuildDefinition,
-                this.WaitForCompletion ? " and wait until the build completes." : ""
+            return new ActionDescription(
+                new ShortActionDescription(
+                    "Queue TFS Build for ", new Hilite(this.TeamProject)
+                ),
+                new LongActionDescription(
+                    "using the build definition ",
+                    new Hilite(this.BuildDefinition),
+                    this.WaitForCompletion ? " and wait until the build completes" + (this.ValidateBuild ? " successfully" : "") : "",
+                    "."
+                )
             );
         }
 
@@ -67,62 +64,77 @@ namespace Inedo.BuildMasterExtensions.TFS
             var buildDefinition = buildService.GetBuildDefinition(this.TeamProject, this.BuildDefinition);
 
             if (buildDefinition == null)
-                throw new InvalidOperationException(string.Format("Build definition \"{0}\" was not found.", this.BuildDefinition));
+                throw new InvalidOperationException($"Build definition \"{this.BuildDefinition}\" was not found.");
 
-            this.LogDebug("Queueing build...");
+            this.LogInformation($"Queueing build of {this.TeamProject}, build definition {Util.CoalesceStr(this.BuildDefinition, "any")}...");
             var queuedBuild = buildService.QueueBuild(buildDefinition);
 
-            this.LogDebug("Build number \"{0}\" created for definition \"{1}\".", queuedBuild.Build.BuildNumber, queuedBuild.BuildDefinition.Name);
+            this.LogInformation($"Build number \"{queuedBuild.Build.BuildNumber}\" created for definition \"{queuedBuild.BuildDefinition.Name}\".");
+
+            this.LogDebug($"Setting $TfsBuildNumber build variable to {queuedBuild.Build.BuildNumber}...");
+            StoredProcs.Variables_CreateOrUpdateVariableDefinition(
+                Variable_Name: "TfsBuildNumber",
+                Environment_Id: null,
+                Server_Id: null,
+                ApplicationGroup_Id: null,
+                Application_Id: this.Context.ApplicationId,
+                Deployable_Id: null,
+                Release_Number: this.Context.ReleaseNumber,
+                Build_Number: this.Context.BuildNumber,
+                Execution_Id: null,
+                Value_Text: queuedBuild.Build.BuildNumber,
+                Sensitive_Indicator: YNIndicator.No
+            ).Execute();
+
+            this.LogInformation("$TfsBuildNumber build variable set to: " + queuedBuild.Build.BuildNumber);
 
             if (this.WaitForCompletion)
             {
-                this.LogDebug("Waiting for build completion...");
-                queuedBuild.StatusChanged += (s, e) =>
-                {
-                    this.ThrowIfCanceledOrTimeoutExpired();
-                    this.LogDebug("TFS Build status reported: " + ((IQueuedBuild)s).Status);
-                };
+                this.LogInformation("Waiting for build completion...");
+                queuedBuild.StatusChanged += 
+                    (s, e) =>
+                    {
+                        this.ThrowIfCanceledOrTimeoutExpired();
+                        this.LogDebug("TFS Build status reported: " + ((IQueuedBuild)s).Status);
+                    };
                 queuedBuild.WaitForBuildCompletion(TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(this.Timeout));
             }
-            if(ValidateBuild)
-                ValidateBuildStatus();
+
+            if (this.ValidateBuild)
+                this.ValidateBuildStatus();
+
+            this.LogInformation($"TFS build {queuedBuild.Build.BuildNumber} created.");
         }
 
         private void ValidateBuildStatus()
         {
-            LogDebug("Validating build completion.");
+            this.LogDebug("Validating build completed successfully...");
             var collection = this.GetTeamProjectCollection();
 
             var buildService = collection.GetService<IBuildServer>();
             var buildDefinition = buildService.GetBuildDefinition(this.TeamProject, this.BuildDefinition);
-
             
             var spec = buildService.CreateBuildDetailSpec(this.TeamProject, this.BuildDefinition);
             spec.MaxBuildsPerDefinition = 1;
             spec.QueryOrder = BuildQueryOrder.FinishTimeDescending;
 
-
             var result = buildService.QueryBuilds(spec);
             var build = result.Builds.FirstOrDefault();
             if (build == null)
-                throw new InvalidOperationException(string.Format("Build {0} for team project {1} definition {2} did not return any builds.", this.BuildNumber, this.TeamProject, this.BuildDefinition));
+                throw new InvalidOperationException($"Build {this.BuildNumber} for team project {this.TeamProject} definition {this.BuildDefinition} did not return any builds.");
 
             if (build.Status != BuildStatus.Succeeded)
             {
-                this.LogError(string.Format(
-                        "There was a build error during the TFS Build {0} for team project {1} and the Validate Build Status option was "+
-                        "selected for this build.",
-                        this.BuildNumber, this.TeamProject)
-                    );
+                this.LogError(
+                    $"There was a build error during the TFS Build {this.BuildNumber} for team project {this.TeamProject} " +
+                    "and the \"Fail if the TFS build does not succeed\" option was selected for this build."
+                );
 
                 var buildErrors = InformationNodeConverters.GetBuildErrors(build);
 
-                // Should this be LogError or LogDebug?
-                this.LogError("Errors reported: ");
-                foreach (IBuildError buildError in buildErrors)
-                    this.LogError(string.Format("{0}; Line {1}: ErrMsg {2}", buildError.ServerPath, buildError.LineNumber, buildError.Message));
-
-                return;
+                this.LogError("Build errors were reported:");
+                foreach (var error in buildErrors)
+                    this.LogError($"{error.ServerPath}; Line {error.LineNumber}: ErrMsg {error.Message}");
             }
         }
     }

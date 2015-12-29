@@ -3,7 +3,6 @@ using System.Linq;
 using Inedo.BuildMaster;
 using Inedo.BuildMaster.Artifacts;
 using Inedo.BuildMaster.Data;
-using Inedo.BuildMaster.Extensibility;
 using Inedo.BuildMaster.Extensibility.Agents;
 using Inedo.BuildMaster.Extensibility.BuildImporters;
 using Inedo.BuildMaster.Files;
@@ -93,7 +92,7 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
                 }
             }
 
-            this.LogDebug("Creating $TfsBuildNumber variable...");
+            this.LogDebug($"Setting $TfsBuildNumber build variable to {tfsBuild.BuildNumber}...");
             StoredProcs.Variables_CreateOrUpdateVariableDefinition(
                 Variable_Name: "TfsBuildNumber",
                 Environment_Id: null,
@@ -107,6 +106,8 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
                 Value_Text: tfsBuild.BuildNumber,
                 Sensitive_Indicator: YNIndicator.No
             ).Execute();
+
+            this.LogInformation("$TfsBuildNumber build variable set to: " + tfsBuild.BuildNumber);
         }
 
         private static bool IsSamePath(string path1, string path2)

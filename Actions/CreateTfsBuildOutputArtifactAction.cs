@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using Inedo.BuildMaster;
+using Inedo.BuildMaster.Artifacts;
 using Inedo.BuildMaster.Data;
 using Inedo.BuildMaster.Extensibility.Actions;
 using Inedo.BuildMaster.Extensibility.Agents;
@@ -12,8 +13,8 @@ using Microsoft.TeamFoundation.Build.Client;
 namespace Inedo.BuildMasterExtensions.TFS
 {
     [ActionProperties(
-        "Create Artifact from TFS Build Output",
-        "Gets an artifact from a TFS build server drop location.",
+        "Capture Artifact from TFS Build Output",
+        "Creates a BuildMaster build artifact from a TFS build server drop location.",
         DefaultToLocalServer = true)]
     [RequiresInterface(typeof(IFileOperationsExecuter))]
     [RequiresInterface(typeof(IRemoteZip))]
@@ -41,24 +42,26 @@ namespace Inedo.BuildMasterExtensions.TFS
         [Persistent]
         public bool IncludeUnsuccessful { get; set; }
 
-        /// <summary>
-        /// Returns a <see cref="System.String" /> that represents this instance.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="System.String" /> that represents this instance.
-        /// </returns>
-        /// <remarks>
-        /// This should return a user-friendly string describing what the Action does
-        /// and the state of its important persistent properties.
-        /// </remarks>
-        public override string ToString()
+        public override ActionDescription GetActionDescription()
         {
-            return string.Format(
-                "Create a BuildMaster artifact from the build output of the team project \"{0}\", for {1} of {2}.",
-                this.TeamProject,
-                string.IsNullOrEmpty(this.BuildNumber) ? "the last successful build" : string.Format("build number \"{0}\"", this.BuildNumber),
-                string.IsNullOrEmpty(this.BuildDefinition) ? "any build definition" : string.Format("build definition \"{0}\"", this.BuildDefinition)
-            );
+            var shortDesc = new ShortActionDescription("Capture TFS Build Artifact from ", new Hilite(this.TeamProject));
+
+            var longDesc = new LongActionDescription("using ");
+            if (string.IsNullOrEmpty(this.BuildNumber))
+                longDesc.AppendContent("the last successful build");
+            else
+                longDesc.AppendContent("build ", new Hilite(this.BuildNumber));
+
+            longDesc.AppendContent(" of ");
+
+            if (string.IsNullOrEmpty(this.BuildDefinition))
+                longDesc.AppendContent("any build definition");
+            else
+                longDesc.AppendContent("build definition ", new Hilite(this.BuildDefinition));
+
+            longDesc.AppendContent(".");
+
+            return new ActionDescription(shortDesc, longDesc);
         }
 
         protected override void Execute()
@@ -80,9 +83,9 @@ namespace Inedo.BuildMasterExtensions.TFS
             var result = buildService.QueryBuilds(spec);
             var build = result.Builds.FirstOrDefault();
             if (build == null)
-                throw new InvalidOperationException(string.Format("Build {0} for team project {1} definition {2} did not return any builds.", this.BuildNumber, this.TeamProject, this.BuildDefinition));
+                throw new InvalidOperationException($"Build {this.BuildNumber} for team project {this.TeamProject} definition {this.BuildDefinition} did not return any builds.");
 
-            this.LogDebug("Build number {0} drop location: {1}", build.BuildNumber, build.DropLocation);
+            this.LogDebug($"Build number {build.BuildNumber} drop location: {build.DropLocation}");
 
             CreateArtifact(string.IsNullOrEmpty(this.ArtifactName) ? build.BuildDefinition.Name : this.ArtifactName, build.DropLocation);
         }
@@ -125,60 +128,20 @@ namespace Inedo.BuildMasterExtensions.TFS
             this.LogDebug("Zipping output...");
             this.Context.Agent.GetService<IRemoteZip>().CreateZipFile(path, zipPath);
 
+            var zipFileEntry = fileOps.GetFileEntry(zipPath);
+
             this.ThrowIfCanceledOrTimeoutExpired();
 
             this.LogDebug("Transferring file to artifact library...");
 
-            string artifactsBasePath = StoredProcs.Configuration_GetValue("CoreEx", "ArtifactsBasePath", null).Execute();
+            var artifactId = new ArtifactIdentifier(this.Context.ApplicationId, this.Context.ReleaseNumber, this.Context.BuildNumber, this.Context.DeployableId, artifactName);
 
-            var artifactPath = Util.Artifacts.GetFullArtifactPath(
-                artifactsBasePath,
-                this.Context.ApplicationId,
-                this.Context.ReleaseNumber,
-                this.Context.BuildNumber,
-                this.Context.DeployableId ?? 0,
-                artifactName
-            );
-
-            var artifactDir = Path.GetDirectoryName(artifactPath);
-
-            if (artifactPath.StartsWith(@"\\") && fileOps.DirectoryExists(artifactDir))
-            {
-                this.LogDebug("Artifacts path is a network share, transferring file to artifact library from the remote server...");
-                fileOps.FileCopyBatch(
-                    this.Context.TempDirectory,
-                    new[] { zipPath },
-                    artifactDir,
-                    new[] { artifactPath },
-                    true,
-                    true
-                );
-            }
-            else
-            {
-                this.LogDebug("Transferring file to artifact library...");
-                Directory.CreateDirectory(artifactDir);
-                Util.Files.TransferFile(
-                    fileOps,
-                    zipPath,
-                    Util.Agents.CreateLocalAgent().GetService<IFileOperationsExecuter>(),
-                    artifactPath
-                );
-            }
-
-            StoredProcs.Artifacts_CreateOrReplaceArtifact(
-                this.Context.ApplicationId,
-                this.Context.ReleaseNumber,
-                this.Context.BuildNumber,
-                Util.NullIf(this.Context.DeployableId, 0),
-                artifactName,
-                this.Context.ExecutionId
-            ).ExecuteNonQuery();
+            ArtifactBuilder.ImportZip(artifactId, fileOps, zipFileEntry);
 
             this.LogDebug("Cleaning up...");
             fileOps.DeleteFiles(new[] { zipPath });
 
-            this.LogInformation("Artifact saved");
+            this.LogInformation("Artfact captured from TFS.");
         }
     }
 }
