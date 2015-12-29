@@ -13,7 +13,7 @@ namespace Inedo.BuildMasterExtensions.TFS.Providers
     internal sealed class RemoteTfs
     {
         private readonly TfsAreaInfo[] EmptyAreas = new TfsAreaInfo[0];
-        private readonly HashSet<string> ClosedStates = new HashSet<string>(new[] { "Resolved", "Closed" }, StringComparer.OrdinalIgnoreCase);
+        private readonly string[] DefaultClosedStates = new [] { "Resolved", "Closed" };
 
         public string BaseUrl { get; set; }
         public string UserName { get; set; }
@@ -22,6 +22,7 @@ namespace Inedo.BuildMasterExtensions.TFS.Providers
         public bool UseSystemCredentials { get; set; }
         public string CustomReleaseNumberFieldName { get; set; }
         public string CustomWiql { get; set; }
+        public string[] CustomClosedStates { get; set; }
 
         public static bool IsAvailable()
         {
@@ -83,7 +84,7 @@ namespace Inedo.BuildMasterExtensions.TFS.Providers
                 }
 
                 return results
-                    .Select(i => new TfsIssue(i, ClosedStates, hyperlinkService))
+                    .Select(i => new TfsIssue(i, this.CustomClosedStates ?? this.DefaultClosedStates, hyperlinkService))
                     .ToArray();
             }
         }

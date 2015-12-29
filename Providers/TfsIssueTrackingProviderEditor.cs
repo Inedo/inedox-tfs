@@ -1,4 +1,5 @@
-﻿using System.Web.UI.WebControls;
+﻿using System;
+using System.Web.UI.WebControls;
 using Inedo.BuildMaster.Extensibility.Providers;
 using Inedo.BuildMaster.Web.Controls.Extensions;
 using Inedo.Web.Controls;
@@ -17,6 +18,7 @@ namespace Inedo.BuildMasterExtensions.TFS
         private CheckBox chkAllowHtml;
         private DropDownList ddlUseWiql;
         private ValidatingTextBox txtWiql;
+        private ValidatingTextBox txtCustomClosedStates;
 
         public override void BindToForm(ProviderBase extension)
         {
@@ -29,6 +31,7 @@ namespace Inedo.BuildMasterExtensions.TFS
             this.txtDomain.Text = provider.Domain;
             this.chkAllowHtml.Checked = provider.AllowHtmlIssueDescriptions;
             this.txtWiql.Text = provider.CustomWiql;
+            this.txtCustomClosedStates.Text = string.Join(Environment.NewLine, provider.CustomClosedStates ?? new string[0]);
 
             if (provider.UseSystemCredentials)
                 this.ddlAuthentication.SelectedValue = "system";
@@ -51,7 +54,8 @@ namespace Inedo.BuildMasterExtensions.TFS
                 Domain = this.txtDomain.Text.Trim(),
                 UseSystemCredentials = (this.ddlAuthentication.SelectedValue == "system"),
                 AllowHtmlIssueDescriptions = this.chkAllowHtml.Checked,
-                CustomWiql = bool.Parse(this.ddlUseWiql.SelectedValue) ? this.txtWiql.Text : null
+                CustomWiql = bool.Parse(this.ddlUseWiql.SelectedValue) ? this.txtWiql.Text : null,
+                CustomClosedStates = this.txtCustomClosedStates.Text.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
             };
         }
 
@@ -72,6 +76,13 @@ namespace Inedo.BuildMasterExtensions.TFS
             this.txtPassword = new PasswordTextBox();
 
             this.chkAllowHtml = new CheckBox { Text = "Allow HTML in issue descriptions" };
+
+            this.txtCustomClosedStates = new ValidatingTextBox()
+            {
+                TextMode = TextBoxMode.MultiLine,
+                Rows = 3,
+                DefaultText = "Closed\r\nResolved"
+            };
 
             ddlAuthentication = new DropDownList
             {
@@ -139,7 +150,11 @@ namespace Inedo.BuildMasterExtensions.TFS
                         w.Write("});");
                         w.Write("$('#{0}').change();", this.ddlUseWiql.ClientID);
                     }
-                )
+                ),
+                new SlimFormField("Closed statuses:", this.txtCustomClosedStates)
+                {
+                    HelpText = "The newline-separated list of issue states in TFS that BuildMaster will use to determine if a synchronized issue is closed."
+                }
             );
         }
     }

@@ -57,6 +57,8 @@ namespace Inedo.BuildMasterExtensions.TFS
         public bool AllowHtmlIssueDescriptions { get; set; }
         [Persistent]
         public string CustomWiql { get; set; }
+        [Persistent]
+        public string[] CustomClosedStates { get; set; }
 
         public override ExtensionComponentDescription GetDescription()
         {
@@ -155,7 +157,8 @@ namespace Inedo.BuildMasterExtensions.TFS
                 UserName = this.UserName,
                 Password = this.Password,
                 Domain = this.Domain,
-                UseSystemCredentials = this.UseSystemCredentials
+                UseSystemCredentials = this.UseSystemCredentials,
+                CustomClosedStates = this.CustomClosedStates
             };
         }
 
