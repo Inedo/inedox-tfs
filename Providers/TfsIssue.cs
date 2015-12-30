@@ -13,6 +13,7 @@ namespace Inedo.BuildMasterExtensions.TFS
         public TfsIssue(WorkItem workItem, string[] closedStates, TswaClientHyperlinkService hyperlinkService)
         {
             this.Id = workItem.Id;
+            this.Type = workItem.Type.Name;
             this.Title = workItem.Title;
             this.Description = workItem.Description;
             this.Status = workItem.State;
@@ -24,6 +25,7 @@ namespace Inedo.BuildMasterExtensions.TFS
 
         public int Id { get; }
         public bool IsClosed { get; }
+        public string Type { get; }
         public string Title { get; }
         public string Description { get; }
         public string Status { get; }
