@@ -41,6 +41,13 @@ namespace Inedo.BuildMasterExtensions.TFS
         [Persistent]
         public bool ValidateBuild{ get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the action should create the $TfsBuildNumber build variable 
+        /// containing the value of the TFS build number.
+        /// </summary>
+        [Persistent]
+        public bool CreateBuildNumberVariable { get; set; } = true;
+
         public override ActionDescription GetActionDescription()
         {
             return new ActionDescription(
@@ -71,22 +78,25 @@ namespace Inedo.BuildMasterExtensions.TFS
 
             this.LogInformation($"Build number \"{queuedBuild.Build.BuildNumber}\" created for definition \"{queuedBuild.BuildDefinition.Name}\".");
 
-            this.LogDebug($"Setting $TfsBuildNumber build variable to {queuedBuild.Build.BuildNumber}...");
-            StoredProcs.Variables_CreateOrUpdateVariableDefinition(
-                Variable_Name: "TfsBuildNumber",
-                Environment_Id: null,
-                Server_Id: null,
-                ApplicationGroup_Id: null,
-                Application_Id: this.Context.ApplicationId,
-                Deployable_Id: null,
-                Release_Number: this.Context.ReleaseNumber,
-                Build_Number: this.Context.BuildNumber,
-                Execution_Id: null,
-                Value_Text: queuedBuild.Build.BuildNumber,
-                Sensitive_Indicator: YNIndicator.No
-            ).Execute();
+            if (this.CreateBuildNumberVariable)
+            {
+                this.LogDebug($"Setting $TfsBuildNumber build variable to {queuedBuild.Build.BuildNumber}...");
+                StoredProcs.Variables_CreateOrUpdateVariableDefinition(
+                    Variable_Name: "TfsBuildNumber",
+                    Environment_Id: null,
+                    Server_Id: null,
+                    ApplicationGroup_Id: null,
+                    Application_Id: this.Context.ApplicationId,
+                    Deployable_Id: null,
+                    Release_Number: this.Context.ReleaseNumber,
+                    Build_Number: this.Context.BuildNumber,
+                    Execution_Id: null,
+                    Value_Text: queuedBuild.Build.BuildNumber,
+                    Sensitive_Indicator: YNIndicator.No
+                ).Execute();
 
-            this.LogInformation("$TfsBuildNumber build variable set to: " + queuedBuild.Build.BuildNumber);
+                this.LogInformation("$TfsBuildNumber build variable set to: " + queuedBuild.Build.BuildNumber);
+            }
 
             if (this.WaitForCompletion)
             {

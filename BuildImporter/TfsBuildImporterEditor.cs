@@ -21,7 +21,8 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
                 BuildDefinition = this.Template.BuildDefinition,
                 TfsBuildNumber = (this.txtBuildNumber.Text != "last succeeded build" && this.txtBuildNumber.Text != "last completed build") ? this.txtBuildNumber.Text : null,
                 IncludeUnsuccessful = this.txtBuildNumber.Text == "last completed build",
-                ServerId = this.Template.ServerId
+                ServerId = this.Template.ServerId,
+                CreateBuildNumberVariable = this.Template.CreateBuildNumberVariable
             };
 
             if (InedoLib.Util.Int.ParseN(importer.TfsBuildNumber) == null)
@@ -30,7 +31,7 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
 
                 var tfsBuild = config.GetBuildInfo(importer.TeamProject, importer.BuildDefinition, importer.TfsBuildNumber, importer.IncludeUnsuccessful);
                 if (tfsBuild == null)
-                    throw new InvalidOperationException("There were matching builds found in TFS.");
+                    throw new InvalidOperationException("There were no matching builds found in TFS.");
 
                 var group = Regex.Match(tfsBuild.BuildNumber, this.Template.BuildNumberPattern).Groups["num"];
                 if (!group.Success || string.IsNullOrEmpty(group.Value))

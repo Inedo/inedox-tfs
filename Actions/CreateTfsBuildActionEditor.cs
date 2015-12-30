@@ -12,6 +12,7 @@ namespace Inedo.BuildMasterExtensions.TFS
         private ValidatingTextBox txtBuildDefinition;
         private CheckBox chkWaitForCompletion;
         private CheckBox chkValidateBuild;
+        private CheckBox chkCreateBuildVariable;
 
         public override void BindToForm(ActionBase extension)
         {
@@ -21,6 +22,7 @@ namespace Inedo.BuildMasterExtensions.TFS
             this.txtBuildDefinition.Text = action.BuildDefinition;
             this.chkWaitForCompletion.Checked = action.WaitForCompletion;
             this.chkValidateBuild.Checked = action.ValidateBuild;
+            this.chkCreateBuildVariable.Checked = action.CreateBuildNumberVariable;
         }
 
         public override ActionBase CreateFromForm()
@@ -30,7 +32,8 @@ namespace Inedo.BuildMasterExtensions.TFS
                 TeamProject = this.txtTeamProject.Text,
                 BuildDefinition = this.txtBuildDefinition.Text,
                 WaitForCompletion = this.chkWaitForCompletion.Checked,
-                ValidateBuild = this.chkValidateBuild.Checked
+                ValidateBuild = this.chkValidateBuild.Checked,
+                CreateBuildNumberVariable = this.chkCreateBuildVariable.Checked
             };
         }
 
@@ -43,6 +46,7 @@ namespace Inedo.BuildMasterExtensions.TFS
 
             this.chkWaitForCompletion = new CheckBox() { Text = "Wait until the TFS build completes", Checked = true };
             this.chkValidateBuild = new CheckBox() { Text = "Fail if the TFS build does not succeed", Checked = true };
+            this.chkCreateBuildVariable = new CheckBox() { Text = "Store the TFS build number as $TfsBuildNumber", Checked = true };
 
             this.Controls.Add(
                 new SlimFormField(
@@ -55,6 +59,7 @@ namespace Inedo.BuildMasterExtensions.TFS
                 ),
                 new SlimFormField(
                     "Options:",
+                    new Div(this.chkCreateBuildVariable),
                     new Div(this.chkWaitForCompletion),
                     new Div(this.chkValidateBuild)
                 )

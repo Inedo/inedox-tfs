@@ -20,6 +20,8 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
         public bool IncludeUnsuccessful { get; set; }
         [Persistent]
         public string BuildNumberPattern { get; set; }
+        [Persistent]
+        public bool CreateBuildNumberVariable { get; set; } = true;
 
         public override ExtensionComponentDescription GetDescription()
         {

@@ -29,6 +29,8 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
         public string TfsBuildNumber { get; set; }
         [Persistent]
         public bool IncludeUnsuccessful { get; set; }
+        [Persistent]
+        public bool CreateBuildNumberVariable { get; set; }
 
         public string BuildNumber { get; set; }
 
@@ -79,7 +81,7 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
                     return;
                 }
 
-                this.LogDebug("Creating {0} artifact...", this.ArtifactName);
+                this.LogDebug($"Creating {this.ArtifactName} artifact...");
                 var artifactId = new ArtifactIdentifier(context.ApplicationId, context.ReleaseNumber, context.BuildNumber, context.DeployableId, this.ArtifactName);
                 using (var artifact = new ArtifactBuilder(artifactId))
                 {
@@ -92,22 +94,25 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
                 }
             }
 
-            this.LogDebug($"Setting $TfsBuildNumber build variable to {tfsBuild.BuildNumber}...");
-            StoredProcs.Variables_CreateOrUpdateVariableDefinition(
-                Variable_Name: "TfsBuildNumber",
-                Environment_Id: null,
-                Server_Id: null,
-                ApplicationGroup_Id: null,
-                Application_Id: context.ApplicationId,
-                Deployable_Id: null,
-                Release_Number: context.ReleaseNumber,
-                Build_Number: context.BuildNumber,
-                Execution_Id: null,
-                Value_Text: tfsBuild.BuildNumber,
-                Sensitive_Indicator: YNIndicator.No
-            ).Execute();
+            if (this.CreateBuildNumberVariable)
+            {
+                this.LogDebug($"Setting $TfsBuildNumber build variable to {tfsBuild.BuildNumber}...");
+                StoredProcs.Variables_CreateOrUpdateVariableDefinition(
+                    Variable_Name: "TfsBuildNumber",
+                    Environment_Id: null,
+                    Server_Id: null,
+                    ApplicationGroup_Id: null,
+                    Application_Id: context.ApplicationId,
+                    Deployable_Id: null,
+                    Release_Number: context.ReleaseNumber,
+                    Build_Number: context.BuildNumber,
+                    Execution_Id: null,
+                    Value_Text: tfsBuild.BuildNumber,
+                    Sensitive_Indicator: YNIndicator.No
+                ).Execute();
 
-            this.LogInformation("$TfsBuildNumber build variable set to: " + tfsBuild.BuildNumber);
+                this.LogInformation("$TfsBuildNumber build variable set to: " + tfsBuild.BuildNumber);
+            }
         }
 
         private static bool IsSamePath(string path1, string path2)

@@ -14,6 +14,7 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
         private BuildDefinitionPicker txtBuildDefinition;
         private DropDownList ddlBuildNumber;
         private ValidatingTextBox txtBuildNumberPattern;
+        private CheckBox chkCreateBuildNumberVariable;
 
         public override void BindToForm(BuildImporterTemplateBase extension)
         {
@@ -24,6 +25,7 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
             this.txtBuildDefinition.TeamProject = template.TeamProject;
             this.ddlBuildNumber.SelectedValue = template.BuildNumberLocked ? (template.IncludeUnsuccessful ? "last" : "success") : string.Empty;
             this.txtBuildNumberPattern.Text = template.BuildNumberPattern;
+            this.chkCreateBuildNumberVariable.Checked = template.CreateBuildNumberVariable;
         }
         public override BuildImporterTemplateBase CreateFromForm()
         {
@@ -37,7 +39,8 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
                 IncludeUnsuccessful = this.ddlBuildNumber.SelectedValue == "last",
                 BuildNumberLocked = !string.IsNullOrEmpty(this.ddlBuildNumber.SelectedValue),
                 BuildNumberPattern = this.txtBuildNumberPattern.Text,
-                ServerId = config.ServerId.GetValueOrDefault()
+                ServerId = config.ServerId.GetValueOrDefault(),
+                CreateBuildNumberVariable = this.chkCreateBuildNumberVariable.Checked
             };
         }
 
@@ -59,12 +62,16 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
                 }
             };
             this.txtBuildNumberPattern = new ValidatingTextBox { Text = "_(?<num>[^_]+)$" };
+            this.chkCreateBuildNumberVariable = new CheckBox() { Text = "Store the TFS build number as $TfsBuildNumber", Checked = true };
 
             this.Controls.Add(
                 new SlimFormField("Artifact name:", this.txtArtifactName),
                 new SlimFormField("Team project:", this.txtTeamProject),
                 new SlimFormField("Build definition:", txtBuildDefinition),
-                new SlimFormField("Build number:", this.ddlBuildNumber),
+                new SlimFormField("Build number:", 
+                    new Div(this.ddlBuildNumber),
+                    new Div(this.chkCreateBuildNumberVariable)
+                ),
                 new SlimFormField("Capture pattern:", this.txtBuildNumberPattern)
                 {
                     HelpText = "When importing a build, you can opt to use the TFS build number; however, because TFS build numbers "
