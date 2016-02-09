@@ -70,9 +70,13 @@ namespace Inedo.BuildMasterExtensions.TFS
 
             var sffCredentials = new SlimFormField("Credentials:",
                 new Div(new Div("Username:"), new Div(this.txtUserName)),
-                new Div(new Div("Password:"), new Div(this.txtPassword)),
+                new Div(new Div("Password / access token:"), new Div(this.txtPassword)),
                 new Div(new Div("Domain:"), new Div(this.txtDomain))
-                ) { ID = "sffCredentials" };
+                )
+            {
+                ID = "sffCredentials",
+                HelpText = HelpText.FromHtml("For Visual Studio Online, either <a href=\"https://www.visualstudio.com/en-us/integrate/get-started/auth/overview\" target=\"_blank\">Alternate Credentials or Personal Access Tokens</a> must be used in the password field.")
+            };
 
             this.Controls.Add(
                 new SlimFormField("TFS client:", this.ctlServerPicker){ HelpText = "The server where the TFS Client (Visual Studio or Team Explorer) is installed." },

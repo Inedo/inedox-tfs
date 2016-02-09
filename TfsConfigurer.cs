@@ -22,7 +22,7 @@ namespace Inedo.BuildMasterExtensions.TFS
         [Persistent]
         public int? ServerId { get; set; }
         /// <summary>
-        /// The base url of the TFS store, should not include collection name, e.g. "http://server:port/tfs"
+        /// The base url of the TFS store, may include collection name, e.g. "http://server:port/tfs"
         /// </summary>
         [Persistent]
         public string BaseUrl { get; set; }

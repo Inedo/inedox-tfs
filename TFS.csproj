@@ -87,6 +87,7 @@
     <Reference Include="System" />
     <Reference Include="System.Web" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -138,6 +139,30 @@
     <Compile Include="Providers\TfsSourceControlProviderEditor.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
+    <Compile Include="VisualStudioOnline\TfsRestApi.cs" />
+    <Compile Include="VisualStudioOnline\ImportVsoArtifactAction.cs" />
+    <Compile Include="VisualStudioOnline\ImportVsoArtifactActionEditor.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="VisualStudioOnline\Model\Common.cs" />
+    <Compile Include="VisualStudioOnline\Model\GetBuildArtifactsResponse.cs" />
+    <Compile Include="VisualStudioOnline\Model\GetBuildDefinitionResponse.cs" />
+    <Compile Include="VisualStudioOnline\Model\GetBuildResponse.cs" />
+    <Compile Include="VisualStudioOnline\Model\GetBuildDefinitionsResponse.cs" />
+    <Compile Include="VisualStudioOnline\Model\GetBuildsResponse.cs" />
+    <Compile Include="VisualStudioOnline\QueueVsoBuildAction.cs" />
+    <Compile Include="VisualStudioOnline\QueueVsoBuildActionEditors.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="VisualStudioOnline\VsoArtifactImporter.cs" />
+    <Compile Include="VisualStudioOnline\VsoBuildImporter.cs" />
+    <Compile Include="VisualStudioOnline\VsoBuildImporterEditor.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="VisualStudioOnline\VsoBuildImporterTemplate.cs" />
+    <Compile Include="VisualStudioOnline\VsoBuildImporterTemplateEditor.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="lib\license.txt" />
@@ -173,9 +198,9 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>if exist $(SolutionDir) cmd /c "del $(SolutionDir)..\..\BuildMaster\ExtensionLib\$(TargetName).bmx"
-if exist $(SolutionDir) $(SolutionDir)..\zip -r $(SolutionDir)..\..\BuildMaster\ExtensionLib\$(TargetName).bmx *.*
-if exist $(SolutionDir) echo hdars &gt; $(SolutionDir)..\..\BuildMaster\BuildMasterSolution\Web\BuildMaster.Web.WebApplication\bin\hsirs</PostBuildEvent>
+    <PostBuildEvent>if exist $(SolutionDir) cmd /c "del $(SolutionDir)..\..\BuildMaster-4.9\ExtensionLib\$(TargetName).bmx"
+if exist $(SolutionDir) $(SolutionDir)..\zip -r $(SolutionDir)..\..\BuildMaster-4.9\ExtensionLib\$(TargetName).bmx *.*
+if exist $(SolutionDir) echo hdars &gt; $(SolutionDir)..\..\BuildMaster-4.9\BuildMasterSolution\Web\BuildMaster.Web.WebApplication\bin\hsirs</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
