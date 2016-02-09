@@ -139,17 +139,17 @@
     <Compile Include="Providers\TfsSourceControlProviderEditor.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
+    <Compile Include="VisualStudioOnline\Model\Common.cs" />
+    <Compile Include="VisualStudioOnline\Model\GetBuildArtifactsResponse.cs" />
+    <Compile Include="VisualStudioOnline\Model\GetBuildDefinitionResponse.cs" />
+    <Compile Include="VisualStudioOnline\Model\GetBuildDefinitionsResponse.cs" />
+    <Compile Include="VisualStudioOnline\Model\GetBuildResponse.cs" />
+    <Compile Include="VisualStudioOnline\Model\GetBuildsResponse.cs" />
     <Compile Include="VisualStudioOnline\TfsRestApi.cs" />
     <Compile Include="VisualStudioOnline\ImportVsoArtifactAction.cs" />
     <Compile Include="VisualStudioOnline\ImportVsoArtifactActionEditor.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="VisualStudioOnline\Model\Common.cs" />
-    <Compile Include="VisualStudioOnline\Model\GetBuildArtifactsResponse.cs" />
-    <Compile Include="VisualStudioOnline\Model\GetBuildDefinitionResponse.cs" />
-    <Compile Include="VisualStudioOnline\Model\GetBuildResponse.cs" />
-    <Compile Include="VisualStudioOnline\Model\GetBuildDefinitionsResponse.cs" />
-    <Compile Include="VisualStudioOnline\Model\GetBuildsResponse.cs" />
     <Compile Include="VisualStudioOnline\QueueVsoBuildAction.cs" />
     <Compile Include="VisualStudioOnline\QueueVsoBuildActionEditors.cs">
       <SubType>ASPXCodeBehind</SubType>
