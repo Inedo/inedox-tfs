@@ -4,6 +4,7 @@ using Inedo.BuildMaster;
 using Inedo.BuildMaster.Artifacts;
 using Inedo.Diagnostics;
 using Inedo.IO;
+using System.Linq;
 
 namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
 {
@@ -17,7 +18,7 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
         /// <param name="teamProject">The team project.</param>
         /// <param name="buildNumber">The build number.</param>
         /// <param name="artifactId">The artifact identifier.</param>
-        public static string DownloadAndImport(TfsConfigurer configurer, ILogger logger, string teamProject, string buildNumber, ArtifactIdentifier artifactId)
+        public static string DownloadAndImport(TfsConfigurer configurer, ILogger logger, string teamProject, string buildNumber, string buildDefinitionName, ArtifactIdentifier artifactId)
         {
             if (logger == null)
                 throw new ArgumentNullException(nameof(logger));
@@ -32,13 +33,23 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
                 Password = configurer.Password
             };
 
+            logger.LogInformation($"Finding last successful build...");
+            var buildDefinitions = api.GetBuildDefinitions();
+            
+            var buildDefinition = buildDefinitions.FirstOrDefault(b => b.name == buildDefinitionName);
+            
+            if (buildDefinition == null)
+               {
+                throw new InvalidOperationException($"The build definition {buildDefinitionName} could not be found.");
+               }
+            
             logger.LogInformation($"Finding {Util.CoalesceStr(buildNumber, "last successful")} build...");
 
             var builds = api.GetBuilds(
                 buildNumber: InedoLib.Util.NullIf(buildNumber, ""),
                 resultFilter: "succeeded",
-                statusFilter: "completed",
-                top: 2
+                statusFilter: "completed"
+                //,top: 2
             );
 
             if (builds.Length == 0)
@@ -46,7 +57,7 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
             if (!string.IsNullOrEmpty(buildNumber) && builds.Length > 1)
                 throw new InvalidOperationException($"A build number was specified and there were multiple builds found with build number {buildNumber}.");
 
-            var build = builds[0];
+            var build = builds.FirstOrDefault(b => b.definition.id == buildDefinition.id);
 
             string tempFile = Path.GetTempFileName();
             try

@@ -59,7 +59,8 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
                 configurer, 
                 this, 
                 this.TeamProject, 
-                this.BuildNumber, 
+                this.BuildNumber,
+                this.BuildDefinition,
                 new ArtifactIdentifier(this.Context.ApplicationId, this.Context.ReleaseNumber, this.Context.BuildNumber, this.Context.DeployableId, this.ArtifactName)
             );
         }
