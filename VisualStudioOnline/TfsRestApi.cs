@@ -113,6 +113,7 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
             
             if (!string.IsNullOrEmpty(this.UserName))
             {
+                request.Credentials = new NetworkCredential(this.UserName, this.Password);
                 request.Headers[HttpRequestHeader.Authorization] = "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes(this.UserName + ":" + this.Password));
             }
 
@@ -166,6 +167,7 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
 
             if (!string.IsNullOrEmpty(this.UserName))
             {
+                request.Credentials = new NetworkCredential(this.UserName, this.Password);
                 request.Headers[HttpRequestHeader.Authorization] = "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes(this.UserName + ":" + this.Password));
             }
 
