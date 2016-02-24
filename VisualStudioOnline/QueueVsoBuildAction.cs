@@ -66,7 +66,7 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
 
             var api = new TfsRestApi(configurer.BaseUrl, this.TeamProject)
             {
-                UserName = configurer.UserName,
+                UserName = string.IsNullOrEmpty(configurer.Domain) ? configurer.UserName : string.Format("{0}\\{1}", configurer.Domain, configurer.UserName),
                 Password = configurer.Password
             };
 
