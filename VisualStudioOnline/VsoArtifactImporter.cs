@@ -54,8 +54,7 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
 
             if (builds.Length == 0)
                 throw new InvalidOperationException($"Could not find build number {buildNumber}. Ensure there is a successful, completed build with this number.");
-            if (!string.IsNullOrEmpty(buildNumber) && builds.Length > 1)
-                throw new InvalidOperationException($"A build number was specified and there were multiple builds found with build number {buildNumber}.");
+            
 
             var build = builds.FirstOrDefault(b => b.definition.id == buildDefinition.id);
 
