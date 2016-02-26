@@ -15,6 +15,7 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
 
         public string ApiVersion { get; set; } = "2.0";
         public string BuildNumber { get; set; }
+        public int Definition { get; set; }
         public int? Top { get; set; }
         public string ResultFilter { get; set; }
         public string StatusFilter { get; set; }
@@ -27,6 +28,8 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
                 buffer.AppendFormat("api-version={0}&", this.ApiVersion);
             if (this.BuildNumber != null)
                 buffer.AppendFormat("buildNumber={0}&", this.BuildNumber);
+            if (this.Definition != 0)
+                buffer.AppendFormat("definitions={0}&", this.Definition);
             if (this.Top != null)
                 buffer.AppendFormat("$top={0}&", this.Top);
             if (this.ResultFilter != null)
@@ -67,6 +70,13 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
         public GetBuildResponse[] GetBuilds(string buildNumber = null, string resultFilter = null, string statusFilter = null, int? top = null)
         {
             var query = new QueryString() { BuildNumber = buildNumber, ResultFilter = resultFilter, StatusFilter = statusFilter, Top = top };
+
+            return this.Invoke<GetBuildsResponse>("GET", "build/builds", query).value;
+        }
+
+        public GetBuildResponse[] GetBuilds(int buildDefinition, string buildNumber = null, string resultFilter = null, string statusFilter = null, int? top = null)
+        {
+            var query = new QueryString() { Definition=buildDefinition, BuildNumber = buildNumber, ResultFilter = resultFilter, StatusFilter = statusFilter, Top = top };
 
             return this.Invoke<GetBuildsResponse>("GET", "build/builds", query).value;
         }

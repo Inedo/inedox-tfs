@@ -35,28 +35,28 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
 
             logger.LogInformation($"Finding last successful build...");
             var buildDefinitions = api.GetBuildDefinitions();
-            
+
             var buildDefinition = buildDefinitions.FirstOrDefault(b => b.name == buildDefinitionName);
-            
+
             if (buildDefinition == null)
-               {
+            {
                 throw new InvalidOperationException($"The build definition {buildDefinitionName} could not be found.");
-               }
-            
+            }
+
             logger.LogInformation($"Finding {Util.CoalesceStr(buildNumber, "last successful")} build...");
 
             var builds = api.GetBuilds(
+                buildDefinition: buildDefinition.id,
                 buildNumber: InedoLib.Util.NullIf(buildNumber, ""),
                 resultFilter: "succeeded",
-                statusFilter: "completed"
-                //,top: 2
+                statusFilter: "completed",
+                top: 2
             );
 
             if (builds.Length == 0)
                 throw new InvalidOperationException($"Could not find build number {buildNumber}. Ensure there is a successful, completed build with this number.");
             
-
-            var build = builds.FirstOrDefault(b => b.definition.id == buildDefinition.id);
+            var build = builds.FirstOrDefault();
 
             string tempFile = Path.GetTempFileName();
             try
