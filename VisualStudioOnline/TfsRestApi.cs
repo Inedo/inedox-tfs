@@ -117,8 +117,10 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
 
         private void DownloadFile(string url, string filePath)
         {
-            var request = (HttpWebRequest)HttpWebRequest.Create(url);
-            request.UserAgent = "BuildMasterTFSExtension/" + typeof(TfsRestApi).Assembly.GetName().Version.ToString();
+            var request = WebRequest.Create(url);
+            var httpRequest = request as HttpWebRequest;
+            if (httpRequest != null)
+                httpRequest.UserAgent = "BuildMasterTFSExtension/" + typeof(TfsRestApi).Assembly.GetName().Version.ToString();
             request.Method = "GET";
             
             if (!string.IsNullOrEmpty(this.UserName))
@@ -162,8 +164,10 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
         {
             string url = this.apiBaseUrl + relativeUrl + query.ToString();
 
-            var request = (HttpWebRequest)HttpWebRequest.Create(url);
-            request.UserAgent = "BuildMasterTFSExtension/" + typeof(TfsRestApi).Assembly.GetName().Version.ToString();
+            var request = WebRequest.Create(url);
+            var httpRequest = request as HttpWebRequest;
+            if (httpRequest != null)
+                httpRequest.UserAgent = "BuildMasterTFSExtension/" + typeof(TfsRestApi).Assembly.GetName().Version.ToString();
             request.ContentType = "application/json";
             request.Method = method;
             if (data != null)
