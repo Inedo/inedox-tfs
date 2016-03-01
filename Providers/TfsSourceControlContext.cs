@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Inedo.BuildMaster.Extensibility.Agents;
 using Inedo.BuildMaster.Extensibility.Providers.SourceControl;
 using Inedo.BuildMaster.Files;
@@ -21,7 +17,6 @@ namespace Inedo.BuildMasterExtensions.TFS
         public string[] SplitPath { get; private set; }
         public string LastSubDirectoryName { get; private set; }
         public string WorkspaceName { get; private set; }
-        //public string AbsoluteDiskPath { get; private set; }
 
         public TfsSourceControlContext(TfsSourceControlProvider provider, string sourcePath) 
             : this(provider, sourcePath, null) { }
@@ -39,10 +34,16 @@ namespace Inedo.BuildMasterExtensions.TFS
             this.LastSubDirectoryName = this.SplitPath.LastOrDefault() ?? string.Empty;
 
             var tmpRepo = new SourceRepository() { RemoteUrl = BuildAbsoluteDiskPath(provider.BaseUrl, this.SplitPath) };
-            this.WorkspaceDiskPath = tmpRepo.GetDiskPath(provider.Agent.GetService<IFileOperationsExecuter>());
-            //this.RepositoryRelativePath = this.SourcePath.TrimStart(EmptyPathString.ToCharArray());
-            //this.AbsoluteDiskPath = BuildAbsoluteDiskPath(this.WorkspaceDiskPath, this.SplitPath);
-            this.WorkspaceName = BuildWorkspaceName(this.WorkspaceDiskPath);
+
+            if (string.IsNullOrEmpty(provider.CustomWorkspacePath))
+                this.WorkspaceDiskPath = tmpRepo.GetDiskPath(provider.Agent.GetService<IFileOperationsExecuter>());
+            else
+                this.WorkspaceDiskPath = provider.CustomWorkspacePath;
+
+            if (string.IsNullOrEmpty(provider.CustomWorkspaceName))
+                this.WorkspaceName = BuildWorkspaceName(this.WorkspaceDiskPath);
+            else
+                this.WorkspaceName = provider.CustomWorkspaceName;
         }
 
         internal SystemEntryInfo CreateSystemEntryInfo(Item item)

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -46,6 +45,16 @@ namespace Inedo.BuildMasterExtensions.TFS
         /// </summary>
         [Persistent]
         public bool UseSystemCredentials { get; set; }
+        /// <summary>
+        /// Gets or sets the custom workspace path. If null or empty, it will be generated based on the path for the Get Latest action.
+        /// </summary>
+        [Persistent]
+        public string CustomWorkspacePath { get; set; }
+        /// <summary>
+        /// Gets or sets the name of the custom workspace. If null or empty, it will be generated based on the <see cref="CustomWorkspacePath"/>.
+        /// </summary>
+        [Persistent]
+        public string CustomWorkspaceName { get; set; }
 
         /// <summary>
         /// Gets the base URI of the Team Foundation Server
@@ -292,6 +301,11 @@ namespace Inedo.BuildMasterExtensions.TFS
         /// <param name="targetPath">The target path.</param>
         private Workspace GetMappedWorkspace(VersionControlServer server, TfsSourceControlContext context)
         {
+            if (!string.IsNullOrEmpty(this.CustomWorkspacePath))
+                this.LogDebug("Using custom workspace path: " + this.CustomWorkspacePath);
+            if (!string.IsNullOrEmpty(this.CustomWorkspaceName))
+                this.LogDebug("Using custom workspace name: " + this.CustomWorkspaceName);
+
             var workspaces = server.QueryWorkspaces(context.WorkspaceName, server.AuthorizedUser, Environment.MachineName);
             var workspace = workspaces.FirstOrDefault();
             if (workspace == null)
@@ -314,7 +328,7 @@ namespace Inedo.BuildMasterExtensions.TFS
             }
 
             if (!workspace.HasReadPermission)
-                throw new System.Security.SecurityException(string.Format("{0} does not have read permission for {1}", server.AuthorizedUser, context.WorkspaceDiskPath));
+                throw new System.Security.SecurityException($"{server.AuthorizedUser} does not have read permission for {context.WorkspaceDiskPath}");
 
             return workspace;
         }
