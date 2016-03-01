@@ -74,11 +74,11 @@ namespace Inedo.BuildMasterExtensions.TFS
         }
 
         private void GetLatest(TfsSourceControlContext context, string targetPath)
-            {
+        {
             this.EnsureLocalWorkspace(context);
             this.UpdateLocalWorkspace(context);
             this.ExportFiles(context, targetPath);
-                }
+        }
 
         /// <summary>
         /// Returns a string representation of this provider.
@@ -88,7 +88,7 @@ namespace Inedo.BuildMasterExtensions.TFS
         {
             return "Provides functionality for getting files and browsing folders in TFS 2010-2015.";
         }
-        
+
         public override DirectoryEntryInfo GetDirectoryEntryInfo(string sourcePath)
         {
             var context = (TfsSourceControlContext)this.CreateSourceControlContext(sourcePath);
@@ -101,11 +101,11 @@ namespace Inedo.BuildMasterExtensions.TFS
             {
                 var sourceControl = tfs.GetService<VersionControlServer>();
                 var itemSet = sourceControl.GetItems(context.SourcePath, RecursionType.OneLevel);
-                    return new DirectoryEntryInfo(
-                        context.LastSubDirectoryName,
-                        context.SourcePath,
-                        itemSet.Items.Where(i => i.ServerItem != context.SourcePath).Select(i => context.CreateSystemEntryInfo(i))
-                );
+                return new DirectoryEntryInfo(
+                    context.LastSubDirectoryName,
+                    context.SourcePath,
+                    itemSet.Items.Where(i => i.ServerItem != context.SourcePath).Select(i => context.CreateSystemEntryInfo(i))
+            );
             }
         }
 
@@ -213,10 +213,10 @@ namespace Inedo.BuildMasterExtensions.TFS
         {
             var context = new TfsSourceControlContext(this, sourcePath, label);
             this.GetLabeled(context, label, targetPath);
-                }
+        }
 
         private void GetLabeled(TfsSourceControlContext context, string label, string targetDirectory)
-                {
+        {
             this.EnsureLocalWorkspace(context);
             this.UpdateLocalWorkspace(context);
             this.ExportFiles(context, targetDirectory);
@@ -271,7 +271,14 @@ namespace Inedo.BuildMasterExtensions.TFS
             }
             else
             {
-                var projectColleciton = new TfsTeamProjectCollection(this.BaseUri, new TfsClientCredentials(new WindowsCredential(new NetworkCredential(this.UserName, this.Password, this.Domain))));
+                TfsClientCredentials credentials;
+                
+                if (string.IsNullOrEmpty(this.Domain))
+                    credentials = new TfsClientCredentials(new BasicAuthCredential(new NetworkCredential(this.UserName, this.Password)));
+                else
+                    credentials = new TfsClientCredentials(new WindowsCredential(new NetworkCredential(this.UserName, this.Password, this.Domain)));
+
+                var projectColleciton = new TfsTeamProjectCollection(this.BaseUri, credentials);
                 projectColleciton.EnsureAuthenticated();
                 return projectColleciton;
             }
@@ -287,12 +294,12 @@ namespace Inedo.BuildMasterExtensions.TFS
         {
             var workspaces = server.QueryWorkspaces(context.WorkspaceName, server.AuthorizedUser, Environment.MachineName);
             var workspace = workspaces.FirstOrDefault();
-            if (workspace == null) 
-        {
+            if (workspace == null)
+            {
                 this.LogDebug("Existing workspace not found, creating workspace \"{0}\"...", context.WorkspaceName);
                 workspace = server.CreateWorkspace(context.WorkspaceName);
             }
-            else 
+            else
             {
                 this.LogDebug("Workspace found: " + workspace.Name);
             }
@@ -371,7 +378,7 @@ namespace Inedo.BuildMasterExtensions.TFS
                 Directory.CreateDirectory(targetDir);
 
             var sourceDirInfo = new DirectoryInfo(sourceDir);
-            
+
             foreach (var file in sourceDirInfo.GetFiles())
             {
                 file.CopyTo(Path.Combine(targetDir, file.Name), true);
