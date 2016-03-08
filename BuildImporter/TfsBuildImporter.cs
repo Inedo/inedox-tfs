@@ -38,7 +38,7 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
         {
             var configurer = (TfsConfigurer)this.GetExtensionConfigurer();
 
-            this.LogDebug("Searching for build {0} for team project {1} definition {2}...", this.TfsBuildNumber, this.TeamProject, this.BuildDefinition);
+            this.LogDebug($"Searching for build {this.TfsBuildNumber} for team project {this.TeamProject} definition {this.BuildDefinition}...");
             var tfsBuild = configurer.GetBuildInfo(this.TeamProject, this.BuildDefinition, this.TfsBuildNumber, this.IncludeUnsuccessful);
 
             if (tfsBuild == null)
@@ -47,7 +47,7 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
                 return;
             }
 
-            this.LogInformation("TFS Build Number: {0}", tfsBuild.BuildNumber);
+            this.LogInformation("TFS Build Number: " + tfsBuild.BuildNumber);
 
             if (string.IsNullOrWhiteSpace(tfsBuild.DropLocation))
             {
@@ -55,23 +55,27 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
                 return;
             }
 
-            this.LogInformation("Drop location: {0}", tfsBuild.DropLocation);
+            this.LogInformation("Drop location: " + tfsBuild.DropLocation);
 
             using (var agent = Util.Agents.CreateAgentFromId(configurer.ServerId))
             {
                 var fileOps = agent.GetService<IFileOperationsExecuter>();
 
                 this.LogDebug("Querying drop location...");
-                var directoryResult = Util.Files.GetDirectoryEntry(
+
+                var directoryResult = fileOps.GetDirectoryEntry(
                     new GetDirectoryEntryCommand
                     {
                         Path = tfsBuild.DropLocation,
                         Recurse = true,
                         IncludeRootPath = true
                     }
-                ).Entry;
+                );
+                var exception = directoryResult.Exceptions.FirstOrDefault();
+                if (exception != null)
+                    throw exception;
 
-                var matches = Util.Files.Comparison.GetMatches(tfsBuild.DropLocation, directoryResult, new[] { "*" })
+                var matches = Util.Files.Comparison.GetMatches(tfsBuild.DropLocation, directoryResult.Entry, new[] { "*" })
                     .Where(e => !IsSamePath(e.Path, tfsBuild.DropLocation))
                     .ToList();
 
