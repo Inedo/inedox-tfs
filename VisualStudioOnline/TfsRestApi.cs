@@ -122,12 +122,8 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
             if (httpRequest != null)
                 httpRequest.UserAgent = "BuildMasterTFSExtension/" + typeof(TfsRestApi).Assembly.GetName().Version.ToString();
             request.Method = "GET";
-            
-            if (!string.IsNullOrEmpty(this.UserName))
-            {
-                request.Credentials = new NetworkCredential(this.UserName, this.Password);
-                request.Headers[HttpRequestHeader.Authorization] = "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes(this.UserName + ":" + this.Password));
-            }
+
+            this.SetCredentials(request);
 
             try
             {
@@ -179,11 +175,7 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
                 }
             }
 
-            if (!string.IsNullOrEmpty(this.UserName))
-            {
-                request.Credentials = new NetworkCredential(this.UserName, this.Password);
-                request.Headers[HttpRequestHeader.Authorization] = "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes(this.UserName + ":" + this.Password));
-            }
+            this.SetCredentials(request);
 
             try
             {
@@ -214,6 +206,20 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
                     }
 
                     throw new Exception(message, ex);
+                }
+            }
+        }
+
+        private void SetCredentials(WebRequest request)
+        {
+            if (!string.IsNullOrEmpty(this.UserName))
+            {
+                request.Credentials = new NetworkCredential(this.UserName, this.Password);
+
+                // local instances of TFS 2015 can return file:/// URLs which result in FileWebRequest instances that do not allow headers
+                if (request is HttpWebRequest)
+                {
+                    request.Headers[HttpRequestHeader.Authorization] = "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes(this.UserName + ":" + this.Password));
                 }
             }
         }
