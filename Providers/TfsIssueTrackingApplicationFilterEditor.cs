@@ -11,6 +11,7 @@ using Inedo.BuildMaster.Web.Security;
 using Inedo.Web.ClientResources;
 using Inedo.Web.Controls;
 using Inedo.Web.Controls.SimpleHtml;
+using Inedo.Web.Handlers;
 
 namespace Inedo.BuildMasterExtensions.TFS.Providers
 {
@@ -140,8 +141,8 @@ namespace Inedo.BuildMasterExtensions.TFS.Providers
                                 ctlNoWiql = ctlNoWiql.ClientID,
                                 ctlProject = ctlProject.ClientID,
                                 ctlArea = ctlAreaPath.ClientID,
-                                getProjectsUrl = DynamicHttpHandling.GetJavascriptDataUrl<int, string, object>(GetProjects),
-                                getAreasUrl = DynamicHttpHandling.GetJavascriptDataUrl<int, string, string, object>(GetAreas),
+                                getProjectsUrl = Ajax.GetUrl(new Func<int, string, object>(GetProjects)),
+                                getAreasUrl = Ajax.GetUrl(new Func<int, string, string, object>(GetAreas)),
                                 applicationId = this.EditorContext.ApplicationId
                             }
                         );
