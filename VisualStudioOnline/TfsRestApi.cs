@@ -58,7 +58,7 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
             this.host = host.TrimEnd('/');
             this.apiBaseUrl = $"{this.host}/{Uri.EscapeUriString(project)}/_apis/";
         }
-        
+
         public string UserName { get; set; }
         public string Password { get; set; }
 
@@ -76,7 +76,7 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
 
         public GetBuildResponse[] GetBuilds(int buildDefinition, string buildNumber = null, string resultFilter = null, string statusFilter = null, int? top = null)
         {
-            var query = new QueryString() { Definition=buildDefinition, BuildNumber = buildNumber, ResultFilter = resultFilter, StatusFilter = statusFilter, Top = top };
+            var query = new QueryString() { Definition = buildDefinition, BuildNumber = buildNumber, ResultFilter = resultFilter, StatusFilter = statusFilter, Top = top };
 
             return this.Invoke<GetBuildsResponse>("GET", "build/builds", query).value;
         }
@@ -89,9 +89,9 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
         public GetBuildResponse QueueBuild(int definitionId)
         {
             return this.Invoke<GetBuildResponse>(
-                "POST", 
-                "build/builds", 
-                QueryString.Default, 
+                "POST",
+                "build/builds",
+                QueryString.Default,
                 new
                 {
                     definition = new { id = definitionId }
@@ -122,7 +122,7 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
             if (httpRequest != null)
                 httpRequest.UserAgent = "BuildMasterTFSExtension/" + typeof(TfsRestApi).Assembly.GetName().Version.ToString();
             request.Method = "GET";
-            
+
             if (!string.IsNullOrEmpty(this.UserName))
             {
                 request.Credentials = new NetworkCredential(this.UserName, this.Password);

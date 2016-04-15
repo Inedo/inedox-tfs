@@ -4,9 +4,9 @@ using Inedo.BuildMaster.Web.Controls.Extensions;
 using Inedo.Web.Controls;
 using Inedo.Web.Controls.SimpleHtml;
 
-namespace Inedo.BuildMasterExtensions.TFS
+namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
 {
-    public sealed class CreateTfsBuildActionEditor : ActionEditorBase
+    internal sealed class QueueVsoBuildActionEditor : ActionEditorBase
     {
         private ValidatingTextBox txtTeamProject;
         private ValidatingTextBox txtBuildDefinition;
@@ -16,7 +16,7 @@ namespace Inedo.BuildMasterExtensions.TFS
 
         public override void BindToForm(ActionBase extension)
         {
-            var action = (CreateTfsBuildAction)extension;
+            var action = (QueueVsoBuildAction)extension;
 
             this.txtTeamProject.Text = action.TeamProject;
             this.txtBuildDefinition.Text = action.BuildDefinition;
@@ -27,7 +27,7 @@ namespace Inedo.BuildMasterExtensions.TFS
 
         public override ActionBase CreateFromForm()
         {
-            return new CreateTfsBuildAction()
+            return new QueueVsoBuildAction()
             {
                 TeamProject = this.txtTeamProject.Text,
                 BuildDefinition = this.txtBuildDefinition.Text,
@@ -39,6 +39,8 @@ namespace Inedo.BuildMasterExtensions.TFS
 
         protected override void CreateChildControls()
         {
+            base.CreateChildControls();
+
             this.txtTeamProject = new ValidatingTextBox { Required = true };
             this.txtBuildDefinition = new ValidatingTextBox { Required = true };
 

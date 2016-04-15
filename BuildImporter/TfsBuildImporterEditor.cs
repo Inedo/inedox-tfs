@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 using Inedo.BuildMaster;
-using Inedo.BuildMaster.Extensibility.Agents;
 using Inedo.BuildMaster.Extensibility.BuildImporters;
 using Inedo.BuildMaster.Web.Controls.Extensions.BuildImporters;
 using Inedo.Web.Controls;
@@ -25,7 +24,7 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
                 CreateBuildNumberVariable = this.Template.CreateBuildNumberVariable
             };
 
-            if (InedoLib.Util.Int.ParseN(importer.TfsBuildNumber) == null)
+            if (AH.ParseInt(importer.TfsBuildNumber) == null)
             {
                 var config = (TfsConfigurer)this.GetExtensionConfigurer();
 

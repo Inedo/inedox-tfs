@@ -1,22 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
-using Inedo.BuildMaster;
-using Inedo.BuildMaster.Extensibility;
+using Inedo.BuildMaster.Documentation;
 using Inedo.BuildMaster.Extensibility.Agents;
 using Inedo.BuildMaster.Extensibility.IssueTrackerConnections;
 using Inedo.BuildMaster.Extensibility.Providers;
 using Inedo.BuildMaster.Web;
 using Inedo.BuildMasterExtensions.TFS.Providers;
+using Inedo.Serialization;
 
 namespace Inedo.BuildMasterExtensions.TFS
 {
-    /// <summary>
-    /// Connects to a Team Foundation 2012 Server to integrate issue tracking with BuildMaster.
-    /// </summary>
-    [ProviderProperties(
-        "Team Foundation Server",
-        "Supports TFS 2010-2013 and earlier; requires that Visual Studio is installed.")]
+    [DisplayName("Team Foundation Server")]
+    [Description("Supports TFS 2010-2015.")]
     [CustomEditor(typeof(TfsIssueTrackingProviderEditor))]
     public sealed partial class TfsIssueTrackingProvider : IssueTrackerConnectionBase, IIssueStatusUpdater, IIssueCloser
     {
@@ -60,9 +57,9 @@ namespace Inedo.BuildMasterExtensions.TFS
         [Persistent]
         public string[] CustomClosedStates { get; set; }
 
-        public override ExtensionComponentDescription GetDescription()
+        public override RichDescription GetDescription()
         {
-            return new ExtensionComponentDescription(
+            return new RichDescription(
                 "TFS at ",
                 new Hilite(this.BaseUrl)
             );

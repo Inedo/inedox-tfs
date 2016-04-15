@@ -4,6 +4,7 @@ using Inedo.BuildMaster;
 using Inedo.BuildMaster.Extensibility.Agents;
 using Inedo.BuildMaster.Extensibility.Configurers.Extension;
 using Inedo.BuildMaster.Web;
+using Inedo.Serialization;
 using Microsoft.TeamFoundation.Build.Client;
 using Microsoft.TeamFoundation.Server;
 
@@ -47,18 +48,7 @@ namespace Inedo.BuildMasterExtensions.TFS
         [Persistent]
         public bool UseSystemCredentials { get; set; }
 
-        public Uri BaseUri { get { return this.BaseUrl == null ? null : new Uri(this.BaseUrl); } }
-
-        /// <summary>
-        /// Returns a <see cref="System.String" /> that represents this instance.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="System.String" /> that represents this instance.
-        /// </returns>
-        public override string ToString()
-        {
-            return string.Empty;
-        }
+        public Uri BaseUri => this.BaseUrl == null ? null : new Uri(this.BaseUrl);
 
         internal TfsBuildInfo GetBuildInfo(string teamProject, string buildDefinition, string buildNumber, bool includeUnsuccessful)
         {
@@ -131,8 +121,8 @@ namespace Inedo.BuildMasterExtensions.TFS
             {
                 var buildService = collection.GetService<IBuildServer>();
 
-                var spec = buildService.CreateBuildDetailSpec(teamProject, InedoLib.Util.CoalesceStr(buildDefinition, "*"));
-                spec.BuildNumber = InedoLib.Util.CoalesceStr(buildNumber, "*");
+                var spec = buildService.CreateBuildDetailSpec(teamProject, AH.CoalesceString(buildDefinition, "*"));
+                spec.BuildNumber = AH.CoalesceString(buildNumber, "*");
                 spec.MaxBuildsPerDefinition = 1;
                 spec.QueryOrder = BuildQueryOrder.FinishTimeDescending;
                 spec.Status = includeUnsuccessful ? (BuildStatus.Failed | BuildStatus.Succeeded | BuildStatus.PartiallySucceeded) : BuildStatus.Succeeded;

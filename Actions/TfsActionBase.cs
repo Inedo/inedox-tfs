@@ -1,12 +1,16 @@
 ﻿using System.Net;
-using Inedo.BuildMaster;
 using Inedo.BuildMaster.Extensibility.Actions;
+using Inedo.Serialization;
 using Microsoft.TeamFoundation.Client;
 
 namespace Inedo.BuildMasterExtensions.TFS
 {
     public abstract class TfsActionBase : AgentBasedActionBase
     {
+        protected TfsActionBase()
+        {
+        }
+
         /// <summary>
         /// Gets or sets the team project.
         /// </summary>
@@ -19,13 +23,7 @@ namespace Inedo.BuildMasterExtensions.TFS
         [Persistent]
         public string BuildDefinition { get; set; }
 
-        /// <summary>
-        /// Gets the extension configurer.
-        /// </summary>
-        public new TfsConfigurer GetExtensionConfigurer() 
-        {
-            return (TfsConfigurer)base.GetExtensionConfigurer();
-        }
+        public new TfsConfigurer GetExtensionConfigurer() => (TfsConfigurer)base.GetExtensionConfigurer();
 
         /// <summary>
         /// Gets the appropriate version control server based by connecting to TFS using the persisted credentials

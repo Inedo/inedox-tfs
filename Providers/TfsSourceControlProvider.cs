@@ -1,22 +1,21 @@
 ﻿using System;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
-using Inedo.BuildMaster;
 using Inedo.BuildMaster.Extensibility.Providers;
 using Inedo.BuildMaster.Extensibility.Providers.SourceControl;
 using Inedo.BuildMaster.Files;
 using Inedo.BuildMaster.Web;
 using Inedo.IO;
+using Inedo.Serialization;
 using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.VersionControl.Client;
 
 namespace Inedo.BuildMasterExtensions.TFS
 {
-    [ProviderProperties(
-        "Team Foundation Server",
-        "Supports TFS 2010-2015; requires that Visual Studio Team System is installed.",
-        RequiresTransparentProxy = true)]
+    [DisplayName("Team Foundation Server")]
+    [Description("Supports TFS 2010-2015.")]
     [CustomEditor(typeof(TfsSourceControlProviderEditor))]
     public class TfsSourceControlProvider : SourceControlProviderBase, ILocalWorkspaceProvider, ILabelingProvider, IRevisionProvider
     {
@@ -59,18 +58,12 @@ namespace Inedo.BuildMasterExtensions.TFS
         /// <summary>
         /// Gets the base URI of the Team Foundation Server
         /// </summary>
-        protected Uri BaseUri
-        {
-            get { return new Uri(BaseUrl); }
-        }
+        protected Uri BaseUri => new Uri(this.BaseUrl);
 
         /// <summary>
         /// Gets the char that's used by the provider to separate directories/files in a path string
         /// </summary>
-        public override char DirectorySeparator
-        {
-            get { return '/'; }
-        }
+        public override char DirectorySeparator => '/';
         /// <summary>
         /// Retrieves the latest version of the source code from the provider's sourcePath into the target path
         /// </summary>

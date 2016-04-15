@@ -1,19 +1,18 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using Inedo.BuildMaster;
 using Inedo.BuildMaster.Data;
-using Inedo.BuildMaster.Extensibility.Actions;
+using Inedo.BuildMaster.Documentation;
 using Inedo.BuildMaster.Extensibility.Agents;
 using Inedo.BuildMaster.Web;
-using Inedo.Data;
+using Inedo.Serialization;
 
 namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
 {
-    [ActionProperties(
-        "Queue Build in VS Online",
-        "Queues a new build in Visual Studio Online or TFS 2015.",
-        DefaultToLocalServer = true)]
+    [DisplayName("Queue Build in VS Online")]
+    [Description("Queues a new build in Visual Studio Online or TFS 2015.")]
     [RequiresInterface(typeof(IFileOperationsExecuter))]
     [RequiresInterface(typeof(IRemoteZip))]
     [CustomEditor(typeof(QueueVsoBuildActionEditor))]
@@ -40,13 +39,13 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
         [Persistent]
         public bool CreateBuildNumberVariable { get; set; } = true;
 
-        public override ActionDescription GetActionDescription()
+        public override ExtendedRichDescription GetActionDescription()
         {
-            return new ActionDescription(
-                new ShortActionDescription(
+            return new ExtendedRichDescription(
+                new RichDescription(
                     "Queue VS Online Build for ", new Hilite(this.TeamProject)
                 ),
-                new LongActionDescription(
+                new RichDescription(
                     "using the build definition ",
                     new Hilite(this.BuildDefinition),
                     this.WaitForCompletion ? " and wait until the build completes" + (this.ValidateBuild ? " successfully" : "") : "",
@@ -86,7 +85,7 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
             if (this.CreateBuildNumberVariable)
             {
                 this.LogDebug($"Setting $TfsBuildNumber build variable to {queuedBuild.buildNumber}...");
-                StoredProcs.Variables_CreateOrUpdateVariableDefinition(
+                DB.Variables_CreateOrUpdateVariableDefinition(
                     Variable_Name: "TfsBuildNumber",
                     Environment_Id: null,
                     Server_Id: null,
@@ -96,9 +95,10 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
                     Release_Number: this.Context.ReleaseNumber,
                     Build_Number: this.Context.BuildNumber,
                     Execution_Id: null,
+                    Promotion_Id: null,
                     Value_Text: queuedBuild.buildNumber,
-                    Sensitive_Indicator: YNIndicator.No
-                ).Execute();
+                    Sensitive_Indicator: false
+                );
 
                 this.LogInformation("$TfsBuildNumber build variable set to: " + queuedBuild.buildNumber);
             }

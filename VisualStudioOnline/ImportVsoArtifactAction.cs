@@ -1,15 +1,15 @@
-﻿using Inedo.BuildMaster;
+﻿using System.ComponentModel;
+using Inedo.BuildMaster;
 using Inedo.BuildMaster.Artifacts;
-using Inedo.BuildMaster.Extensibility.Actions;
+using Inedo.BuildMaster.Documentation;
 using Inedo.BuildMaster.Extensibility.Agents;
 using Inedo.BuildMaster.Web;
+using Inedo.Serialization;
 
 namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
 {
-    [ActionProperties(
-        "Import Build Artifact from VS Online",
-        "Downloads build output as a zip file from Visual Studio Online or TFS 2015 and imports it as a BuildMaster artifact.",
-        DefaultToLocalServer = true)]
+    [DisplayName("Import Build Artifact from VS Online")]
+    [Description("Downloads build output as a zip file from Visual Studio Online or TFS 2015 and imports it as a BuildMaster artifact.")]
     [RequiresInterface(typeof(IFileOperationsExecuter))]
     [RequiresInterface(typeof(IRemoteZip))]
     [CustomEditor(typeof(ImportVsoArtifactActionEditor))]
@@ -29,11 +29,11 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
         [Persistent]
         public string ArtifactName { get; set; }
 
-        public override ActionDescription GetActionDescription()
+        public override ExtendedRichDescription GetActionDescription()
         {
-            var shortDesc = new ShortActionDescription("Import VS Online Build Artifact from ", new Hilite(this.TeamProject));
+            var shortDesc = new RichDescription("Import VS Online Build Artifact from ", new Hilite(this.TeamProject));
 
-            var longDesc = new LongActionDescription("using ");
+            var longDesc = new RichDescription("using ");
             if (string.IsNullOrEmpty(this.BuildNumber))
                 longDesc.AppendContent("the last successful build");
             else
@@ -48,7 +48,7 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
 
             longDesc.AppendContent(".");
 
-            return new ActionDescription(shortDesc, longDesc);
+            return new ExtendedRichDescription(shortDesc, longDesc);
         }
 
         protected override void Execute()

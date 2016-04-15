@@ -13,14 +13,10 @@ namespace Inedo.BuildMasterExtensions.TFS
         private static readonly Regex WorkspaceNameSanitizerRegex = new Regex("[" + Regex.Escape(@"""/:<>\|*?;") + "]", RegexOptions.Compiled);
         private const string EmptyPathString = "$/";
 
-        public string SourcePath { get; private set; }
-        public string[] SplitPath { get; private set; }
-        public string LastSubDirectoryName { get; private set; }
-        public string WorkspaceName { get; private set; }
-
-        public TfsSourceControlContext(TfsSourceControlProvider provider, string sourcePath) 
-            : this(provider, sourcePath, null) { }
-
+        public TfsSourceControlContext(TfsSourceControlProvider provider, string sourcePath)
+            : this(provider, sourcePath, null)
+        {
+        }
         public TfsSourceControlContext(TfsSourceControlProvider provider, string sourcePath, string label)
         {
             this.Label = label;
@@ -45,6 +41,11 @@ namespace Inedo.BuildMasterExtensions.TFS
             else
                 this.WorkspaceName = provider.CustomWorkspaceName;
         }
+
+        public string SourcePath { get; }
+        public string[] SplitPath { get; }
+        public string LastSubDirectoryName { get; }
+        public string WorkspaceName { get; }
 
         internal SystemEntryInfo CreateSystemEntryInfo(Item item)
         {
@@ -77,7 +78,7 @@ namespace Inedo.BuildMasterExtensions.TFS
              *  - Cannot end with a space
              *  - Must not contain the following printable characters: " / : < > \ | * ? ;      
              */
-            
+
             var split = workspaceDiskPath.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
             string name = "BM-" + split.LastOrDefault();
             name = WorkspaceNameSanitizerRegex.Replace(name, "_");

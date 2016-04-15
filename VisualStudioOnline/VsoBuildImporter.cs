@@ -1,17 +1,16 @@
-﻿using Inedo.BuildMaster;
+﻿using System.ComponentModel;
 using Inedo.BuildMaster.Artifacts;
 using Inedo.BuildMaster.Data;
 using Inedo.BuildMaster.Extensibility.BuildImporters;
 using Inedo.BuildMaster.Web;
-using Inedo.Data;
 using Inedo.Diagnostics;
+using Inedo.Serialization;
 
 namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
 {
-    [BuildImporterProperties(
-        "Visual Studio Online",
-        "Downloads and imports artifacts from Visual Studio Online.",
-        typeof(VsoBuildImporterTemplate))]
+    [DisplayName("Visual Studio Online")]
+    [Description("Downloads and imports artifacts from Visual Studio Online.")]
+    [BuildImporterTemplate(typeof(VsoBuildImporterTemplate))]
     [CustomEditor(typeof(VsoBuildImporterEditor))]
     public sealed class VsoBuildImporter : BuildImporterBase, ICustomBuildNumberProvider
     {
@@ -46,7 +45,7 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
             if (this.CreateBuildNumberVariable)
             {
                 this.LogDebug($"Setting $TfsBuildNumber build variable to {buildNumber}...");
-                StoredProcs.Variables_CreateOrUpdateVariableDefinition(
+                DB.Variables_CreateOrUpdateVariableDefinition(
                     Variable_Name: "TfsBuildNumber",
                     Environment_Id: null,
                     Server_Id: null,
@@ -56,9 +55,10 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
                     Release_Number: context.ReleaseNumber,
                     Build_Number: context.BuildNumber,
                     Execution_Id: null,
+                    Promotion_Id: null,
                     Value_Text: buildNumber,
-                    Sensitive_Indicator: YNIndicator.No
-                ).Execute();
+                    Sensitive_Indicator: false
+                );
 
                 this.LogInformation("$TfsBuildNumber build variable set to: " + buildNumber);
             }

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using Inedo.BuildMaster;
 using Inedo.BuildMaster.Artifacts;
 using Inedo.Diagnostics;
 using Inedo.IO;
-using System.Linq;
 
 namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
 {
@@ -47,7 +47,7 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
 
             var builds = api.GetBuilds(
                 buildDefinition: buildDefinition.id,
-                buildNumber: InedoLib.Util.NullIf(buildNumber, ""),
+                buildNumber: AH.NullIf(buildNumber, ""),
                 resultFilter: "succeeded",
                 statusFilter: "completed",
                 top: 2
@@ -55,7 +55,7 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
 
             if (builds.Length == 0)
                 throw new InvalidOperationException($"Could not find build number {buildNumber}. Ensure there is a successful, completed build with this number.");
-            
+
             var build = builds.FirstOrDefault();
 
             string tempFile = Path.GetTempFileName();

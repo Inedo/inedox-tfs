@@ -1,21 +1,21 @@
 ﻿using System;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using Inedo.BuildMaster;
 using Inedo.BuildMaster.Artifacts;
 using Inedo.BuildMaster.Data;
-using Inedo.BuildMaster.Extensibility.Actions;
+using Inedo.BuildMaster.Documentation;
 using Inedo.BuildMaster.Extensibility.Agents;
 using Inedo.BuildMaster.Files;
 using Inedo.BuildMaster.Web;
+using Inedo.Serialization;
 using Microsoft.TeamFoundation.Build.Client;
 
 namespace Inedo.BuildMasterExtensions.TFS
 {
-    [ActionProperties(
-        "Capture Artifact from TFS Build Output",
-        "Creates a BuildMaster build artifact from a TFS build server drop location.",
-        DefaultToLocalServer = true)]
+    [DisplayName("Capture Artifact from TFS Build Output")]
+    [Description("Creates a BuildMaster build artifact from a TFS build server drop location.")]
     [RequiresInterface(typeof(IFileOperationsExecuter))]
     [RequiresInterface(typeof(IRemoteZip))]
     [CustomEditor(typeof(CreateTfsBuildOutputArtifactActionEditor))]
@@ -42,11 +42,11 @@ namespace Inedo.BuildMasterExtensions.TFS
         [Persistent]
         public bool IncludeUnsuccessful { get; set; }
 
-        public override ActionDescription GetActionDescription()
+        public override ExtendedRichDescription GetActionDescription()
         {
-            var shortDesc = new ShortActionDescription("Capture TFS Build Artifact from ", new Hilite(this.TeamProject));
+            var shortDesc = new RichDescription("Capture TFS Build Artifact from ", new Hilite(this.TeamProject));
 
-            var longDesc = new LongActionDescription("using ");
+            var longDesc = new RichDescription("using ");
             if (string.IsNullOrEmpty(this.BuildNumber))
                 longDesc.AppendContent("the last successful build");
             else
@@ -61,7 +61,7 @@ namespace Inedo.BuildMasterExtensions.TFS
 
             longDesc.AppendContent(".");
 
-            return new ActionDescription(shortDesc, longDesc);
+            return new ExtendedRichDescription(shortDesc, longDesc);
         }
 
         protected override void Execute()
@@ -95,8 +95,8 @@ namespace Inedo.BuildMasterExtensions.TFS
             if (string.IsNullOrEmpty(artifactName) || artifactName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
                 throw new InvalidOperationException("Artifact Name cannot contain invalid file name characters: " + new string(Path.GetInvalidFileNameChars()));
 
-            if (StoredProcs.Releases_GetRelease(this.Context.ApplicationId, this.Context.ReleaseNumber)
-                .Execute().ReleaseDeployables_Extended
+            if (DB.Releases_GetRelease(this.Context.ApplicationId, this.Context.ReleaseNumber)
+                .ReleaseDeployables_Extended
                 .Any(rd => rd.Deployable_Id == this.Context.DeployableId && rd.InclusionType_Code == Domains.DeployableInclusionTypes.Referenced))
             {
                 this.LogError(

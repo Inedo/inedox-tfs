@@ -47,7 +47,7 @@ namespace Inedo.BuildMasterExtensions.TFS
 
         public override void InitializeDefaultValues()
         {
-            BindToForm(new TfsConfigurer());
+            this.BindToForm(new TfsConfigurer());
         }
 
         protected override void CreateChildControls()
@@ -75,12 +75,12 @@ namespace Inedo.BuildMasterExtensions.TFS
                 )
             {
                 ID = "sffCredentials",
-                HelpText = HelpText.FromHtml("For Visual Studio Online, either <a href=\"https://www.visualstudio.com/en-us/integrate/get-started/auth/overview\" target=\"_blank\">Alternate Credentials or Personal Access Tokens</a> must be used in the password field.")
+                HelpText = new LiteralHtml("For Visual Studio Online, either <a href=\"https://www.visualstudio.com/en-us/integrate/get-started/auth/overview\" target=\"_blank\">Alternate Credentials or Personal Access Tokens</a> must be used in the password field.", false)
             };
 
             this.Controls.Add(
-                new SlimFormField("TFS client:", this.ctlServerPicker){ HelpText = "The server where the TFS Client (Visual Studio or Team Explorer) is installed." },
-                new SlimFormField("TFS collection url:", this.txtBaseUrl){ HelpText = "The is the api of the TFS Collection to use, e.g. http://tfsserver:8080/tfs" },
+                new SlimFormField("TFS client:", this.ctlServerPicker) { HelpText = "The server where the TFS Client (Visual Studio or Team Explorer) is installed." },
+                new SlimFormField("TFS collection url:", this.txtBaseUrl) { HelpText = "The is the api of the TFS Collection to use, e.g. http://tfsserver:8080/tfs" },
                 sffAuthentication,
                 sffCredentials,
                 new RenderJQueryDocReadyDelegator(w =>

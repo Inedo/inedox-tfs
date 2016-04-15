@@ -4,7 +4,7 @@ using Inedo.Web.Controls;
 
 namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
 {
-    public sealed class ImportVsoArtifactActionEditor : ActionEditorBase
+    internal sealed class ImportVsoArtifactActionEditor : ActionEditorBase
     {
         private ValidatingTextBox txtTeamProject;
         private ValidatingTextBox txtArtifactName;
@@ -34,10 +34,10 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
 
         protected override void CreateChildControls()
         {
-            this.txtTeamProject = new ValidatingTextBox() { Required = true };
-            this.txtBuildDefinition = new ValidatingTextBox() { DefaultText = "default" };
-            this.txtBuildNumber = new ValidatingTextBox() { DefaultText = "last successful" };
-            this.txtArtifactName = new ValidatingTextBox() { DefaultText = "use name of build definition" };
+            this.txtTeamProject = new ValidatingTextBox { Required = true };
+            this.txtBuildDefinition = new ValidatingTextBox { DefaultText = "default" };
+            this.txtBuildNumber = new ValidatingTextBox { DefaultText = "last successful" };
+            this.txtArtifactName = new ValidatingTextBox { DefaultText = "use name of build definition" };
 
             this.Controls.Add(
                 new SlimFormField("Team project:", this.txtTeamProject),

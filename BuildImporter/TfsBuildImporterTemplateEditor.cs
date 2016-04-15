@@ -1,5 +1,4 @@
-﻿using System;
-using System.Web.UI.WebControls;
+﻿using System.Web.UI.WebControls;
 using Inedo.BuildMaster.Extensibility.BuildImporters;
 using Inedo.BuildMaster.Web.Controls.Extensions.BuildImporters;
 using Inedo.Web.Controls;
@@ -68,7 +67,7 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
                 new SlimFormField("Artifact name:", this.txtArtifactName),
                 new SlimFormField("Team project:", this.txtTeamProject),
                 new SlimFormField("Build definition:", txtBuildDefinition),
-                new SlimFormField("Build number:", 
+                new SlimFormField("Build number:",
                     new Div(this.ddlBuildNumber),
                     new Div(this.chkCreateBuildNumberVariable)
                 ),

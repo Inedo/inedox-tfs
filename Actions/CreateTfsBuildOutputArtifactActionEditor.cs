@@ -40,11 +40,11 @@ namespace Inedo.BuildMasterExtensions.TFS
         {
             base.CreateChildControls();
 
-            this.txtTeamProject = new ValidatingTextBox() { Required = true };
-            this.txtArtifactName = new ValidatingTextBox() { DefaultText = "use name of build definition" };
-            this.txtBuildNumber = new ValidatingTextBox() { DefaultText = "last successful" };
-            this.txtBuildDefinition = new ValidatingTextBox() { DefaultText = "any" };
-            this.chkIncludeUnsuccessful = new CheckBox() { Text = "Only include builds that are \"succeeded\"", Checked = true };
+            this.txtTeamProject = new ValidatingTextBox { Required = true };
+            this.txtArtifactName = new ValidatingTextBox { DefaultText = "use name of build definition" };
+            this.txtBuildNumber = new ValidatingTextBox { DefaultText = "last successful" };
+            this.txtBuildDefinition = new ValidatingTextBox { DefaultText = "any" };
+            this.chkIncludeUnsuccessful = new CheckBox { Text = "Only include builds that are \"succeeded\"", Checked = true };
 
             this.Controls.Add(
                 new SlimFormField("Team project:", this.txtTeamProject),
