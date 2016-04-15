@@ -5,10 +5,10 @@ using System.Linq;
 using Inedo.BuildMaster;
 using Inedo.BuildMaster.Artifacts;
 using Inedo.BuildMaster.Data;
-using Inedo.BuildMaster.Documentation;
 using Inedo.BuildMaster.Extensibility.Agents;
 using Inedo.BuildMaster.Files;
 using Inedo.BuildMaster.Web;
+using Inedo.Documentation;
 using Inedo.Serialization;
 using Microsoft.TeamFoundation.Build.Client;
 

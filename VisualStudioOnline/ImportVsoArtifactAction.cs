@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel;
 using Inedo.BuildMaster;
 using Inedo.BuildMaster.Artifacts;
-using Inedo.BuildMaster.Documentation;
 using Inedo.BuildMaster.Extensibility.Agents;
 using Inedo.BuildMaster.Web;
+using Inedo.Documentation;
 using Inedo.Serialization;
 
 namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline

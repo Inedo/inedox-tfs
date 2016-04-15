@@ -1,7 +1,7 @@
 ﻿using System;
-using Inedo.BuildMaster.Documentation;
 using Inedo.BuildMaster.Extensibility.IssueTrackerConnections;
 using Inedo.BuildMaster.Web;
+using Inedo.Documentation;
 using Inedo.Serialization;
 
 namespace Inedo.BuildMasterExtensions.TFS.Providers

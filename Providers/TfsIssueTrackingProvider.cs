@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
-using Inedo.BuildMaster.Documentation;
 using Inedo.BuildMaster.Extensibility.Agents;
 using Inedo.BuildMaster.Extensibility.IssueTrackerConnections;
 using Inedo.BuildMaster.Extensibility.Providers;
 using Inedo.BuildMaster.Web;
 using Inedo.BuildMasterExtensions.TFS.Providers;
+using Inedo.Documentation;
 using Inedo.Serialization;
 
 namespace Inedo.BuildMasterExtensions.TFS
