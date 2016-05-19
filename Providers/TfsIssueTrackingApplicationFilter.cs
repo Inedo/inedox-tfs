@@ -1,8 +1,8 @@
 ﻿using System;
-using Inedo.BuildMaster;
-using Inedo.BuildMaster.Extensibility;
 using Inedo.BuildMaster.Extensibility.IssueTrackerConnections;
 using Inedo.BuildMaster.Web;
+using Inedo.Documentation;
+using Inedo.Serialization;
 
 namespace Inedo.BuildMasterExtensions.TFS.Providers
 {
@@ -21,9 +21,9 @@ namespace Inedo.BuildMasterExtensions.TFS.Providers
         [Persistent]
         public string CustomWiql { get; set; }
 
-        public override ExtensionComponentDescription GetDescription()
+        public override RichDescription GetDescription()
         {
-            var description = new ExtensionComponentDescription(
+            var description = new RichDescription(
                 "Collection: ",
                 new Hilite(this.CollectionName ?? (this.CollectionId.ToString()))
             );

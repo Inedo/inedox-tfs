@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Linq;
 using Inedo.BuildMaster;
 using Inedo.BuildMaster.Artifacts;
@@ -9,13 +10,13 @@ using Inedo.BuildMaster.Files;
 using Inedo.BuildMaster.Web;
 using Inedo.Data;
 using Inedo.Diagnostics;
+using Inedo.Serialization;
 
 namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
 {
-    [BuildImporterProperties(
-        "TFS",
-        "Imports artifacts from TFS.",
-        typeof(TfsBuildImporterTemplate))]
+    [DisplayName("TFS")]
+    [Description("Imports artifacts from TFS.")]
+    [BuildImporterTemplate(typeof(TfsBuildImporterTemplate))]
     [CustomEditor(typeof(TfsBuildImporterEditor))]
     public sealed class TfsBuildImporter : BuildImporterBase, ICustomBuildNumberProvider
     {
@@ -101,7 +102,7 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
             if (this.CreateBuildNumberVariable)
             {
                 this.LogDebug($"Setting $TfsBuildNumber build variable to {tfsBuild.BuildNumber}...");
-                StoredProcs.Variables_CreateOrUpdateVariableDefinition(
+                DB.Variables_CreateOrUpdateVariableDefinition(
                     Variable_Name: "TfsBuildNumber",
                     Environment_Id: null,
                     Server_Id: null,
@@ -111,9 +112,10 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
                     Release_Number: context.ReleaseNumber,
                     Build_Number: context.BuildNumber,
                     Execution_Id: null,
+                    Promotion_Id: null,
                     Value_Text: tfsBuild.BuildNumber,
                     Sensitive_Indicator: YNIndicator.No
-                ).Execute();
+                );
 
                 this.LogInformation("$TfsBuildNumber build variable set to: " + tfsBuild.BuildNumber);
             }

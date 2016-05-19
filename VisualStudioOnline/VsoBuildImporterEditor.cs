@@ -25,7 +25,7 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
                 CreateBuildNumberVariable = this.Template.CreateBuildNumberVariable
             };
 
-            if (InedoLib.Util.Int.ParseN(importer.TfsBuildNumber) == null)
+            if (AH.ParseInt(importer.TfsBuildNumber) == null)
             {
                 var config = (TfsConfigurer)this.GetExtensionConfigurer();
 
@@ -36,12 +36,12 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
                 };
 
                 var tfsBuild = api.GetBuilds(
-                    buildNumber: importer.TfsBuildNumber, 
-                    resultFilter: importer.IncludeUnsuccessful ? "" : "succeeded", 
-                    statusFilter: "completed", 
+                    buildNumber: importer.TfsBuildNumber,
+                    resultFilter: importer.IncludeUnsuccessful ? "" : "succeeded",
+                    statusFilter: "completed",
                     top: 1
                   ).FirstOrDefault();
-                
+
                 if (tfsBuild == null)
                     throw new InvalidOperationException("There were no matching builds found in TFS.");
 

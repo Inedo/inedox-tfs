@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Inedo.BuildMaster.Extensibility.Providers.IssueTracking;
 using Inedo.BuildMasterExtensions.TFS.Providers;
 

@@ -126,7 +126,7 @@ namespace Inedo.BuildMasterExtensions.TFS
 
             var ctlNoWiql = new SlimFormField("Release number field:", this.txtCustomReleaseNumberFieldName)
             {
-                HelpText = HelpText.FromHtml("If you store your TFS work item release numbers in a custom field, enter the full field \"refname\" of the custom field here - otherwise leave this field blank and \"Iteration\" will be used to retrieve them.<br /><br />For more information on custom work item types, visit <a href=\"http://msdn.microsoft.com/en-us/library/ms400654.aspx\" target=\"_blank\">http://msdn.microsoft.com/en-us/library/ms400654.aspx</a>")
+                HelpText = new LiteralHtml("If you store your TFS work item release numbers in a custom field, enter the full field \"refname\" of the custom field here - otherwise leave this field blank and \"Iteration\" will be used to retrieve them.<br /><br />For more information on custom work item types, visit <a href=\"http://msdn.microsoft.com/en-us/library/ms400654.aspx\" target=\"_blank\">http://msdn.microsoft.com/en-us/library/ms400654.aspx</a>", false)
             };
 
             this.Controls.Add(

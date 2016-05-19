@@ -6,7 +6,6 @@ using Inedo.BuildMaster;
 using Inedo.BuildMaster.Data;
 using Inedo.BuildMaster.Extensibility.IssueTrackerConnections;
 using Inedo.BuildMaster.Extensibility.Providers.IssueTracking;
-using Inedo.BuildMaster.Web.Controls;
 using Inedo.BuildMaster.Web.Controls.Extensions;
 using Inedo.BuildMaster.Web.Security;
 using Inedo.Web.ClientResources;
@@ -18,8 +17,8 @@ namespace Inedo.BuildMasterExtensions.TFS.Providers
 {
     internal sealed class TfsIssueTrackingApplicationFilterEditor : IssueTrackerApplicationConfigurationEditorBase
     {
-        private ComboSelect ddlCollection;
-        private ComboSelect ddlUseWiql;
+        private SelectList ddlCollection;
+        private SelectList ddlUseWiql;
         private HiddenField ctlProject;
         private HiddenField ctlAreaPath;
         private TextBox txtCustomWiql;
@@ -67,7 +66,7 @@ namespace Inedo.BuildMasterExtensions.TFS.Providers
             return new TfsIssueTrackingApplicationFilter
             {
                 CollectionId = Guid.Parse(this.ddlCollection.SelectedValue),
-                CollectionName = this.ddlCollection.SelectedItem.Text,
+                CollectionName = this.ddlCollection.Items.FirstOrDefault(i => i.Selected)?.Text,
                 ProjectName = this.ctlProject.Value,
                 AreaPath = this.ctlAreaPath.Value
             };
@@ -76,42 +75,34 @@ namespace Inedo.BuildMasterExtensions.TFS.Providers
         protected override void OnPreRender(EventArgs e)
         {
             this.IncludeClientResourceInPage(
-                new JavascriptResource
-                {
-                    ResourcePath = "~/extension-resources/TFS/TfsIssueTrackingApplicationFilterEditor.js?" + typeof(TfsIssueTrackingApplicationFilterEditor).Assembly.GetName().Version,
-                    CompatibleVersions = { InedoLibCR.Versions.jq171 },
-                    Dependencies = { InedoLibCR.select2.select2_js }
-                }
+                new JavascriptResource("extension-resources/TFS/TfsIssueTrackingApplicationFilterEditor.js", InedoLibCR.select2)
             );
 
             base.OnPreRender(e);
         }
         protected override void CreateChildControls()
         {
-            this.ddlCollection = new ComboSelect();
+            this.ddlCollection = new SelectList();
             this.ddlCollection.Items.AddRange(
                 from c in this.collections.Value
                 orderby c.Name
-                select new ListItem(c.Name, c.Id.ToString())
+                select new SelectListItem(c.Name, c.Id.ToString())
             );
 
             if (this.HasProviderWiql())
             {
                 this.Controls.Add(
-                    new InfoBox(
-                        InfoBox.InfoBoxTypes.Info,
-                        new P("There is a custom WIQL query defined at the provider level. That query will override any project or area filtering here."),
-                        new P("However, you may still specify a custom WIQL query here to override the provider's WIQL query.")
-                    )
+                    new P("There is a custom WIQL query defined at the provider level. That query will override any project or area filtering here."),
+                    new P("However, you may still specify a custom WIQL query here to override the provider's WIQL query.")
                 );
             }
 
-            this.ddlUseWiql = new ComboSelect
+            this.ddlUseWiql = new SelectList
             {
                 Items =
                 {
-                    new ListItem("Not using a custom query", "False"),
-                    new ListItem("Custom WIQL query", "True")
+                    new SelectListItem("Not using a custom query", "False"),
+                    new SelectListItem("Custom WIQL query", "True")
                 }
             };
 
@@ -150,8 +141,8 @@ namespace Inedo.BuildMasterExtensions.TFS.Providers
                                 ctlNoWiql = ctlNoWiql.ClientID,
                                 ctlProject = ctlProject.ClientID,
                                 ctlArea = ctlAreaPath.ClientID,
-                                getProjectsUrl = DynamicHttpHandling.GetJavascriptDataUrl<int, string, object>(GetProjects),
-                                getAreasUrl = DynamicHttpHandling.GetJavascriptDataUrl<int, string, string, object>(GetAreas),
+                                getProjectsUrl = Ajax.GetUrl(new Func<int, string, object>(GetProjects)),
+                                getAreasUrl = Ajax.GetUrl(new Func<int, string, string, object>(GetAreas)),
                                 applicationId = this.EditorContext.ApplicationId
                             }
                         );
@@ -170,8 +161,7 @@ namespace Inedo.BuildMasterExtensions.TFS.Providers
         }
         private TfsIssueTrackingProvider GetProvider()
         {
-            var application = StoredProcs.Applications_GetApplication(this.EditorContext.ApplicationId)
-                .Execute()
+            var application = DB.Applications_GetApplication(this.EditorContext.ApplicationId)
                 .Applications_Extended
                 .First();
 
@@ -195,10 +185,9 @@ namespace Inedo.BuildMasterExtensions.TFS.Providers
         [AjaxMethod]
         private static object GetProjects(int applicationId, string collectionId)
         {
-            WebUserContext.ValidatePrivileges(SecuredTask.Applications_EditApplication, applicationId: applicationId);
+            WebUserContext.ValidatePrivileges(SecuredTask.Applications_Manage, applicationId: applicationId);
 
-            var application = StoredProcs.Applications_GetApplication(applicationId)
-                .Execute()
+            var application = DB.Applications_GetApplication(applicationId)
                 .Applications_Extended
                 .First();
 
@@ -217,10 +206,9 @@ namespace Inedo.BuildMasterExtensions.TFS.Providers
         [AjaxMethod]
         private static object GetAreas(int applicationId, string collectionId, string projectName)
         {
-            WebUserContext.ValidatePrivileges(SecuredTask.Applications_EditApplication, applicationId: applicationId);
+            WebUserContext.ValidatePrivileges(SecuredTask.Applications_Manage, applicationId: applicationId);
 
-            var application = StoredProcs.Applications_GetApplication(applicationId)
-                .Execute()
+            var application = DB.Applications_GetApplication(applicationId)
                 .Applications_Extended
                 .First();
 

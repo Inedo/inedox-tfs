@@ -1,7 +1,7 @@
-﻿using Inedo.BuildMaster;
-using Inedo.BuildMaster.Extensibility;
-using Inedo.BuildMaster.Extensibility.BuildImporters;
+﻿using Inedo.BuildMaster.Extensibility.BuildImporters;
 using Inedo.BuildMaster.Web;
+using Inedo.Documentation;
+using Inedo.Serialization;
 
 namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
 {
@@ -23,9 +23,9 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
         [Persistent]
         public bool CreateBuildNumberVariable { get; set; } = true;
 
-        public override ExtensionComponentDescription GetDescription()
+        public override RichDescription GetDescription()
         {
-            var desc = new ExtensionComponentDescription("Import ");
+            var desc = new RichDescription("Import ");
             if (this.BuildNumberLocked)
                 desc.AppendContent(this.IncludeUnsuccessful ? "last completed build" : "last succeeded build");
             else

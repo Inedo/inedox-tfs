@@ -44,24 +44,20 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BuildMaster.Web.Controls, Version=4.9.5.3, Culture=neutral, PublicKeyToken=112cfb71329714a6, processorArchitecture=MSIL">
-      <HintPath>packages\Inedo.BuildMaster.SDK.4.9\lib\net40\BuildMaster.Web.Controls.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="BuildMaster.Web.Controls, Version=5.0.4.25, Culture=neutral, PublicKeyToken=112cfb71329714a6, processorArchitecture=MSIL">
+      <HintPath>packages\Inedo.BuildMaster.SDK.5.0\lib\net45\BuildMaster.Web.Controls.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="BuildMasterCore, Version=4.9.5.3, Culture=neutral, PublicKeyToken=112cfb71329714a6, processorArchitecture=MSIL">
-      <HintPath>packages\Inedo.BuildMaster.SDK.4.9\lib\net40\BuildMasterCore.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="BuildMasterCore, Version=5.0.4.25, Culture=neutral, PublicKeyToken=112cfb71329714a6, processorArchitecture=MSIL">
+      <HintPath>packages\Inedo.BuildMaster.SDK.5.0\lib\net45\BuildMasterCore.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">
-      <HintPath>packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Inedo.ExecutionEngine, Version=30.1.0.0, Culture=neutral, PublicKeyToken=68703f0e52007e75, processorArchitecture=MSIL">
+      <HintPath>packages\Inedo.BuildMaster.SDK.5.0\lib\net45\Inedo.ExecutionEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="InedoLib, Version=272.1.0.0, Culture=neutral, PublicKeyToken=112cfb71329714a6, processorArchitecture=MSIL">
-      <HintPath>packages\Inedo.BuildMaster.SDK.4.9\lib\net40\InedoLib.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="InedoLib, Version=382.1.0.0, Culture=neutral, PublicKeyToken=112cfb71329714a6, processorArchitecture=MSIL">
+      <HintPath>packages\Inedo.BuildMaster.SDK.5.0\lib\net45\InedoLib.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.TeamFoundation.Build.Client">
@@ -111,10 +107,6 @@
     <Compile Include="BuildImporter\TfsBuildImporterTemplateEditor.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="DeployTeamBuildRecipe.cs" />
-    <Compile Include="DeployTeamBuildRecipeEditor.cs">
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
     <Compile Include="Actions\CreateTfsBuildOutputArtifactAction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Providers\RemoteTfs.cs">
@@ -155,7 +147,7 @@
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="VisualStudioOnline\QueueVsoBuildAction.cs" />
-    <Compile Include="VisualStudioOnline\QueueVsoBuildActionEditors.cs">
+    <Compile Include="VisualStudioOnline\QueueVsoBuildActionEditor.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="VisualStudioOnline\VsoArtifactImporter.cs" />
@@ -196,15 +188,13 @@
     <Content Include="TfsIssueTrackingApplicationFilterEditor.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="packages.config">
-      <SubType>Designer</SubType>
-    </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>if exist $(SolutionDir) cmd /c "del $(SolutionDir)..\..\BuildMaster-4.9\ExtensionLib\$(TargetName).bmx"
-if exist $(SolutionDir) $(SolutionDir)..\zip -r $(SolutionDir)..\..\BuildMaster-4.9\ExtensionLib\$(TargetName).bmx *.*
-if exist $(SolutionDir) echo hdars &gt; $(SolutionDir)..\..\BuildMaster-4.9\BuildMasterSolution\Web\BuildMaster.Web.WebApplication\bin\hsirs</PostBuildEvent>
+    <PostBuildEvent>if exist $(SolutionDir) cmd /c "del $(SolutionDir)..\..\BuildMaster\ExtensionLib\$(TargetName).bmx"
+if exist $(SolutionDir) $(SolutionDir)..\zip -r $(SolutionDir)..\..\BuildMaster\ExtensionLib\$(TargetName).bmx *.*
+if exist $(SolutionDir) echo hdars &gt; $(SolutionDir)..\..\BuildMaster\BuildMasterSolution\Web\BuildMaster.Web.WebApplication\bin\hsirs</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

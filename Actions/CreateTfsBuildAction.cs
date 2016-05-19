@@ -1,22 +1,18 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Linq;
 using Inedo.BuildMaster;
 using Inedo.BuildMaster.Data;
-using Inedo.BuildMaster.Extensibility.Actions;
 using Inedo.BuildMaster.Extensibility.Agents;
 using Inedo.BuildMaster.Web;
-using Inedo.Data;
+using Inedo.Documentation;
+using Inedo.Serialization;
 using Microsoft.TeamFoundation.Build.Client;
 
 namespace Inedo.BuildMasterExtensions.TFS
 {
-    /// <summary>
-    /// Gets or sets the build number if not empty, or includes all builds in the search.
-    /// </summary>
-    [ActionProperties(
-        "Queue TFS Build",
-        "Queues a new build in TFS.",
-        DefaultToLocalServer = true)]
+    [DisplayName("Queue TFS Build")]
+    [Description("Queues a new build in TFS.")]
     [RequiresInterface(typeof(IFileOperationsExecuter))]
     [RequiresInterface(typeof(IRemoteZip))]
     [CustomEditor(typeof(CreateTfsBuildActionEditor))]
@@ -39,7 +35,7 @@ namespace Inedo.BuildMasterExtensions.TFS
         /// Gets or sets a value indicating whether the action should validate a successful build status.
         /// </summary>
         [Persistent]
-        public bool ValidateBuild{ get; set; }
+        public bool ValidateBuild { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the action should create the $TfsBuildNumber build variable 
@@ -48,13 +44,13 @@ namespace Inedo.BuildMasterExtensions.TFS
         [Persistent]
         public bool CreateBuildNumberVariable { get; set; } = true;
 
-        public override ActionDescription GetActionDescription()
+        public override ExtendedRichDescription GetActionDescription()
         {
-            return new ActionDescription(
-                new ShortActionDescription(
+            return new ExtendedRichDescription(
+                new RichDescription(
                     "Queue TFS Build for ", new Hilite(this.TeamProject)
                 ),
-                new LongActionDescription(
+                new RichDescription(
                     "using the build definition ",
                     new Hilite(this.BuildDefinition),
                     this.WaitForCompletion ? " and wait until the build completes" + (this.ValidateBuild ? " successfully" : "") : "",
@@ -81,7 +77,7 @@ namespace Inedo.BuildMasterExtensions.TFS
             if (this.CreateBuildNumberVariable)
             {
                 this.LogDebug($"Setting $TfsBuildNumber build variable to {queuedBuild.Build.BuildNumber}...");
-                StoredProcs.Variables_CreateOrUpdateVariableDefinition(
+                DB.Variables_CreateOrUpdateVariableDefinition(
                     Variable_Name: "TfsBuildNumber",
                     Environment_Id: null,
                     Server_Id: null,
@@ -91,9 +87,10 @@ namespace Inedo.BuildMasterExtensions.TFS
                     Release_Number: this.Context.ReleaseNumber,
                     Build_Number: this.Context.BuildNumber,
                     Execution_Id: null,
+                    Promotion_Id: null,
                     Value_Text: queuedBuild.Build.BuildNumber,
-                    Sensitive_Indicator: YNIndicator.No
-                ).Execute();
+                    Sensitive_Indicator: false
+                );
 
                 this.LogInformation("$TfsBuildNumber build variable set to: " + queuedBuild.Build.BuildNumber);
             }
@@ -101,7 +98,7 @@ namespace Inedo.BuildMasterExtensions.TFS
             if (this.WaitForCompletion)
             {
                 this.LogInformation("Waiting for build completion...");
-                queuedBuild.StatusChanged += 
+                queuedBuild.StatusChanged +=
                     (s, e) =>
                     {
                         this.ThrowIfCanceledOrTimeoutExpired();
@@ -123,7 +120,7 @@ namespace Inedo.BuildMasterExtensions.TFS
 
             var buildService = collection.GetService<IBuildServer>();
             var buildDefinition = buildService.GetBuildDefinition(this.TeamProject, this.BuildDefinition);
-            
+
             var spec = buildService.CreateBuildDetailSpec(this.TeamProject, this.BuildDefinition);
             spec.MaxBuildsPerDefinition = 1;
             spec.QueryOrder = BuildQueryOrder.FinishTimeDescending;
