@@ -35,12 +35,13 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
                     Password = config.Password
                 };
 
-                var tfsBuild = api.GetBuilds(
+                var tfsBuild = api.GetBuildsAsync(
                     buildNumber: importer.TfsBuildNumber,
                     resultFilter: importer.IncludeUnsuccessful ? "" : "succeeded",
                     statusFilter: "completed",
                     top: 1
-                  ).FirstOrDefault();
+                  ).Result()
+                   .FirstOrDefault();
 
                 if (tfsBuild == null)
                     throw new InvalidOperationException("There were no matching builds found in TFS.");

@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 using System.Web.Script.Serialization;
 using Inedo.BuildMasterExtensions.TFS.VisualStudioOnline.Model;
 using Inedo.IO;
@@ -62,33 +63,36 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
         public string UserName { get; set; }
         public string Password { get; set; }
 
-        public GetBuildResponse GetBuild(int buildId)
+        public async Task<GetBuildResponse> GetBuildAsync(int buildId)
         {
-            return this.Invoke<GetBuildResponse>("GET", $"build/builds/{buildId}", QueryString.Default);
+            return await this.InvokeAsync<GetBuildResponse>("GET", $"build/builds/{buildId}", QueryString.Default).ConfigureAwait(false);
         }
 
-        public GetBuildResponse[] GetBuilds(string buildNumber = null, string resultFilter = null, string statusFilter = null, int? top = null)
+        public async Task<GetBuildResponse[]> GetBuildsAsync(string buildNumber = null, string resultFilter = null, string statusFilter = null, int? top = null)
         {
             var query = new QueryString() { BuildNumber = buildNumber, ResultFilter = resultFilter, StatusFilter = statusFilter, Top = top };
 
-            return this.Invoke<GetBuildsResponse>("GET", "build/builds", query).value;
+            var response = await this.InvokeAsync<GetBuildsResponse>("GET", "build/builds", query).ConfigureAwait(false);
+            return response.value;
         }
 
-        public GetBuildResponse[] GetBuilds(int buildDefinition, string buildNumber = null, string resultFilter = null, string statusFilter = null, int? top = null)
+        public async Task<GetBuildResponse[]> GetBuildsAsync(int buildDefinition, string buildNumber = null, string resultFilter = null, string statusFilter = null, int? top = null)
         {
             var query = new QueryString() { Definition = buildDefinition, BuildNumber = buildNumber, ResultFilter = resultFilter, StatusFilter = statusFilter, Top = top };
 
-            return this.Invoke<GetBuildsResponse>("GET", "build/builds", query).value;
+            var response = await this.InvokeAsync<GetBuildsResponse>("GET", "build/builds", query).ConfigureAwait(false);
+            return response.value;
         }
 
-        public GetBuildDefinitionResponse[] GetBuildDefinitions()
+        public async Task<GetBuildDefinitionResponse[]> GetBuildDefinitionsAsync()
         {
-            return this.Invoke<GetBuildDefinitionsResponse>("GET", "build/definitions", QueryString.Default).value;
+            var response = await this.InvokeAsync<GetBuildDefinitionsResponse>("GET", "build/definitions", QueryString.Default).ConfigureAwait(false);
+            return response.value;
         }
 
-        public GetBuildResponse QueueBuild(int definitionId)
+        public async Task<GetBuildResponse> QueueBuildAsync(int definitionId)
         {
-            return this.Invoke<GetBuildResponse>(
+            return await this.InvokeAsync<GetBuildResponse>(
                 "POST", 
                 "build/builds", 
                 QueryString.Default, 
@@ -96,26 +100,26 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
                 {
                     definition = new { id = definitionId }
                 }
-            );
+            ).ConfigureAwait(false);
         }
 
-        public void DownloadArtifact(int buildId, string artifactName, string filePath)
+        public async System.Threading.Tasks.Task DownloadArtifactAsync(int buildId, string artifactName, string filePath)
         {
-            var response = this.Invoke<GetBuildArtifactsResponse>("GET", $"build/builds/{buildId}/artifacts", QueryString.Default);
+            var response = await this.InvokeAsync<GetBuildArtifactsResponse>("GET", $"build/builds/{buildId}/artifacts", QueryString.Default).ConfigureAwait(false);
             var artifact = response.value.FirstOrDefault(a => string.Equals(a.name, artifactName, StringComparison.OrdinalIgnoreCase));
             if (artifact == null)
                 throw new InvalidOperationException($"Artifact \"{artifactName}\" could not be found for build ID # {buildId}.");
 
             string url = artifact.resource.downloadUrl;
-            this.DownloadFile(url, filePath);
+            await this.DownloadFileAsync(url, filePath).ConfigureAwait(false);
         }
 
         private object Invoke(string method, string relativeUrl, QueryString query, object data = null)
         {
-            return this.Invoke<object>(method, relativeUrl, query, data);
+            return this.InvokeAsync<object>(method, relativeUrl, query, data);
         }
 
-        private void DownloadFile(string url, string filePath)
+        private async System.Threading.Tasks.Task DownloadFileAsync(string url, string filePath)
         {
             var request = WebRequest.Create(url);
             var httpRequest = request as HttpWebRequest;
@@ -127,11 +131,11 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
 
             try
             {
-                using (var response = request.GetResponse())
+                using (var response = await request.GetResponseAsync().ConfigureAwait(false))
                 using (var responseStream = response.GetResponseStream())
                 using (var fileStream = FileEx.Open(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
-                    responseStream.CopyTo(fileStream);
+                    await responseStream.CopyToAsync(fileStream).ConfigureAwait(false);
                 }
             }
             catch (WebException ex)
@@ -156,7 +160,7 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
             }
         }
 
-        private T Invoke<T>(string method, string relativeUrl, QueryString query, object data = null)
+        private async Task<T> InvokeAsync<T>(string method, string relativeUrl, QueryString query, object data = null)
         {
             string url = this.apiBaseUrl + relativeUrl + query.ToString();
 
@@ -168,7 +172,7 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
             request.Method = method;
             if (data != null)
             {
-                using (var requestStream = request.GetRequestStream())
+                using (var requestStream = await request.GetRequestStreamAsync().ConfigureAwait(false))
                 using (var writer = new StreamWriter(requestStream, InedoLib.UTF8Encoding))
                 {
                     InedoLib.Util.JavaScript.WriteJson(writer, data);
@@ -179,7 +183,7 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
 
             try
             {
-                using (var response = request.GetResponse())
+                using (var response = await request.GetResponseAsync().ConfigureAwait(false))
                 using (var responseStream = response.GetResponseStream())
                 using (var reader = new StreamReader(responseStream))
                 {

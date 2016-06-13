@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Inedo.Agents;
 using Inedo.BuildMaster;
 using Inedo.BuildMaster.Extensibility.Agents;
 using Inedo.BuildMaster.Extensibility.Configurers.Extension;
@@ -13,7 +14,7 @@ using Microsoft.TeamFoundation.Server;
 namespace Inedo.BuildMasterExtensions.TFS
 {
     [CustomEditor(typeof(TfsConfigurerEditor))]
-    public sealed class TfsConfigurer : ExtensionConfigurerBase
+    public sealed class TfsConfigurer : ExtensionConfigurerBase, IVsoConnectionInfo
     {
         public static readonly string TypeQualifiedName = typeof(TfsConfigurer).FullName + "," + typeof(TfsConfigurer).Assembly.GetName().Name;
 
@@ -49,6 +50,9 @@ namespace Inedo.BuildMasterExtensions.TFS
         public bool UseSystemCredentials { get; set; }
 
         public Uri BaseUri => this.BaseUrl == null ? null : new Uri(this.BaseUrl);
+
+        string IVsoConnectionInfo.TeamProjectCollectionUrl => this.BaseUrl;
+        string IVsoConnectionInfo.PasswordOrToken => this.Password;
 
         internal TfsBuildInfo GetBuildInfo(string teamProject, string buildDefinition, string buildNumber, bool includeUnsuccessful)
         {

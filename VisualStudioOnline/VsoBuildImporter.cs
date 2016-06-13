@@ -33,14 +33,14 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
         {
             var configurer = (TfsConfigurer)this.GetExtensionConfigurer();
 
-            string buildNumber = VsoArtifactImporter.DownloadAndImport(
+            string buildNumber = VsoArtifactImporter.DownloadAndImportAsync(
                 configurer,
                 this,
                 this.TeamProject,
                 this.TfsBuildNumber,
                 this.BuildDefinition,
                 new ArtifactIdentifier(context.ApplicationId, context.ReleaseNumber, context.BuildNumber, context.DeployableId, this.ArtifactName)
-            );
+            ).Result();
 
             if (this.CreateBuildNumberVariable)
             {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
+using Inedo.Agents;
 using Inedo.BuildMaster;
 using Inedo.BuildMaster.Data;
 using Inedo.BuildMaster.Extensibility.Agents;
@@ -14,7 +15,6 @@ namespace Inedo.BuildMasterExtensions.TFS
     [DisplayName("Queue TFS Build")]
     [Description("Queues a new build in TFS.")]
     [RequiresInterface(typeof(IFileOperationsExecuter))]
-    [RequiresInterface(typeof(IRemoteZip))]
     [CustomEditor(typeof(CreateTfsBuildActionEditor))]
     [Tag(Tags.Builds)]
     [Tag("tfs")]

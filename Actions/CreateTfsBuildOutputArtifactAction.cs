@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using Inedo.Agents;
 using Inedo.BuildMaster;
 using Inedo.BuildMaster.Artifacts;
 using Inedo.BuildMaster.Data;
@@ -17,7 +18,6 @@ namespace Inedo.BuildMasterExtensions.TFS
     [DisplayName("Capture Artifact from TFS Build Output")]
     [Description("Creates a BuildMaster build artifact from a TFS build server drop location.")]
     [RequiresInterface(typeof(IFileOperationsExecuter))]
-    [RequiresInterface(typeof(IRemoteZip))]
     [CustomEditor(typeof(CreateTfsBuildOutputArtifactActionEditor))]
     [Tag(Tags.Artifacts)]
     [Tag(Tags.Builds)]
@@ -126,17 +126,18 @@ namespace Inedo.BuildMasterExtensions.TFS
                 this.LogWarning("There are no files to capture in this artifact.");
 
             this.LogDebug("Zipping output...");
-            this.Context.Agent.GetService<IRemoteZip>().CreateZipFile(path, zipPath);
-
-            var zipFileEntry = fileOps.GetFileEntry(zipPath);
+            fileOps.CreateZipFile(path, zipPath);
 
             this.ThrowIfCanceledOrTimeoutExpired();
 
             this.LogDebug("Transferring file to artifact library...");
 
             var artifactId = new ArtifactIdentifier(this.Context.ApplicationId, this.Context.ReleaseNumber, this.Context.BuildNumber, this.Context.DeployableId, artifactName);
-
-            ArtifactBuilder.ImportZip(artifactId, fileOps, zipFileEntry);
+            
+            using (var stream = fileOps.OpenFile(zipPath, FileMode.Open, FileAccess.Read))
+            {
+                ArtifactBuilder.ImportZip(artifactId, stream);
+            }
 
             this.LogDebug("Cleaning up...");
             fileOps.DeleteFiles(new[] { zipPath });

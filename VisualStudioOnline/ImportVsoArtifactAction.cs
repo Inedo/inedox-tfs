@@ -1,8 +1,10 @@
 ﻿using System.ComponentModel;
+using Inedo.Agents;
 using Inedo.BuildMaster;
 using Inedo.BuildMaster.Artifacts;
-using Inedo.BuildMaster.Extensibility.Agents;
+using Inedo.BuildMaster.Extensibility.Actions;
 using Inedo.BuildMaster.Web;
+using Inedo.BuildMasterExtensions.TFS.Legacy.ActionImporters;
 using Inedo.Documentation;
 using Inedo.Serialization;
 
@@ -11,10 +13,10 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
     [DisplayName("Import Build Artifact from VS Online")]
     [Description("Downloads build output as a zip file from Visual Studio Online or TFS 2015 and imports it as a BuildMaster artifact.")]
     [RequiresInterface(typeof(IFileOperationsExecuter))]
-    [RequiresInterface(typeof(IRemoteZip))]
     [CustomEditor(typeof(ImportVsoArtifactActionEditor))]
     [Tag(Tags.Builds)]
     [Tag("tfs")]
+    [ConvertibleToOperation(typeof(ImportVsoArtifactImporter))]
     public sealed class ImportVsoArtifactAction : TfsActionBase
     {
         /// <summary>
@@ -55,14 +57,14 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
         {
             var configurer = this.GetExtensionConfigurer();
 
-            VsoArtifactImporter.DownloadAndImport(
+            VsoArtifactImporter.DownloadAndImportAsync(
                 configurer, 
                 this, 
                 this.TeamProject, 
                 this.BuildNumber,
                 this.BuildDefinition,
                 new ArtifactIdentifier(this.Context.ApplicationId, this.Context.ReleaseNumber, this.Context.BuildNumber, this.Context.DeployableId, this.ArtifactName)
-            );
+            ).Result();
         }
     }
 }

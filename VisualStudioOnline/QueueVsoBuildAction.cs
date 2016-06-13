@@ -2,10 +2,12 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Threading;
+using Inedo.Agents;
 using Inedo.BuildMaster;
 using Inedo.BuildMaster.Data;
-using Inedo.BuildMaster.Extensibility.Agents;
+using Inedo.BuildMaster.Extensibility.Actions;
 using Inedo.BuildMaster.Web;
+using Inedo.BuildMasterExtensions.TFS.Legacy.ActionImporters;
 using Inedo.Documentation;
 using Inedo.Serialization;
 
@@ -14,10 +16,10 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
     [DisplayName("Queue Build in VS Online")]
     [Description("Queues a new build in Visual Studio Online or TFS 2015.")]
     [RequiresInterface(typeof(IFileOperationsExecuter))]
-    [RequiresInterface(typeof(IRemoteZip))]
     [CustomEditor(typeof(QueueVsoBuildActionEditor))]
     [Tag(Tags.Builds)]
     [Tag("tfs")]
+    [ConvertibleToOperation(typeof(QueueVsoBuildImporter))]
     public sealed class QueueVsoBuildAction : TfsActionBase
     {
         /// <summary>
@@ -70,7 +72,7 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
             };
 
             this.LogDebug("Finding VSO build definition...");
-            var definition = api.GetBuildDefinitions()
+            var definition = api.GetBuildDefinitionsAsync().Result()
                 .FirstOrDefault(d => string.IsNullOrEmpty(this.BuildDefinition) || string.Equals(d.name, this.BuildDefinition, StringComparison.OrdinalIgnoreCase));
 
             if (definition == null)
@@ -78,7 +80,7 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
 
             this.LogInformation($"Queueing VSO build of {this.TeamProject}, build definition {definition.name}...");
 
-            var queuedBuild = api.QueueBuild(definition.id);
+            var queuedBuild = api.QueueBuildAsync(definition.id).Result();
 
             this.LogInformation($"Build number \"{queuedBuild.buildNumber}\" created for definition \"{queuedBuild.definition.name}\".");
 
@@ -112,7 +114,7 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
                 {
                     this.ThrowIfCanceledOrTimeoutExpired();
                     Thread.Sleep(4000);
-                    queuedBuild = api.GetBuild(queuedBuild.id);
+                    queuedBuild = api.GetBuildAsync(queuedBuild.id).Result();
                     if (queuedBuild.status != lastStatus)
                     {
                         this.LogInformation($"Current build status changed from \"{lastStatus}\" to \"{queuedBuild.status}\"...");
