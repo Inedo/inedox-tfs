@@ -59,9 +59,9 @@ namespace Inedo.BuildMasterExtensions.TFS.Operations
 
         protected override ExtendedRichDescription GetDescription(IOperationConfiguration config)
         {
-            var shortDesc = new RichDescription("Import VS Online Build Artifact from ", new Hilite(config[nameof(this.TeamProject)]));
+            var shortDesc = new RichDescription("Import VSO ", new Hilite(config[nameof(this.ArtifactName)]), " Artifact");
 
-            var longDesc = new RichDescription("using ");
+            var longDesc = new RichDescription("from ", new Hilite(config[nameof(this.TeamProject)]), " using ");
             if (string.IsNullOrEmpty(config[nameof(this.BuildNumber)]))
                 longDesc.AppendContent("the last successful build");
             else

@@ -192,17 +192,23 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
                     return js.Deserialize<T>(s);
                 }
             }
-            catch (WebException ex)
+            catch (WebException ex) when (ex.Response != null)
             {
-                if (ex.Response == null)
-                    throw;
+                var httpResponse = ex.Response as HttpWebResponse;
+                if (httpResponse != null)
+                {
+                    if (httpResponse.StatusCode == HttpStatusCode.Unauthorized)
+                        throw new InvalidOperationException("TFS server returned 401 Unauthorized - verify that the credentials used to connect are correct.");
+                    if (httpResponse.StatusCode == HttpStatusCode.Forbidden)
+                        throw new InvalidOperationException("TFS server returned 403 Forbidden - verify that the credentials used to connect are correct.");
+                }
 
                 using (var responseStream = ex.Response.GetResponseStream())
                 {
                     string message;
                     try
                     {
-                        message = new StreamReader(responseStream).ReadToEnd();
+                        message = await new StreamReader(responseStream).ReadToEndAsync().ConfigureAwait(false);
                     }
                     catch
                     {
