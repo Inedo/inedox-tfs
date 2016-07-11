@@ -68,6 +68,7 @@ namespace Inedo.BuildMasterExtensions.TFS.Operations
                 await new DB.Context(false).Variables_CreateOrUpdateVariableDefinitionAsync(
                     Variable_Name: "TfsBuildNumber",
                     Environment_Id: null,
+                    ServerRole_Id: null,
                     Server_Id: null,
                     ApplicationGroup_Id: null,
                     Application_Id: context.ApplicationId,

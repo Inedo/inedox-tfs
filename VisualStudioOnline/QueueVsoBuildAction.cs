@@ -90,6 +90,7 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
                 DB.Variables_CreateOrUpdateVariableDefinition(
                     Variable_Name: "TfsBuildNumber",
                     Environment_Id: null,
+                    ServerRole_Id: null,
                     Server_Id: null,
                     ApplicationGroup_Id: null,
                     Application_Id: this.Context.ApplicationId,
