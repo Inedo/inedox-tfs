@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Inedo.BuildMaster;
 using Inedo.BuildMaster.Artifacts;
 using Inedo.Diagnostics;
 using Inedo.IO;
@@ -59,9 +58,18 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
                 await api.DownloadArtifactAsync(build.id, artifactId.ArtifactName, tempFile).ConfigureAwait(false);
                 logger.LogInformation("Artifact file downloaded from VSO, importing into BuildMaster artifact library...");
 
-                using (var stream = FileEx.Open(tempFile, FileMode.Open, FileAccess.Read, FileShare.Read))
+                using (var stream = FileEx.Open(tempFile, FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.Asynchronous | FileOptions.SequentialScan))
                 {
-                    ArtifactBuilder.ImportZip(artifactId, stream);
+                    await Artifact.CreateArtifactAsync(
+                        applicationId: artifactId.ApplicationId,
+                        releaseNumber: artifactId.ReleaseNumber,
+                        buildNumber: artifactId.BuildNumber,
+                        deployableId: artifactId.DeployableId,
+                        executionId: null,
+                        artifactName: artifactId.ArtifactName,
+                        artifactData: stream,
+                        overwrite: true
+                    ).ConfigureAwait(false);
                 }
 
                 logger.LogInformation($"{artifactId.ArtifactName} artifact imported.");

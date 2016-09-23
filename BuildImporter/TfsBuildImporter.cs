@@ -59,7 +59,7 @@ namespace Inedo.BuildMasterExtensions.TFS.BuildImporter
 
             this.LogInformation("Drop location: " + tfsBuild.DropLocation);
 
-            using (var agent = Util.Agents.CreateAgentFromId(configurer.ServerId))
+            using (var agent = BuildMasterAgent.Create(configurer.ServerId.Value))
             {
                 var fileOps = agent.GetService<IFileOperationsExecuter>();
 
