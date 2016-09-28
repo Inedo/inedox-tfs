@@ -8,10 +8,11 @@ namespace Inedo.BuildMasterExtensions.TFS.Operations
 {
     public abstract class TfsOperation : ExecuteOperation, IHasCredentials<TfsCredentials>, IVsoConnectionInfo
     {
-        [Category("Connection/Identity")]
-        [ScriptAlias("Credentials")]
-        [DisplayName("Credentials")]
-        public string CredentialName { get; set; }
+        //[Category("Connection/Identity")]
+        //[ScriptAlias("Credentials")]
+        //[DisplayName("Credentials")]
+        //public string CredentialName { get; set; }
+        public abstract string CredentialName { get; set; }
 
         [Category("Connection/Identity")]
         [ScriptAlias("Url")]

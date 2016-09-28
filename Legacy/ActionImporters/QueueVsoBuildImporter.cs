@@ -18,7 +18,7 @@ namespace Inedo.BuildMasterExtensions.TFS.Legacy.ActionImporters
                 Domain = configurer.Domain,
                 TeamProjectCollectionUrl = configurer.BaseUrl,
                 TeamProject = action.TeamProject,
-                CreateBuildNumberVariable = action.CreateBuildNumberVariable,
+                TfsBuildNumber = action.CreateBuildNumberVariable ? "$TfsBuildNumber" : null,
                 ValidateBuild = action.ValidateBuild,
                 WaitForCompletion = action.WaitForCompletion
             };

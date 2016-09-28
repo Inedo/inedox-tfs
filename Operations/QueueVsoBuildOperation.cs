@@ -3,9 +3,10 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Inedo.BuildMaster;
-using Inedo.BuildMaster.Data;
 using Inedo.BuildMaster.Extensibility;
 using Inedo.BuildMaster.Extensibility.Operations;
+using Inedo.BuildMaster.Web.Controls;
+using Inedo.BuildMasterExtensions.TFS.SuggestionProviders;
 using Inedo.BuildMasterExtensions.TFS.VisualStudioOnline;
 using Inedo.Diagnostics;
 using Inedo.Documentation;
@@ -16,41 +17,47 @@ namespace Inedo.BuildMasterExtensions.TFS.Operations
     [Description("Queues a build in TFS 2015 or Visual Studio Online, optionally waiting for its completion.")]
     [ScriptAlias("Queue-Build")]
     [Tag(Tags.Builds)]
+    [Tag("tfs")]
     public sealed class QueueVsoBuildOperation : TfsOperation
     {
+        [ScriptAlias("Credentials")]
+        [DisplayName("Credentials")]
+        public override string CredentialName { get; set; }
+
         [ScriptAlias("TeamProject")]
         [DisplayName("Team project")]
+        [SuggestibleValue(typeof(TeamProjectNameSuggestionProvider))]
         public string TeamProject { get; set; }
 
         [Required]
         [ScriptAlias("BuildDefinition")]
         [DisplayName("Build definition")]
+        [SuggestibleValue(typeof(BuildDefinitionNameSuggestionProvider))]
         public string BuildDefinition { get; set; }
 
         [ScriptAlias("WaitForCompletion")]
         [DisplayName("Wait for completion")]
-        public bool WaitForCompletion { get; set; }
+        [DefaultValue(true)]
+        public bool WaitForCompletion { get; set; } = true;
 
         [ScriptAlias("Validate")]
         [DisplayName("Validate success")]
-        public bool ValidateBuild { get; set; }
-
-        [Category("Advanced")]
-        [ScriptAlias("CreateBuildNumberVariable")]
-        [DisplayName("Create $TfsBuildNumber")]
         [DefaultValue(true)]
-        public bool CreateBuildNumberVariable { get; set; } = true;
+        public bool ValidateBuild { get; set; } = true;
+
+        [Output]
+        [ScriptAlias("TfsBuildNumber")]
+        [DisplayName("Set build number to variable")]
+        [Description("The TFS build number can be output into a runtime variable.")]
+        [PlaceholderText("e.g. $TfsBuildNumber")]
+        public string TfsBuildNumber { get; set; }
 
         public async override Task ExecuteAsync(IOperationExecutionContext context)
         {
-            var api = new TfsRestApi(this.TeamProjectCollectionUrl, this.TeamProject)
-            {
-                UserName = string.IsNullOrEmpty(this.Domain) ? this.UserName : string.Format("{0}\\{1}", this.Domain, this.UserName),
-                Password = this.PasswordOrToken
-            };
+            var api = new TfsRestApi(this);
 
             this.LogDebug("Finding VSO build definition...");
-            var definitionResult = await api.GetBuildDefinitionsAsync();
+            var definitionResult = await api.GetBuildDefinitionsAsync(this.TeamProject);
             var definition = definitionResult.FirstOrDefault(d => string.IsNullOrEmpty(this.BuildDefinition) || string.Equals(d.name, this.BuildDefinition, StringComparison.OrdinalIgnoreCase));
 
             if (definition == null)
@@ -58,31 +65,11 @@ namespace Inedo.BuildMasterExtensions.TFS.Operations
 
             this.LogInformation($"Queueing VSO build of {this.TeamProject}, build definition {definition.name}...");
 
-            var queuedBuild = await api.QueueBuildAsync(definition.id);
+            var queuedBuild = await api.QueueBuildAsync(this.TeamProject, definition.id);
 
             this.LogInformation($"Build number \"{queuedBuild.buildNumber}\" created for definition \"{queuedBuild.definition.name}\".");
 
-            if (this.CreateBuildNumberVariable)
-            {
-                this.LogDebug($"Setting $TfsBuildNumber build variable to {queuedBuild.buildNumber}...");
-                await new DB.Context(false).Variables_CreateOrUpdateVariableDefinitionAsync(
-                    Variable_Name: "TfsBuildNumber",
-                    Environment_Id: null,
-                    ServerRole_Id: null,
-                    Server_Id: null,
-                    ApplicationGroup_Id: null,
-                    Application_Id: context.ApplicationId,
-                    Deployable_Id: null,
-                    Release_Number: context.ReleaseNumber,
-                    Build_Number: context.BuildNumber,
-                    Execution_Id: null,
-                    Promotion_Id: null,
-                    Value_Text: queuedBuild.buildNumber,
-                    Sensitive_Indicator: false
-                );
-
-                this.LogInformation("$TfsBuildNumber build variable set to: " + queuedBuild.buildNumber);
-            }
+            this.TfsBuildNumber = queuedBuild.buildNumber;
 
             if (this.WaitForCompletion)
             {
@@ -92,7 +79,7 @@ namespace Inedo.BuildMasterExtensions.TFS.Operations
                 while (!string.Equals(queuedBuild.status, "completed", StringComparison.OrdinalIgnoreCase))
                 {
                     await Task.Delay(4000, context.CancellationToken);
-                    queuedBuild = await api.GetBuildAsync(queuedBuild.id);
+                    queuedBuild = await api.GetBuildAsync(this.TeamProject, queuedBuild.id);
                     if (queuedBuild.status != lastStatus)
                     {
                         this.LogInformation($"Current build status changed from \"{lastStatus}\" to \"{queuedBuild.status}\"...");

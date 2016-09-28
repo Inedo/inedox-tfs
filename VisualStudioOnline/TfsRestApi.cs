@@ -44,56 +44,62 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
 
     internal sealed class TfsRestApi
     {
-        private string host;
-        private string apiBaseUrl;
+        private IVsoConnectionInfo connectionInfo;
 
-        public TfsRestApi(string host, string project)
+        public TfsRestApi(IVsoConnectionInfo connectionInfo)
         {
-            if (host == null)
-                throw new ArgumentNullException(nameof(host));
-            if (project == null)
-                throw new ArgumentNullException(nameof(project));
-            if (string.IsNullOrEmpty(project))
-                throw new ArgumentException("A team project is required for the TFS Rest API.", nameof(project));
+            if (connectionInfo == null)
+                throw new ArgumentNullException(nameof(connectionInfo));
 
-            this.host = host.TrimEnd('/');
-            this.apiBaseUrl = $"{this.host}/{Uri.EscapeUriString(project)}/_apis/";
-        }
-        
-        public string UserName { get; set; }
-        public string Password { get; set; }
-
-        public async Task<GetBuildResponse> GetBuildAsync(int buildId)
-        {
-            return await this.InvokeAsync<GetBuildResponse>("GET", $"build/builds/{buildId}", QueryString.Default).ConfigureAwait(false);
+            this.connectionInfo = connectionInfo;
         }
 
-        public async Task<GetBuildResponse[]> GetBuildsAsync(string buildNumber = null, string resultFilter = null, string statusFilter = null, int? top = null)
+        public async Task<GetTeamProjectResponse[]> GetProjectsAsync()
+        {
+            var response = await this.InvokeAsync<GetTeamProjectsResponse>("GET", null, "projects", QueryString.Default);
+            return response.value;
+        }
+
+        public async Task<GetBuildResponse> GetBuildAsync(string project, int buildId)
+        {
+            return await this.InvokeAsync<GetBuildResponse>("GET", project, $"build/builds/{buildId}", QueryString.Default).ConfigureAwait(false);
+        }
+
+        public async Task<GetBuildResponse[]> GetBuildsAsync(string project, string buildNumber = null, string resultFilter = null, string statusFilter = null, int? top = null)
         {
             var query = new QueryString() { BuildNumber = buildNumber, ResultFilter = resultFilter, StatusFilter = statusFilter, Top = top };
 
-            var response = await this.InvokeAsync<GetBuildsResponse>("GET", "build/builds", query).ConfigureAwait(false);
+            var response = await this.InvokeAsync<GetBuildsResponse>("GET", project, "build/builds", query).ConfigureAwait(false);
             return response.value;
         }
 
-        public async Task<GetBuildResponse[]> GetBuildsAsync(int buildDefinition, string buildNumber = null, string resultFilter = null, string statusFilter = null, int? top = null)
+        public async Task<GetBuildResponse[]> GetBuildsAsync(string project, int buildDefinition, string buildNumber = null, string resultFilter = null, string statusFilter = null, int? top = null)
         {
             var query = new QueryString() { Definition = buildDefinition, BuildNumber = buildNumber, ResultFilter = resultFilter, StatusFilter = statusFilter, Top = top };
 
-            var response = await this.InvokeAsync<GetBuildsResponse>("GET", "build/builds", query).ConfigureAwait(false);
+            var response = await this.InvokeAsync<GetBuildsResponse>("GET", project, "build/builds", query).ConfigureAwait(false);
             return response.value;
         }
 
-        public async Task<GetBuildDefinitionResponse[]> GetBuildDefinitionsAsync()
+        public async Task<GetBuildDefinitionResponse> GetBuildDefinitionAsync(string project, string name)
         {
-            var response = await this.InvokeAsync<GetBuildDefinitionsResponse>("GET", "build/definitions", QueryString.Default).ConfigureAwait(false);
+            var response = await this.InvokeAsync<GetBuildDefinitionsResponse>("GET", project, "build/definitions", QueryString.Default).ConfigureAwait(false);
+            var definition = response.value.FirstOrDefault(d => string.Equals(d.name, name, StringComparison.OrdinalIgnoreCase));
+
+            return definition;
+        }
+
+        public async Task<GetBuildDefinitionResponse[]> GetBuildDefinitionsAsync(string project)
+        {
+            var response = await this.InvokeAsync<GetBuildDefinitionsResponse>("GET", project, "build/definitions", QueryString.Default).ConfigureAwait(false);
             return response.value;
         }
 
-        public async Task<GetBuildResponse> QueueBuildAsync(int definitionId)
+        public async Task<GetBuildResponse> QueueBuildAsync(string project, int definitionId)
         {
             return await this.InvokeAsync<GetBuildResponse>(
                 "POST", 
+                project,
                 "build/builds", 
                 QueryString.Default, 
                 new
@@ -103,23 +109,23 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
             ).ConfigureAwait(false);
         }
 
-        public async System.Threading.Tasks.Task DownloadArtifactAsync(int buildId, string artifactName, string filePath)
+        public async Task<Artifact[]> GetArtifactsAsync(string project, int buildId)
         {
-            var response = await this.InvokeAsync<GetBuildArtifactsResponse>("GET", $"build/builds/{buildId}/artifacts", QueryString.Default).ConfigureAwait(false);
+            var response = await this.InvokeAsync<GetBuildArtifactsResponse>("GET", project, $"build/builds/{buildId}/artifacts", QueryString.Default).ConfigureAwait(false);
+            return response.value;
+        }
+
+        public async Task DownloadArtifactAsync(string project, int buildId, string artifactName, string filePath)
+        {
+            var response = await this.InvokeAsync<GetBuildArtifactsResponse>("GET", project, $"build/builds/{buildId}/artifacts", QueryString.Default).ConfigureAwait(false);
             var artifact = response.value.FirstOrDefault(a => string.Equals(a.name, artifactName, StringComparison.OrdinalIgnoreCase));
             if (artifact == null)
                 throw new InvalidOperationException($"Artifact \"{artifactName}\" could not be found for build ID # {buildId}.");
-
-            string url = artifact.resource.downloadUrl;
-            await this.DownloadFileAsync(url, filePath).ConfigureAwait(false);
+            
+            await this.DownloadFileAsync(artifact.resource.downloadUrl, filePath).ConfigureAwait(false);
         }
 
-        private object Invoke(string method, string relativeUrl, QueryString query, object data = null)
-        {
-            return this.InvokeAsync<object>(method, relativeUrl, query, data);
-        }
-
-        private async System.Threading.Tasks.Task DownloadFileAsync(string url, string filePath)
+        private async Task DownloadFileAsync(string url, string filePath)
         {
             var request = WebRequest.Create(url);
             var httpRequest = request as HttpWebRequest;
@@ -160,9 +166,15 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
             }
         }
 
-        private async Task<T> InvokeAsync<T>(string method, string relativeUrl, QueryString query, object data = null)
+        private async Task<T> InvokeAsync<T>(string method, string project, string relativeUrl, QueryString query, object data = null)
         {
-            string url = this.apiBaseUrl + relativeUrl + query.ToString();
+            string apiBaseUrl;
+            if (string.IsNullOrEmpty(project))
+                apiBaseUrl = $"{this.connectionInfo.TeamProjectCollectionUrl}/_apis/";
+            else
+                apiBaseUrl = $"{this.connectionInfo.TeamProjectCollectionUrl}/{Uri.EscapeUriString(project)}/_apis/";
+
+            string url = apiBaseUrl + relativeUrl + query.ToString();
 
             var request = WebRequest.Create(url);
             var httpRequest = request as HttpWebRequest;
@@ -222,14 +234,16 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
 
         private void SetCredentials(WebRequest request)
         {
-            if (!string.IsNullOrEmpty(this.UserName))
+            if (!string.IsNullOrEmpty(this.connectionInfo.UserName))
             {
-                request.Credentials = new NetworkCredential(this.UserName, this.Password);
+                string fullName = string.IsNullOrEmpty(this.connectionInfo.Domain) ? this.connectionInfo.UserName : $"{this.connectionInfo.Domain}\\{this.connectionInfo.UserName}";
+
+                request.Credentials = new NetworkCredential(fullName, this.connectionInfo.PasswordOrToken);
 
                 // local instances of TFS 2015 can return file:/// URLs which result in FileWebRequest instances that do not allow headers
                 if (request is HttpWebRequest)
                 {
-                    request.Headers[HttpRequestHeader.Authorization] = "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes(this.UserName + ":" + this.Password));
+                    request.Headers[HttpRequestHeader.Authorization] = "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes(fullName + ":" + this.connectionInfo.PasswordOrToken));
                 }
             }
         }

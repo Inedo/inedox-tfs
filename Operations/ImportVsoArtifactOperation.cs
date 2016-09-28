@@ -4,6 +4,8 @@ using Inedo.BuildMaster;
 using Inedo.BuildMaster.Artifacts;
 using Inedo.BuildMaster.Extensibility;
 using Inedo.BuildMaster.Extensibility.Operations;
+using Inedo.BuildMaster.Web.Controls;
+using Inedo.BuildMasterExtensions.TFS.SuggestionProviders;
 using Inedo.BuildMasterExtensions.TFS.VisualStudioOnline;
 using Inedo.Diagnostics;
 using Inedo.Documentation;
@@ -14,38 +16,48 @@ namespace Inedo.BuildMasterExtensions.TFS.Operations
     [Description("Downloads an artifact from the specified TFS server or Visual Studio Online and saves it to the artifact library.")]
     [ScriptAlias("Import-Artifact")]
     [Tag(Tags.Artifacts)]
+    [Tag("tfs")]
     public sealed class ImportVsoArtifactOperation : TfsOperation
     {
-        [ScriptAlias("BuildNumber")]
-        [DisplayName("Build number")]
-        [PlaceholderText("latest")]
-        public string BuildNumber { get; set; }
-
-        [Required]
-        [ScriptAlias("ArtifactName")]
-        [DisplayName("Artifact name")]
-        public string ArtifactName { get; set; }
+        [ScriptAlias("Credentials")]
+        [DisplayName("Credentials")]
+        public override string CredentialName { get; set; }
 
         [ScriptAlias("TeamProject")]
         [DisplayName("Team project")]
+        [SuggestibleValue(typeof(TeamProjectNameSuggestionProvider))]
         public string TeamProject { get; set; }
 
         [Required]
         [ScriptAlias("BuildDefinition")]
         [DisplayName("Build definition")]
+        [SuggestibleValue(typeof(BuildDefinitionNameSuggestionProvider))]
         public string BuildDefinition { get; set; }        
 
-        [Category("Advanced")]
-        [ScriptAlias("CreateBuildNumberVariable")]
-        [DisplayName("Create $TfsBuildNumber")]
-        [DefaultValue(true)]
-        public bool CreateBuildNumberVariable { get; set; } = true;
+        [ScriptAlias("BuildNumber")]
+        [DisplayName("Build number")]
+        [PlaceholderText("latest")]
+        [SuggestibleValue(typeof(BuildNumberSuggestionProvider))]
+        public string BuildNumber { get; set; }
+
+        [Required]
+        [ScriptAlias("ArtifactName")]
+        [DisplayName("Artifact name")]
+        [SuggestibleValue(typeof(ArtifactNameSuggestionProvider))]
+        public string ArtifactName { get; set; }
+
+        [Output]
+        [ScriptAlias("TfsBuildNumber")]
+        [DisplayName("Set build number to variable")]
+        [Description("The TFS build number can be output into a runtime variable.")]
+        [PlaceholderText("e.g. $TfsBuildNumber")]
+        public string TfsBuildNumber { get; set; }
 
         public async override Task ExecuteAsync(IOperationExecutionContext context)
         {
             this.LogInformation($"Importing {this.ArtifactName} artifact with build number \"{this.BuildNumber ?? "latest"}\" from TFS...");
 
-            string buildNumber = await VsoArtifactImporter.DownloadAndImportAsync(
+            this.TfsBuildNumber = await VsoArtifactImporter.DownloadAndImportAsync(
                 (IVsoConnectionInfo)this,
                 (ILogger)this,
                 this.TeamProject,

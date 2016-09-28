@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
+﻿using System.ComponentModel;
+using System.Runtime.InteropServices;
 using System.Security;
-using System.Text;
-using System.Threading.Tasks;
 using Inedo.BuildMaster.Extensibility;
 using Inedo.BuildMaster.Extensibility.Credentials;
 using Inedo.BuildMaster.Web;
@@ -16,7 +12,7 @@ namespace Inedo.BuildMasterExtensions.TFS.Credentials
     [ScriptAlias("Tfs")]
     [DisplayName("Team Foundation Server")]
     [Description("Credentials for TFS that can be either username/password, or personal access token.")]
-    public sealed class TfsCredentials : ResourceCredentials
+    public sealed class TfsCredentials : ResourceCredentials, IVsoConnectionInfo
     {
         [Required]
         [Persistent]
@@ -43,6 +39,24 @@ namespace Inedo.BuildMasterExtensions.TFS.Credentials
             if (!string.IsNullOrEmpty(this.Domain))
                 desc.AppendContent("@", this.Domain);
             return desc;
+        }
+
+        string IVsoConnectionInfo.TeamProjectCollectionUrl => this.TeamProjectCollection;
+
+        string IVsoConnectionInfo.PasswordOrToken
+        {
+            get
+            {
+                var ptr = Marshal.SecureStringToGlobalAllocUnicode(this.PasswordOrToken);
+                try
+                {
+                    return Marshal.PtrToStringUni(ptr);
+                }
+                finally
+                {
+                    Marshal.ZeroFreeGlobalAllocUnicode(ptr);
+                }
+            }
         }
     }
 }

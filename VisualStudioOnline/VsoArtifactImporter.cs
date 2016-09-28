@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Inedo.BuildMaster;
 using Inedo.BuildMaster.Artifacts;
 using Inedo.Diagnostics;
 using Inedo.IO;
@@ -16,29 +15,24 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
             if (logger == null)
                 throw new ArgumentNullException(nameof(logger));
             if (connectionInfo == null)
-                throw new ArgumentNullException("A configurer must be configured or selected in order to import a VS online build.");
+                throw new ArgumentNullException(nameof(connectionInfo), "A configurer must be configured or selected in order to import a VS online build.");
             if (string.IsNullOrEmpty(connectionInfo.TeamProjectCollectionUrl))
                 throw new InvalidOperationException("The base URL property of the TFS configurer or the Url property of the Import VSO Artifact operation must be set to import a VS online build.");
+            if (string.IsNullOrEmpty(teamProject))
+                throw new InvalidOperationException("A team project is required to import artifacts.");
 
-            var api = new TfsRestApi(connectionInfo.TeamProjectCollectionUrl, teamProject)
-            {
-                UserName = string.IsNullOrEmpty(connectionInfo.Domain) ? connectionInfo.UserName : string.Format("{0}\\{1}", connectionInfo.Domain, connectionInfo.UserName),
-                Password = connectionInfo.PasswordOrToken
-            };
+            var api = new TfsRestApi(connectionInfo);
 
             logger.LogInformation($"Finding last successful build...");
-            var buildDefinitions = await api.GetBuildDefinitionsAsync().ConfigureAwait(false);
 
-            var buildDefinition = buildDefinitions.FirstOrDefault(b => b.name == buildDefinitionName);
-
+            var buildDefinition = await api.GetBuildDefinitionAsync(teamProject, buildDefinitionName).ConfigureAwait(false);
             if (buildDefinition == null)
-            {
                 throw new InvalidOperationException($"The build definition {buildDefinitionName} could not be found.");
-            }
 
             logger.LogInformation($"Finding {AH.CoalesceString(buildNumber, "last successful")} build...");
 
             var builds = await api.GetBuildsAsync(
+                project: teamProject,
                 buildDefinition: buildDefinition.id,
                 buildNumber: AH.NullIf(buildNumber, ""),
                 resultFilter: "succeeded",
@@ -56,12 +50,21 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
             {
                 logger.LogInformation($"Downloading {artifactId.ArtifactName} artifact from VSO...");
                 logger.LogDebug("Downloading artifact file to: " + tempFile);
-                await api.DownloadArtifactAsync(build.id, artifactId.ArtifactName, tempFile).ConfigureAwait(false);
+                await api.DownloadArtifactAsync(teamProject, build.id, artifactId.ArtifactName, tempFile).ConfigureAwait(false);
                 logger.LogInformation("Artifact file downloaded from VSO, importing into BuildMaster artifact library...");
 
                 using (var stream = FileEx.Open(tempFile, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
-                    ArtifactBuilder.ImportZip(artifactId, stream);
+                    await Artifact.CreateArtifactAsync(
+                        artifactId.ApplicationId,
+                        artifactId.ReleaseNumber,
+                        artifactId.BuildNumber,
+                        artifactId.DeployableId,
+                        null,
+                        artifactId.ArtifactName,
+                        stream,
+                        true
+                    ).ConfigureAwait(false);
                 }
 
                 logger.LogInformation($"{artifactId.ArtifactName} artifact imported.");

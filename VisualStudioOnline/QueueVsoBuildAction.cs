@@ -65,14 +65,10 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
             if (string.IsNullOrEmpty(configurer.BaseUrl))
                 throw new InvalidOperationException("The base URL property of the TFS configurer must be set to queue a VS online build.");
 
-            var api = new TfsRestApi(configurer.BaseUrl, this.TeamProject)
-            {
-                UserName = string.IsNullOrEmpty(configurer.Domain) ? configurer.UserName : string.Format("{0}\\{1}", configurer.Domain, configurer.UserName),
-                Password = configurer.Password
-            };
+            var api = new TfsRestApi(configurer);
 
             this.LogDebug("Finding VSO build definition...");
-            var definition = api.GetBuildDefinitionsAsync().Result()
+            var definition = api.GetBuildDefinitionsAsync(this.TeamProject).Result()
                 .FirstOrDefault(d => string.IsNullOrEmpty(this.BuildDefinition) || string.Equals(d.name, this.BuildDefinition, StringComparison.OrdinalIgnoreCase));
 
             if (definition == null)
@@ -80,7 +76,7 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
 
             this.LogInformation($"Queueing VSO build of {this.TeamProject}, build definition {definition.name}...");
 
-            var queuedBuild = api.QueueBuildAsync(definition.id).Result();
+            var queuedBuild = api.QueueBuildAsync(this.TeamProject, definition.id).Result();
 
             this.LogInformation($"Build number \"{queuedBuild.buildNumber}\" created for definition \"{queuedBuild.definition.name}\".");
 
@@ -115,7 +111,7 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
                 {
                     this.ThrowIfCanceledOrTimeoutExpired();
                     Thread.Sleep(4000);
-                    queuedBuild = api.GetBuildAsync(queuedBuild.id).Result();
+                    queuedBuild = api.GetBuildAsync(this.TeamProject, queuedBuild.id).Result();
                     if (queuedBuild.status != lastStatus)
                     {
                         this.LogInformation($"Current build status changed from \"{lastStatus}\" to \"{queuedBuild.status}\"...");

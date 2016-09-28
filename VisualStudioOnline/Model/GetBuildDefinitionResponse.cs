@@ -75,11 +75,11 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline.Model
         public bool continueOnError { get; set; }
         public bool alwaysRun { get; set; }
         public string displayName { get; set; }
-        public Task task { get; set; }
+        public BuildTask task { get; set; }
         public Inputs inputs { get; set; }
     }
 
-    public class Task
+    public class BuildTask
     {
         public string id { get; set; }
         public string versionSpec { get; set; }

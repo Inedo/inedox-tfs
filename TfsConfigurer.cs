@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using Inedo.Agents;
-using Inedo.BuildMaster;
 using Inedo.BuildMaster.Extensibility.Agents;
 using Inedo.BuildMaster.Extensibility.Configurers.Extension;
 using Inedo.BuildMaster.Web;
@@ -56,7 +55,8 @@ namespace Inedo.BuildMasterExtensions.TFS
 
         internal TfsBuildInfo GetBuildInfo(string teamProject, string buildDefinition, string buildNumber, bool includeUnsuccessful)
         {
-            using (var agent = Util.Agents.CreateAgentFromId(this.ServerId))
+            var agent = this.ServerId != null ? BuildMasterAgent.Create((int)this.ServerId) : BuildMasterAgent.CreateLocalAgent();
+            using (agent)
             {
                 var methodExecuter = agent.GetService<IRemoteMethodExecuter>();
                 return methodExecuter.InvokeFunc(this.GetBuildInfoInternal, teamProject, buildDefinition, buildNumber, includeUnsuccessful);
@@ -64,7 +64,7 @@ namespace Inedo.BuildMasterExtensions.TFS
         }
         internal string[] GetBuildDefinitions(string teamProject)
         {
-            using (var agent = Util.Agents.CreateAgentFromId(this.ServerId))
+            using (var agent = this.CreateAgent())
             {
                 var methodExecuter = agent.GetService<IRemoteMethodExecuter>();
                 return methodExecuter.InvokeFunc(this.GetBuildDefinitionsInternal, teamProject);
@@ -72,7 +72,7 @@ namespace Inedo.BuildMasterExtensions.TFS
         }
         internal string[] GetTeamProjects()
         {
-            using (var agent = Util.Agents.CreateAgentFromId(this.ServerId))
+            using (var agent = this.CreateAgent())
             {
                 var methodExecuter = agent.GetService<IRemoteMethodExecuter>();
                 return methodExecuter.InvokeFunc(this.GetTeamProjectsInternal);
@@ -80,11 +80,19 @@ namespace Inedo.BuildMasterExtensions.TFS
         }
         internal string TestConnection()
         {
-            using (var agent = Util.Agents.CreateAgentFromId(this.ServerId))
+            using (var agent = this.CreateAgent())
             {
                 var methodExecuter = agent.GetService<IRemoteMethodExecuter>();
                 return methodExecuter.InvokeFunc(this.TestConnectionInternal);
             }
+        }
+
+        private BuildMasterAgent CreateAgent()
+        {
+            if (this.ServerId == null)
+                return BuildMasterAgent.CreateLocalAgent();
+            else
+                return BuildMasterAgent.Create((int)this.ServerId);
         }
 
         private string TestConnectionInternal()

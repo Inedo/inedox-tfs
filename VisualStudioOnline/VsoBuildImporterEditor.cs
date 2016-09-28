@@ -29,13 +29,10 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
             {
                 var config = (TfsConfigurer)this.GetExtensionConfigurer();
 
-                var api = new TfsRestApi(config.BaseUrl, importer.TeamProject)
-                {
-                    UserName = config.UserName,
-                    Password = config.Password
-                };
+                var api = new TfsRestApi(config);
 
                 var tfsBuild = api.GetBuildsAsync(
+                    project: importer.TeamProject,
                     buildNumber: importer.TfsBuildNumber,
                     resultFilter: importer.IncludeUnsuccessful ? "" : "succeeded",
                     statusFilter: "completed",
