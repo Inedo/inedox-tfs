@@ -131,18 +131,18 @@ namespace Inedo.BuildMasterExtensions.TFS
             this.ThrowIfCanceledOrTimeoutExpired();
 
             this.LogDebug("Transferring file to artifact library...");
-            
+
             using (var stream = fileOps.OpenFile(zipPath, FileMode.Open, FileAccess.Read))
             {
                 Artifact.CreateArtifact(
-                    this.Context.ApplicationId,
-                    this.Context.ReleaseNumber,
-                    this.Context.BuildNumber,
-                    this.Context.DeployableId,
-                    this.Context.ExecutionId,
-                    artifactName,
-                    stream,
-                    true
+                    applicationId: this.Context.ApplicationId,
+                    releaseNumber: this.Context.ReleaseNumber,
+                    buildNumber: this.Context.BuildNumber,
+                    deployableId: this.Context.DeployableId,
+                    executionId: this.Context.ExecutionId,
+                    artifactName: artifactName,
+                    artifactData: stream,
+                    overwrite: true
                 );
             }
 
