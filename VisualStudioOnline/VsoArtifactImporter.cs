@@ -53,17 +53,17 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
                 await api.DownloadArtifactAsync(teamProject, build.id, artifactId.ArtifactName, tempFile).ConfigureAwait(false);
                 logger.LogInformation("Artifact file downloaded from VSO, importing into BuildMaster artifact library...");
 
-                using (var stream = FileEx.Open(tempFile, FileMode.Open, FileAccess.Read, FileShare.Read))
+                using (var stream = FileEx.Open(tempFile, FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.Asynchronous | FileOptions.SequentialScan))
                 {
                     await Artifact.CreateArtifactAsync(
-                        artifactId.ApplicationId,
-                        artifactId.ReleaseNumber,
-                        artifactId.BuildNumber,
-                        artifactId.DeployableId,
-                        null,
-                        artifactId.ArtifactName,
-                        stream,
-                        true
+                        applicationId: artifactId.ApplicationId,
+                        releaseNumber: artifactId.ReleaseNumber,
+                        buildNumber: artifactId.BuildNumber,
+                        deployableId: artifactId.DeployableId,
+                        executionId: null,
+                        artifactName: artifactId.ArtifactName,
+                        artifactData: stream,
+                        overwrite: true
                     ).ConfigureAwait(false);
                 }
 
