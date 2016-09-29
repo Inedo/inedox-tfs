@@ -213,6 +213,8 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
                         throw new InvalidOperationException("TFS server returned 401 Unauthorized - verify that the credentials used to connect are correct.");
                     if (httpResponse.StatusCode == HttpStatusCode.Forbidden)
                         throw new InvalidOperationException("TFS server returned 403 Forbidden - verify that the credentials used to connect are correct.");
+                    if (httpResponse.StatusCode == HttpStatusCode.NotFound)
+                        throw new InvalidOperationException("TFS server returned 404 Not Found - verify that the URL in the credentials and the feed name of the operation (if applicable) are correct.");
                 }
 
                 using (var responseStream = ex.Response.GetResponseStream())
