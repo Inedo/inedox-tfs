@@ -11,15 +11,11 @@ using Microsoft.TeamFoundation.VersionControl.Client;
 
 namespace Inedo.BuildMasterExtensions.TFS
 {
-    [SlimSerializable]
     internal sealed class TfsSourceControlContext : SourceControlContext
     {
         private static readonly Regex WorkspaceNameSanitizerRegex = new Regex("[" + Regex.Escape(@"""/:<>\|*?;") + "]", RegexOptions.Compiled);
         public const string EmptyPathString = "$/";
 
-        private TfsSourceControlContext()
-        {
-        }
         public TfsSourceControlContext(TfsSourceControlProvider provider, string sourcePath)
             : this(provider, sourcePath, null)
         {
