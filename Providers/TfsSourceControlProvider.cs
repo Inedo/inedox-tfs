@@ -75,32 +75,18 @@ namespace Inedo.BuildMasterExtensions.TFS
             }
         }
 
-        public override void GetLatest(string sourcePath, string targetPath)
-        {
-            this.Remote.InvokeAction(() =>
-            {
-                var context = (TfsSourceControlContext)this.CreateSourceControlContext(sourcePath);
-                this.GetLatest(context, targetPath);
-            });
-        }
-        private void GetLatest(TfsSourceControlContext context, string targetPath)
+        private void GetLatestInternal(TfsSourceControlContext context, string targetPath)
         {
             this.EnsureLocalWorkspaceInternal(context);
             this.UpdateLocalWorkspaceInternal(context);
             this.ExportFilesInternal(context, targetPath);
         }
+        public override void GetLatest(string sourcePath, string targetPath)
+            => this.Remote.InvokeAction(this.GetLatestInternal, (TfsSourceControlContext)this.CreateSourceControlContext(sourcePath), targetPath);
 
         public override string ToString() => "Provides functionality for getting files and browsing folders in TFS 2010-2015.";
 
-        public override DirectoryEntryInfo GetDirectoryEntryInfo(string sourcePath)
-        {
-            return this.Remote.InvokeFunc(() =>
-            {
-                var context = (TfsSourceControlContext)this.CreateSourceControlContext(sourcePath);
-                return this.GetDirectoryEntryInfo(context);
-            });
-        }
-        private DirectoryEntryInfo GetDirectoryEntryInfo(TfsSourceControlContext context)
+        private DirectoryEntryInfo GetDirectoryEntryInfoInternal(TfsSourceControlContext context)
         {
             using (var tfs = this.GetTeamProjectCollection())
             {
@@ -113,16 +99,11 @@ namespace Inedo.BuildMasterExtensions.TFS
             );
             }
         }
+        public override DirectoryEntryInfo GetDirectoryEntryInfo(string sourcePath)
+            => this.Remote.InvokeFunc(this.GetDirectoryEntryInfoInternal, (TfsSourceControlContext)this.CreateSourceControlContext(sourcePath));
 
-        public override byte[] GetFileContents(string filePath)
-        {
-            return this.Remote.InvokeFunc(() =>
-            {
-                var context = (TfsSourceControlContext)this.CreateSourceControlContext(filePath);
-                return this.GetFileContents(context);
-            });
-        }
-        private byte[] GetFileContents(TfsSourceControlContext context)
+
+        private byte[] GetFileContentsInternal(TfsSourceControlContext context)
         {
             var tempFile = Path.GetTempFileName();
             using (var tfs = this.GetTeamProjectCollection())
@@ -134,11 +115,10 @@ namespace Inedo.BuildMasterExtensions.TFS
                 return File.ReadAllBytes(tempFile);
             }
         }
+        public override byte[] GetFileContents(string filePath)
+            => this.Remote.InvokeFunc(this.GetFileContentsInternal, (TfsSourceControlContext)this.CreateSourceControlContext(filePath));
 
-        public override bool IsAvailable()
-        {
-            return this.Remote.InvokeFunc(IsAvailableInternal);            
-        }
+        public override bool IsAvailable() => this.Remote.InvokeFunc(IsAvailableInternal);
         private static bool IsAvailableInternal()
         {
             try
@@ -173,15 +153,7 @@ namespace Inedo.BuildMasterExtensions.TFS
             }
         }
 
-        public void ApplyLabel(string label, string sourcePath)
-        {
-            this.Remote.InvokeAction(() =>
-            {
-                var context = (TfsSourceControlContext)this.CreateSourceControlContext(sourcePath);
-                this.ApplyLabel(context, label);
-            });
-        }
-        private void ApplyLabel(TfsSourceControlContext context, string label)
+        private void ApplyLabelInternal(TfsSourceControlContext context, string label)
         {
             using (var tfs = this.GetTeamProjectCollection())
             {
@@ -191,30 +163,18 @@ namespace Inedo.BuildMasterExtensions.TFS
                 versionControlService.CreateLabel(versionControlLabel, new[] { new LabelItemSpec(new ItemSpec(context.SourcePath, RecursionType.Full), VersionSpec.Latest, false) }, LabelChildOption.Replace);
             }
         }
+        public void ApplyLabel(string label, string sourcePath)
+            => this.Remote.InvokeAction(this.ApplyLabelInternal, (TfsSourceControlContext)this.CreateSourceControlContext(sourcePath), label);
 
-        public void GetLabeled(string label, string sourcePath, string targetPath)
-        {
-            this.Remote.InvokeAction(() =>
-            {
-                var context = new TfsSourceControlContext(this, sourcePath, label);
-                this.GetLabeled(context, label, targetPath);
-            });
-        }
-        private void GetLabeled(TfsSourceControlContext context, string label, string targetDirectory)
+        private void GetLabeledInternal(TfsSourceControlContext context, string label, string targetDirectory)
         {
             this.EnsureLocalWorkspaceInternal(context);
             this.UpdateLocalWorkspaceInternal(context);
             this.ExportFilesInternal(context, targetDirectory);
         }
+        public void GetLabeled(string label, string sourcePath, string targetPath)
+            => this.Remote.InvokeAction(this.GetLabeledInternal, (TfsSourceControlContext)this.CreateSourceControlContext(sourcePath), label, targetPath);
 
-        public object GetCurrentRevision(string path)
-        {
-            return this.Remote.InvokeFunc(() =>
-            {
-                var context = (TfsSourceControlContext)this.CreateSourceControlContext(path);
-                return this.GetCurrentRevision(context);
-            });
-        }
         private object GetCurrentRevision(TfsSourceControlContext context)
         {
             using (var tfs = this.GetTeamProjectCollection())
@@ -230,6 +190,8 @@ namespace Inedo.BuildMasterExtensions.TFS
                 return itemSet.Items.Max(i => i.ChangesetId);
             }
         }
+        public object GetCurrentRevision(string path)
+            => this.Remote.InvokeFunc(this.GetCurrentRevision, (TfsSourceControlContext)this.CreateSourceControlContext(path));
 
         private TfsTeamProjectCollection GetTeamProjectCollection()
         {

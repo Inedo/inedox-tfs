@@ -14,7 +14,7 @@ namespace Inedo.BuildMasterExtensions.TFS
     internal sealed class TfsSourceControlContext : SourceControlContext
     {
         private static readonly Regex WorkspaceNameSanitizerRegex = new Regex("[" + Regex.Escape(@"""/:<>\|*?;") + "]", RegexOptions.Compiled);
-        private const string EmptyPathString = "$/";
+        public const string EmptyPathString = "$/";
 
         public TfsSourceControlContext(TfsSourceControlProvider provider, string sourcePath)
             : this(provider, sourcePath, null)
