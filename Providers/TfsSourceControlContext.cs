@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using Inedo.Agents;
 using Inedo.BuildMaster.Extensibility.Agents;
@@ -16,6 +17,9 @@ namespace Inedo.BuildMasterExtensions.TFS
         private static readonly Regex WorkspaceNameSanitizerRegex = new Regex("[" + Regex.Escape(@"""/:<>\|*?;") + "]", RegexOptions.Compiled);
         public const string EmptyPathString = "$/";
 
+        private TfsSourceControlContext()
+        {
+        }
         public TfsSourceControlContext(TfsSourceControlProvider provider, string sourcePath)
             : this(provider, sourcePath, null)
         {
@@ -91,5 +95,6 @@ namespace Inedo.BuildMasterExtensions.TFS
             else
                 return name;
         }
+
     }
 }
