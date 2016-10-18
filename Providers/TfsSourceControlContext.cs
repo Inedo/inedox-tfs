@@ -5,10 +5,12 @@ using Inedo.Agents;
 using Inedo.BuildMaster.Extensibility.Agents;
 using Inedo.BuildMaster.Extensibility.Providers.SourceControl;
 using Inedo.BuildMaster.Files;
+using Inedo.Serialization;
 using Microsoft.TeamFoundation.VersionControl.Client;
 
 namespace Inedo.BuildMasterExtensions.TFS
 {
+    [SlimSerializable]
     internal sealed class TfsSourceControlContext : SourceControlContext
     {
         private static readonly Regex WorkspaceNameSanitizerRegex = new Regex("[" + Regex.Escape(@"""/:<>\|*?;") + "]", RegexOptions.Compiled);
