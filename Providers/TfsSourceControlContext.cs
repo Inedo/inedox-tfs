@@ -16,11 +16,11 @@ namespace Inedo.BuildMasterExtensions.TFS
         private static readonly Regex WorkspaceNameSanitizerRegex = new Regex("[" + Regex.Escape(@"""/:<>\|*?;") + "]", RegexOptions.Compiled);
         public const string EmptyPathString = "$/";
 
-        public TfsSourceControlContext(TfsSourceControlProvider provider, string sourcePath)
-            : this(provider, sourcePath, null)
+        public TfsSourceControlContext(TfsSourceControlProvider provider, string sourcePath, string workspaceDiskPath)
+            : this(provider, sourcePath, null, workspaceDiskPath)
         {
         }
-        public TfsSourceControlContext(TfsSourceControlProvider provider, string sourcePath, string label)
+        public TfsSourceControlContext(TfsSourceControlProvider provider, string sourcePath, string label, string workspaceDiskPath)
         {
             this.Label = label;
 
@@ -32,12 +32,7 @@ namespace Inedo.BuildMasterExtensions.TFS
             this.SplitPath = SplitPathParts(this.SourcePath);
             this.LastSubDirectoryName = this.SplitPath.LastOrDefault() ?? string.Empty;
 
-            var tmpRepo = new SourceRepository() { RemoteUrl = BuildAbsoluteDiskPath(provider.BaseUrl, this.SplitPath) };
-
-            if (string.IsNullOrEmpty(provider.CustomWorkspacePath))
-                this.WorkspaceDiskPath = tmpRepo.GetDiskPath(provider.Agent.GetService<IFileOperationsExecuter>());
-            else
-                this.WorkspaceDiskPath = provider.CustomWorkspacePath;
+            this.WorkspaceDiskPath = workspaceDiskPath;
 
             if (string.IsNullOrEmpty(provider.CustomWorkspaceName))
                 this.WorkspaceName = BuildWorkspaceName(this.WorkspaceDiskPath);
