@@ -75,7 +75,7 @@ namespace Inedo.BuildMasterExtensions.TFS
             // that is used to generate a workspace diskpath when a custom one isn't specified
 
             // var tmpRepo = new SourceRepository() { RemoteUrl = BuildAbsoluteDiskPath(provider.BaseUrl, this.SplitPath) };
-            var splitPathParts = sourcePath.Split(new[] { "/" }, StringSplitOptions.RemoveEmptyEntries).Where(p => p != "$");
+            var splitPathParts = (sourcePath ?? "").Split(new[] { "/" }, StringSplitOptions.RemoveEmptyEntries).Where(p => p != "$");
             var absoluteDiskPath = $@"{this.BaseUrl?.TrimEnd()}\{string.Join("\\", splitPathParts)}";
 
             // this.WorkspaceDiskPath = tmpRepo.GetDiskPath(provider.Agent.GetService<IFileOperationsExecuter>());
@@ -102,7 +102,7 @@ namespace Inedo.BuildMasterExtensions.TFS
         public override void GetLatest(string sourcePath, string targetPath) => this.Remote.InvokeAction(this.GetLatestInternal, sourcePath, targetPath, this.BuildWorkspaceDiskPath(sourcePath));
         private void GetLatestInternal(string sourcePath, string targetPath, string workspaceDiskPath)
         {
-            var context = (TfsSourceControlContext)this.CreateSourceControlContextInternal(sourcePath, workspaceDiskPath);
+            var context = new TfsSourceControlContext(this, sourcePath, workspaceDiskPath);
 
             this.EnsureLocalWorkspaceInternal(context);
             this.UpdateLocalWorkspaceInternal(context);
@@ -114,7 +114,7 @@ namespace Inedo.BuildMasterExtensions.TFS
         public override DirectoryEntryInfo GetDirectoryEntryInfo(string sourcePath) => this.Remote.InvokeFunc(this.GetDirectoryEntryInfoInternal, sourcePath, this.BuildWorkspaceDiskPath(sourcePath));
         private DirectoryEntryInfo GetDirectoryEntryInfoInternal(string sourcePath, string workspaceDiskPath)
         {
-            var context = (TfsSourceControlContext)this.CreateSourceControlContextInternal(sourcePath, workspaceDiskPath);
+            var context = new TfsSourceControlContext(this, sourcePath, workspaceDiskPath);
             using (var tfs = this.GetTeamProjectCollection())
             {
                 var sourceControl = tfs.GetService<VersionControlServer>();
@@ -130,7 +130,7 @@ namespace Inedo.BuildMasterExtensions.TFS
         public override byte[] GetFileContents(string filePath) => this.Remote.InvokeFunc(this.GetFileContentsInternal, filePath, this.BuildWorkspaceDiskPath(filePath));
         private byte[] GetFileContentsInternal(string filePath, string workspaceDiskPath)
         {
-            var context = (TfsSourceControlContext)this.CreateSourceControlContextInternal(filePath, workspaceDiskPath);
+            var context = new TfsSourceControlContext(this, filePath, workspaceDiskPath);
 
             var tempFile = Path.GetTempFileName();
             using (var tfs = this.GetTeamProjectCollection())
@@ -182,7 +182,7 @@ namespace Inedo.BuildMasterExtensions.TFS
         public void ApplyLabel(string label, string sourcePath) => this.Remote.InvokeAction(this.ApplyLabelInternal, sourcePath, label, this.BuildWorkspaceDiskPath(sourcePath));
         private void ApplyLabelInternal(string sourcePath, string label, string workspaceDiskPath)
         {
-            var context = (TfsSourceControlContext)this.CreateSourceControlContextInternal(sourcePath, workspaceDiskPath);
+            var context = new TfsSourceControlContext(this, sourcePath, label, workspaceDiskPath);
 
             using (var tfs = this.GetTeamProjectCollection())
             {
@@ -196,7 +196,7 @@ namespace Inedo.BuildMasterExtensions.TFS
         public void GetLabeled(string label, string sourcePath, string targetPath) => this.Remote.InvokeAction(this.GetLabeledInternal, sourcePath, label, targetPath, this.BuildWorkspaceDiskPath(sourcePath));
         private void GetLabeledInternal(string sourcePath, string label, string targetDirectory, string workspaceDiskPath)
         {
-            var context = (TfsSourceControlContext)this.CreateSourceControlContextInternal(sourcePath, workspaceDiskPath);
+            var context = new TfsSourceControlContext(this, sourcePath, label, workspaceDiskPath);
 
             this.EnsureLocalWorkspaceInternal(context);
             this.UpdateLocalWorkspaceInternal(context);
@@ -206,7 +206,7 @@ namespace Inedo.BuildMasterExtensions.TFS
         public object GetCurrentRevision(string path) => this.Remote.InvokeFunc(this.GetCurrentRevisionInternal, path, this.BuildWorkspaceDiskPath(path));
         private object GetCurrentRevisionInternal(string path, string workspaceDiskPath)
         {
-            var context = (TfsSourceControlContext)this.CreateSourceControlContextInternal(path, workspaceDiskPath);
+            var context = new TfsSourceControlContext(this, path, workspaceDiskPath);
 
             using (var tfs = this.GetTeamProjectCollection())
             {
@@ -296,9 +296,6 @@ namespace Inedo.BuildMasterExtensions.TFS
                 this.CopyNonTfsFiles(subDir.FullName, Path.Combine(targetDir, subDir.Name));
             }
         }
-
-        private SourceControlContext CreateSourceControlContextInternal(string contextData, string workspaceDiskPath)
-            => new TfsSourceControlContext(this, contextData, workspaceDiskPath);
 
         private void DeleteWorkspaceInternal(SourceControlContext context)
         {
