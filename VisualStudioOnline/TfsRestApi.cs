@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -15,15 +16,20 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
         public static QueryString Default = new QueryString();
 
         public string ApiVersion { get; set; } = "2.0";
+        public string Expand { get; set; }
+        
         public string BuildNumber { get; set; }
         public int Definition { get; set; }
         public int? Top { get; set; }
         public string ResultFilter { get; set; }
         public string StatusFilter { get; set; }
+        
+        public IEnumerable<int> Ids { get; set; }
+        public string Timeframe { get; set; }
 
         public override string ToString()
         {
-            var buffer = new StringBuilder(100);
+            var buffer = new StringBuilder(1024);
             buffer.Append('?');
             if (this.ApiVersion != null)
                 buffer.AppendFormat("api-version={0}&", this.ApiVersion);
@@ -37,6 +43,12 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
                 buffer.AppendFormat("resultFilter={0}&", this.ResultFilter);
             if (this.StatusFilter != null)
                 buffer.AppendFormat("statusFilter={0}&", this.StatusFilter);
+            if (this.Ids != null)
+                buffer.AppendFormat("ids={0}&", string.Join(",", this.Ids));
+            if (this.Timeframe != null)
+                buffer.AppendFormat("$timeframe={0}&", this.Timeframe);
+            if (this.Expand != null)
+                buffer.AppendFormat("$expand={0}&", this.Expand);
 
             return buffer.ToString().TrimEnd('?', '&');
         }
@@ -54,9 +66,111 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
             this.connectionInfo = connectionInfo;
         }
 
+        public async Task<GetWorkItemResponse> CreateWorkItemAsync(string project, string workItemType, string title, string description, string iterationPath)
+        {
+            var args = new List<object>(8);
+            args.Add(new
+            {
+                op = "add",
+                path = "/fields/title",
+                value = title
+            });
+            if (!string.IsNullOrEmpty(description))
+            {
+                args.Add(new
+                {
+                    op = "add",
+                    path = "/fields/description",
+                    value = description
+                });
+            }
+            if (!string.IsNullOrEmpty(iterationPath))
+            {
+                args.Add(new
+                {
+                    op = "add",
+                    path = "/fields/iterationpath",
+                    value = iterationPath
+                });
+            }
+
+            var response = await this.InvokeAsync<GetWorkItemResponse>(
+                "PATCH",
+                project,
+                $"wit/workitems/${Uri.EscapeDataString(workItemType)}",
+                QueryString.Default,
+                args.ToArray(),
+                contentType: "application/json-patch+json"
+            ).ConfigureAwait(false);
+
+            return response;
+        }
+
+        public async Task<GetWorkItemResponse> UpdateWorkItemAsync(string id, string title, string description, string iterationPath, string state)
+        {
+            var args = new List<object>(8);
+
+            if (!string.IsNullOrEmpty(title))
+                args.Add(new { op = "replace", path = "/fields/title", value = title });
+            if (!string.IsNullOrEmpty(description))
+                args.Add(new { op = "replace", path = "/fields/description", value = description });
+            if (!string.IsNullOrEmpty(iterationPath))
+                args.Add(new { op = "replace", path = "/fields/iterationpath", value = iterationPath });
+            if (!string.IsNullOrEmpty(state))
+                args.Add(new { op = "replace", path = "/fields/state", value = state });
+
+            var response = await this.InvokeAsync<GetWorkItemResponse>(
+                "PATCH",
+                null,
+                $"wit/workitems/{id}",
+                QueryString.Default,
+                args.ToArray(),
+                contentType: "application/json-patch+json"
+            ).ConfigureAwait(false);
+
+            return response;
+        }
+
+        public async Task<GetWorkItemResponse[]> GetWorkItemsAsync(string wiql)
+        {
+            var wiqlResponse = await this.InvokeAsync<GetWiqlResponse>(
+                "POST", 
+                null, 
+                "wit/wiql", 
+                new QueryString { ApiVersion = "1.0" }, 
+                new { query = wiql }
+            ).ConfigureAwait(false);
+
+            var workItemsResponse = await this.InvokeAsync<GetWorkItemsResponse>(
+                "GET",
+                null,
+                "wit/workitems",
+                new QueryString
+                {
+                    ApiVersion = "1.0",
+                    Ids = wiqlResponse.workItems.Select(w => w.id),
+                    Expand = "links"
+                }
+            ).ConfigureAwait(false);
+
+            return workItemsResponse.value;
+        }
+
+        public async Task<GetIterationResponse[]> GetIterationsAsync(string project)
+        {
+            var response = await this.InvokeAsync<GetIterationsResponse>("GET", project, "work/teamsettings/iterations", new QueryString { Timeframe = "current" }).ConfigureAwait(false);
+            return response.value;
+        }
+
+        public async Task<GetWorkItemTypeResponse[]> GetWorkItemTypesAsync(string project)
+        {
+            var response = await this.InvokeAsync<GetWorkItemTypesResponse>("GET", project, "wit/workitemtypes", QueryString.Default).ConfigureAwait(false);
+            return response.value;
+        }
+
         public async Task<GetTeamProjectResponse[]> GetProjectsAsync()
         {
-            var response = await this.InvokeAsync<GetTeamProjectsResponse>("GET", null, "projects", QueryString.Default);
+            var response = await this.InvokeAsync<GetTeamProjectsResponse>("GET", null, "projects", QueryString.Default).ConfigureAwait(false);
             return response.value;
         }
 
@@ -166,7 +280,7 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
             }
         }
 
-        private async Task<T> InvokeAsync<T>(string method, string project, string relativeUrl, QueryString query, object data = null)
+        private async Task<T> InvokeAsync<T>(string method, string project, string relativeUrl, QueryString query, object data = null, string contentType = "application/json")
         {
             string apiBaseUrl;
             if (string.IsNullOrEmpty(project))
@@ -180,7 +294,7 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
             var httpRequest = request as HttpWebRequest;
             if (httpRequest != null)
                 httpRequest.UserAgent = "BuildMasterTFSExtension/" + typeof(TfsRestApi).Assembly.GetName().Version.ToString();
-            request.ContentType = "application/json";
+            request.ContentType = contentType;
             request.Method = method;
             if (data != null)
             {
@@ -196,41 +310,24 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
             try
             {
                 using (var response = await request.GetResponseAsync().ConfigureAwait(false))
-                using (var responseStream = response.GetResponseStream())
-                using (var reader = new StreamReader(responseStream))
                 {
-                    var js = new JavaScriptSerializer();
-                    string s = reader.ReadToEnd();
-                    return js.Deserialize<T>(s);
+                    return DeserializeJson<T>(response);
                 }
             }
             catch (WebException ex) when (ex.Response != null)
             {
-                var httpResponse = ex.Response as HttpWebResponse;
-                if (httpResponse != null)
-                {
-                    if (httpResponse.StatusCode == HttpStatusCode.Unauthorized)
-                        throw new InvalidOperationException("TFS server returned 401 Unauthorized - verify that the credentials used to connect are correct.");
-                    if (httpResponse.StatusCode == HttpStatusCode.Forbidden)
-                        throw new InvalidOperationException("TFS server returned 403 Forbidden - verify that the credentials used to connect are correct.");
-                    if (httpResponse.StatusCode == HttpStatusCode.NotFound)
-                        throw new InvalidOperationException("TFS server returned 404 Not Found - verify that the URL in the credentials and the feed name of the operation (if applicable) are correct.");
-                }
+                throw TfsRestException.Wrap(ex, url);
+            }
+        }
 
-                using (var responseStream = ex.Response.GetResponseStream())
-                {
-                    string message;
-                    try
-                    {
-                        message = await new StreamReader(responseStream).ReadToEndAsync().ConfigureAwait(false);
-                    }
-                    catch
-                    {
-                        throw ex;
-                    }
-
-                    throw new Exception(message, ex);
-                }
+        internal static T DeserializeJson<T>(WebResponse response)
+        {
+            using (var responseStream = response.GetResponseStream())
+            using (var reader = new StreamReader(responseStream))
+            {
+                var js = new JavaScriptSerializer();
+                string s = reader.ReadToEnd();
+                return js.Deserialize<T>(s);
             }
         }
 
@@ -246,6 +343,49 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
                 if (request is HttpWebRequest)
                 {
                     request.Headers[HttpRequestHeader.Authorization] = "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes(fullName + ":" + this.connectionInfo.PasswordOrToken));
+                }
+            }
+        }
+    }
+
+    internal sealed class TfsRestException : Exception
+    {
+        public TfsRestException(int statusCode, string message, Exception inner)
+            : base(message, inner)
+        {
+            this.StatusCode = statusCode;
+        }
+
+        public int StatusCode { get; }
+
+        public string FullMessage => $"The server returned an error ({this.StatusCode}): {this.Message}";
+
+        public static TfsRestException Wrap(WebException ex, string url)
+        {
+            var response = (HttpWebResponse)ex.Response;
+            try
+            {
+                var error = TfsRestApi.DeserializeJson<Error>(response);
+                return new TfsRestException((int)response.StatusCode, error.message, ex);
+            }
+            catch
+            {
+                using (var responseStream = ex.Response.GetResponseStream())
+                {
+                    try
+                    {
+                        string errorText = new StreamReader(responseStream).ReadToEnd();
+                        return new TfsRestException((int)response.StatusCode, errorText, ex);
+                    }
+                    catch
+                    {
+                        if (response.StatusCode == HttpStatusCode.Unauthorized || response.StatusCode == HttpStatusCode.Forbidden)
+                            return new TfsRestException((int)response.StatusCode, "Verify that the credentials used to connect are correct.", ex);
+                        if (response.StatusCode == HttpStatusCode.NotFound)
+                            return new TfsRestException(404, $"Verify that the URL in the operation or credentials is correct (resolved to '{url}').", ex);
+
+                        throw ex;
+                    }
                 }
             }
         }

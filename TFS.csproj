@@ -44,28 +44,28 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BuildMaster.Web.Controls, Version=5.4.0.30, Culture=neutral, PublicKeyToken=112cfb71329714a6, processorArchitecture=MSIL">
-      <HintPath>packages\Inedo.BuildMaster.SDK.5.4.0\lib\net45\BuildMaster.Web.Controls.dll</HintPath>
+    <Reference Include="BuildMaster.Web.Controls, Version=5.6.0.7, Culture=neutral, PublicKeyToken=112cfb71329714a6, processorArchitecture=MSIL">
+      <HintPath>packages\Inedo.BuildMaster.SDK.5.6.0\lib\net45\BuildMaster.Web.Controls.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
     </Reference>
-    <Reference Include="BuildMasterCore, Version=5.4.0.30, Culture=neutral, PublicKeyToken=112cfb71329714a6, processorArchitecture=MSIL">
-      <HintPath>packages\Inedo.BuildMaster.SDK.5.4.0\lib\net45\BuildMasterCore.dll</HintPath>
+    <Reference Include="BuildMasterCore, Version=5.6.0.7, Culture=neutral, PublicKeyToken=112cfb71329714a6, processorArchitecture=MSIL">
+      <HintPath>packages\Inedo.BuildMaster.SDK.5.6.0\lib\net45\BuildMasterCore.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Inedo.Agents.Client, Version=454.1.0.0, Culture=neutral, PublicKeyToken=9de986a2f8db80fc, processorArchitecture=MSIL">
-      <HintPath>packages\Inedo.BuildMaster.SDK.5.4.0\lib\net45\Inedo.Agents.Client.dll</HintPath>
+    <Reference Include="Inedo.Agents.Client, Version=466.1.0.0, Culture=neutral, PublicKeyToken=9de986a2f8db80fc, processorArchitecture=MSIL">
+      <HintPath>packages\Inedo.BuildMaster.SDK.5.6.0\lib\net45\Inedo.Agents.Client.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Inedo.ExecutionEngine, Version=44.2.0.0, Culture=neutral, PublicKeyToken=68703f0e52007e75, processorArchitecture=MSIL">
-      <HintPath>packages\Inedo.BuildMaster.SDK.5.4.0\lib\net45\Inedo.ExecutionEngine.dll</HintPath>
+    <Reference Include="Inedo.ExecutionEngine, Version=47.1.0.0, Culture=neutral, PublicKeyToken=68703f0e52007e75, processorArchitecture=MSIL">
+      <HintPath>packages\Inedo.BuildMaster.SDK.5.6.0\lib\net45\Inedo.ExecutionEngine.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
     </Reference>
-    <Reference Include="InedoLib, Version=454.1.0.0, Culture=neutral, PublicKeyToken=112cfb71329714a6, processorArchitecture=MSIL">
-      <HintPath>packages\Inedo.BuildMaster.SDK.5.4.0\lib\net45\InedoLib.dll</HintPath>
+    <Reference Include="InedoLib, Version=466.1.0.0, Culture=neutral, PublicKeyToken=112cfb71329714a6, processorArchitecture=MSIL">
+      <HintPath>packages\Inedo.BuildMaster.SDK.5.6.0\lib\net45\InedoLib.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
     </Reference>
@@ -118,12 +118,15 @@
     </Compile>
     <Compile Include="Actions\CreateTfsBuildOutputArtifactAction.cs" />
     <Compile Include="Credentials\TfsCredentials.cs" />
+    <Compile Include="IssueSources\TfsIssueSource.cs" />
     <Compile Include="IVsoConnectionInfo.cs" />
     <Compile Include="Legacy\ActionImporters\QueueVsoBuildImporter.cs" />
     <Compile Include="Legacy\ActionImporters\ImportVsoArtifactImporter.cs" />
     <Compile Include="ListVariableSources\TeamProjectNameVariableSource.cs" />
     <Compile Include="ListVariableSources\BuildDefinitionNameVariableSource.cs" />
     <Compile Include="ListVariableSources\TfsBuildNumberVariableSource.cs" />
+    <Compile Include="Operations\UpdateWorkItemOperation.cs" />
+    <Compile Include="Operations\CreateWorkItemOperation.cs" />
     <Compile Include="Operations\ImportVsoArtifactOperation.cs" />
     <Compile Include="Operations\QueueVsoBuildOperation.cs" />
     <Compile Include="Operations\TfsOperation.cs" />
@@ -140,6 +143,8 @@
     <Compile Include="SuggestionProviders\ArtifactNameSuggestionProvider.cs" />
     <Compile Include="SuggestionProviders\BuildNumberSuggestionProvider.cs" />
     <Compile Include="SuggestionProviders\BuildDefinitionNameSuggestionProvider.cs" />
+    <Compile Include="SuggestionProviders\WorkItemTypeSuggestionProvider.cs" />
+    <Compile Include="SuggestionProviders\IterationPathSuggestionProvider.cs" />
     <Compile Include="SuggestionProviders\TeamProjectNameSuggestionProvider.cs" />
     <Compile Include="TeamProjectPicker.cs" />
     <Compile Include="Providers\TfsCategory.cs" />
@@ -159,12 +164,17 @@
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="VisualStudioOnline\Model\Common.cs" />
+    <Compile Include="VisualStudioOnline\Model\Error.cs" />
     <Compile Include="VisualStudioOnline\Model\GetBuildArtifactsResponse.cs" />
     <Compile Include="VisualStudioOnline\Model\GetBuildDefinitionResponse.cs" />
     <Compile Include="VisualStudioOnline\Model\GetBuildDefinitionsResponse.cs" />
     <Compile Include="VisualStudioOnline\Model\GetBuildResponse.cs" />
     <Compile Include="VisualStudioOnline\Model\GetBuildsResponse.cs" />
+    <Compile Include="VisualStudioOnline\Model\GetIterationsResponse.cs" />
     <Compile Include="VisualStudioOnline\Model\GetTeamProjectsResponse.cs" />
+    <Compile Include="VisualStudioOnline\Model\GetWiqlResponse.cs" />
+    <Compile Include="VisualStudioOnline\Model\GetWorkItemsResponse.cs" />
+    <Compile Include="VisualStudioOnline\Model\GetWorkItemTypesResponse.cs" />
     <Compile Include="VisualStudioOnline\TfsRestApi.cs" />
     <Compile Include="VisualStudioOnline\ImportVsoArtifactAction.cs" />
     <Compile Include="VisualStudioOnline\ImportVsoArtifactActionEditor.cs">
@@ -174,6 +184,7 @@
     <Compile Include="VisualStudioOnline\QueueVsoBuildActionEditor.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
+    <Compile Include="VisualStudioOnline\TfsRestIssue.cs" />
     <Compile Include="VisualStudioOnline\VsoArtifactImporter.cs" />
     <Compile Include="VisualStudioOnline\VsoBuildImporter.cs" />
     <Compile Include="VisualStudioOnline\VsoBuildImporterEditor.cs">
@@ -216,9 +227,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>if exist $(SolutionDir) cmd /c "del $(SolutionDir)..\..\BuildMaster\ExtensionLib\$(TargetName).bmx"
-if exist $(SolutionDir) $(SolutionDir)..\zip -r $(SolutionDir)..\..\BuildMaster\ExtensionLib\$(TargetName).bmx *.*
-if exist $(SolutionDir) echo hdars &gt; $(SolutionDir)..\..\BuildMaster\BuildMasterSolution\Web\BuildMaster.Web.WebApplication\bin\hsirs</PostBuildEvent>
+    <PostBuildEvent>powershell -Command "if (Test-Path C:\Projects\BuildMaster\Extensions -PathType Container) { Compress-Archive -Path '$(TargetDir)*' -DestinationPath C:\Projects\BuildMaster\Extensions\$(TargetName).zip -Force; Move-Item C:\Projects\BuildMaster\Extensions\$(TargetName).zip -Destination C:\Projects\BuildMaster\Extensions\$(TargetName).bmx -Force }"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

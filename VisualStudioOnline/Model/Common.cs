@@ -20,22 +20,13 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline.Model
 
     public class _Links
     {
-        public Self self { get; set; }
-        public Web web { get; set; }
-        public Timeline timeline { get; set; }
+        public Href self { get; set; }
+        public Href web { get; set; }
+        public Href timeline { get; set; }
+        public Href html { get; set; }
     }
 
-    public class Self
-    {
-        public string href { get; set; }
-    }
-
-    public class Web
-    {
-        public string href { get; set; }
-    }
-
-    public class Timeline
+    public class Href
     {
         public string href { get; set; }
     }
