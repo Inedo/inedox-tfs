@@ -31,6 +31,7 @@ namespace Inedo.BuildMasterExtensions.TFS.IssueSources
         [DisplayName("Iteration path")]
         [SuggestibleValue(typeof(IterationPathSuggestionProvider))]
         public string IterationPath { get; set; }
+        [Persistent]
         [DisplayName("Custom WIQL")]
         [PlaceholderText("Use above fields")]
         [FieldEditMode(FieldEditMode.Multiline)]
