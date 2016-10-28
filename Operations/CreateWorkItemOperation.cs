@@ -58,7 +58,7 @@ Create-WorkItem(
         [ScriptAlias("TfsIssueId")]
         [DisplayName("Set issue ID to a variable")]
         [Description("The TFS issue ID can be output into a runtime variable.")]
-        [PlaceholderText("e.g. TfsIssueId")]
+        [PlaceholderText("e.g. $TfsIssueId")]
         public string TfsIssueId { get; set; }
 
         public override async Task ExecuteAsync(IOperationExecutionContext context)
@@ -68,7 +68,7 @@ Create-WorkItem(
             var client = new TfsRestApi(this);
             try
             {
-                var result = await client.CreateOrUpdateWorkItemAsync(this.TeamProject, this.Type, this.Title, this.Description, this.IterationPath).ConfigureAwait(false);
+                var result = await client.CreateWorkItemAsync(this.TeamProject, this.Type, this.Title, this.Description, this.IterationPath).ConfigureAwait(false);
 
                 this.LogDebug($"Work item (ID={result.id}) created.");
                 this.TfsIssueId = result.id.ToString();

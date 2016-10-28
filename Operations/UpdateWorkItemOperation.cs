@@ -35,20 +35,23 @@ Create-WorkItem(
         [DisplayName("Id")]
         [Description("The ID for issues may be stored as output variables of the Create-WorkItem operation.")]
         public string Id { get; set; }
-        [Required]
         [ScriptAlias("Title")]
         [DisplayName("Title")]
+        [PlaceholderText("Unchanged")]
         public string Title { get; set; }
         [ScriptAlias("Description")]
         [DisplayName("Description")]
+        [PlaceholderText("Unchanged")]
         [FieldEditMode(FieldEditMode.Multiline)]
         public string Description { get; set; }
         [ScriptAlias("IterationPath")]
         [DisplayName("Iteration path")]
+        [PlaceholderText("Unchanged")]
         [SuggestibleValue(typeof(IterationPathSuggestionProvider))]
         public string IterationPath { get; set; }
         [ScriptAlias("State")]
         [DisplayName("State")]
+        [PlaceholderText("Unchanged")]
         public string State { get; set; }
 
         public override async Task ExecuteAsync(IOperationExecutionContext context)

@@ -69,30 +69,11 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
         public async Task<GetWorkItemResponse> CreateWorkItemAsync(string project, string workItemType, string title, string description, string iterationPath)
         {
             var args = new List<object>(8);
-            args.Add(new
-            {
-                op = "add",
-                path = "/fields/title",
-                value = title
-            });
+            args.Add(new { op = "add", path = "/fields/System.Title", value = title });
             if (!string.IsNullOrEmpty(description))
-            {
-                args.Add(new
-                {
-                    op = "add",
-                    path = "/fields/description",
-                    value = description
-                });
-            }
+                args.Add(new { op = "add", path = "/fields/System.Description", value = description });
             if (!string.IsNullOrEmpty(iterationPath))
-            {
-                args.Add(new
-                {
-                    op = "add",
-                    path = "/fields/iterationpath",
-                    value = iterationPath
-                });
-            }
+                args.Add(new { op = "add", path = "/fields/System.IterationPath", value = iterationPath });
 
             var response = await this.InvokeAsync<GetWorkItemResponse>(
                 "PATCH",
@@ -110,14 +91,27 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
         {
             var args = new List<object>(8);
 
+            // have to use "remove" then "add" because "replace" errors out if a value is missing
             if (!string.IsNullOrEmpty(title))
-                args.Add(new { op = "replace", path = "/fields/title", value = title });
+            {
+                args.Add(new { op = "remove", path = "/fields/System.Title" });
+                args.Add(new { op = "add", path = "/fields/System.Title", value = title });
+            }
             if (!string.IsNullOrEmpty(description))
-                args.Add(new { op = "replace", path = "/fields/description", value = description });
+            {
+                args.Add(new { op = "remove", path = "/fields/System.Description" });
+                args.Add(new { op = "add", path = "/fields/System.Description", value = description });
+            }
             if (!string.IsNullOrEmpty(iterationPath))
-                args.Add(new { op = "replace", path = "/fields/iterationpath", value = iterationPath });
+            {
+                args.Add(new { op = "remove", path = "/fields/System.IterationPath" });
+                args.Add(new { op = "add", path = "/fields/System.IterationPath", value = iterationPath });
+            }
             if (!string.IsNullOrEmpty(state))
-                args.Add(new { op = "replace", path = "/fields/state", value = state });
+            {
+                args.Add(new { op = "remove", path = "/fields/System.State" });
+                args.Add(new { op = "add", path = "/fields/System.State", value = state });
+            }
 
             var response = await this.InvokeAsync<GetWorkItemResponse>(
                 "PATCH",
