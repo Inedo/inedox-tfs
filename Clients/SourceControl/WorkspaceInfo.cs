@@ -1,7 +1,7 @@
 ﻿using Inedo.Diagnostics;
 using Inedo.IO;
 
-namespace Inedo.BuildMasterExtensions.TFS.Clients
+namespace Inedo.BuildMasterExtensions.TFS.Clients.SourceControl
 {
     internal sealed class WorkspaceInfo
     {

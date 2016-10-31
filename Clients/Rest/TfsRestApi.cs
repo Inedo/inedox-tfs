@@ -9,7 +9,7 @@ using System.Web.Script.Serialization;
 using Inedo.BuildMasterExtensions.TFS.VisualStudioOnline.Model;
 using Inedo.IO;
 
-namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
+namespace Inedo.BuildMasterExtensions.TFS.Clients.Rest
 {
     internal sealed class QueryString
     {

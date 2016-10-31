@@ -8,7 +8,7 @@ using Inedo.IO;
 using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.VersionControl.Client;
 
-namespace Inedo.BuildMasterExtensions.TFS.Clients
+namespace Inedo.BuildMasterExtensions.TFS.Clients.SourceControl
 {
     internal sealed class TfsSourceControlClient : IDisposable
     {

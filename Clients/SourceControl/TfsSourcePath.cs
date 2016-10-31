@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using Inedo.BuildMaster.Web.Controls;
 
-namespace Inedo.BuildMasterExtensions.TFS.Clients
+namespace Inedo.BuildMasterExtensions.TFS.Clients.SourceControl
 {
     internal sealed class TfsSourcePath : IPathInfo
     {

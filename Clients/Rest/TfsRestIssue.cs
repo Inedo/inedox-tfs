@@ -2,7 +2,7 @@
 using Inedo.BuildMaster.Extensibility.IssueTrackerConnections;
 using Inedo.BuildMasterExtensions.TFS.VisualStudioOnline.Model;
 
-namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
+namespace Inedo.BuildMasterExtensions.TFS.Clients.Rest
 {
     public sealed class TfsRestIssue : IIssueTrackerIssue
     {

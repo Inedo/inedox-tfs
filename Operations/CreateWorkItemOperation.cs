@@ -5,8 +5,8 @@ using Inedo.BuildMaster.Extensibility;
 using Inedo.BuildMaster.Extensibility.Operations;
 using Inedo.BuildMaster.Web;
 using Inedo.BuildMaster.Web.Controls;
+using Inedo.BuildMasterExtensions.TFS.Clients.Rest;
 using Inedo.BuildMasterExtensions.TFS.SuggestionProviders;
-using Inedo.BuildMasterExtensions.TFS.VisualStudioOnline;
 using Inedo.Diagnostics;
 using Inedo.Documentation;
 

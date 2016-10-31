@@ -117,13 +117,13 @@
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Legacy\Actions\CreateTfsBuildOutputArtifactAction.cs" />
-    <Compile Include="Clients\TfsSourcePath.cs" />
-    <Compile Include="Clients\TfsSourceControlClient.cs" />
-    <Compile Include="Clients\MappedWorkspace.cs" />
-    <Compile Include="Clients\WorkspaceInfo.cs" />
+    <Compile Include="Clients\SourceControl\TfsSourcePath.cs" />
+    <Compile Include="Clients\SourceControl\TfsSourceControlClient.cs" />
+    <Compile Include="Clients\SourceControl\MappedWorkspace.cs" />
+    <Compile Include="Clients\SourceControl\WorkspaceInfo.cs" />
     <Compile Include="Credentials\TfsCredentials.cs" />
     <Compile Include="IssueSources\TfsIssueSource.cs" />
-    <Compile Include="Legacy\IVsoConnectionInfo.cs" />
+    <Compile Include="Clients\Rest\IVsoConnectionInfo.cs" />
     <Compile Include="Legacy\ActionImporters\QueueVsoBuildImporter.cs" />
     <Compile Include="Legacy\ActionImporters\ImportVsoArtifactImporter.cs" />
     <Compile Include="ListVariableSources\TeamProjectNameVariableSource.cs" />
@@ -172,19 +172,19 @@
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="VariableFunctions\TfsDefaultServerNameVariableFunction.cs" />
-    <Compile Include="Legacy\VisualStudioOnline\Model\Common.cs" />
-    <Compile Include="Legacy\VisualStudioOnline\Model\Error.cs" />
-    <Compile Include="Legacy\VisualStudioOnline\Model\GetBuildArtifactsResponse.cs" />
-    <Compile Include="Legacy\VisualStudioOnline\Model\GetBuildDefinitionResponse.cs" />
-    <Compile Include="Legacy\VisualStudioOnline\Model\GetBuildDefinitionsResponse.cs" />
-    <Compile Include="Legacy\VisualStudioOnline\Model\GetBuildResponse.cs" />
-    <Compile Include="Legacy\VisualStudioOnline\Model\GetBuildsResponse.cs" />
-    <Compile Include="Legacy\VisualStudioOnline\Model\GetIterationsResponse.cs" />
-    <Compile Include="Legacy\VisualStudioOnline\Model\GetTeamProjectsResponse.cs" />
-    <Compile Include="Legacy\VisualStudioOnline\Model\GetWiqlResponse.cs" />
-    <Compile Include="Legacy\VisualStudioOnline\Model\GetWorkItemsResponse.cs" />
-    <Compile Include="Legacy\VisualStudioOnline\Model\GetWorkItemTypesResponse.cs" />
-    <Compile Include="Legacy\VisualStudioOnline\TfsRestApi.cs" />
+    <Compile Include="Clients\Rest\Model\Common.cs" />
+    <Compile Include="Clients\Rest\Model\Error.cs" />
+    <Compile Include="Clients\Rest\Model\GetBuildArtifactsResponse.cs" />
+    <Compile Include="Clients\Rest\Model\GetBuildDefinitionResponse.cs" />
+    <Compile Include="Clients\Rest\Model\GetBuildDefinitionsResponse.cs" />
+    <Compile Include="Clients\Rest\Model\GetBuildResponse.cs" />
+    <Compile Include="Clients\Rest\Model\GetBuildsResponse.cs" />
+    <Compile Include="Clients\Rest\Model\GetIterationsResponse.cs" />
+    <Compile Include="Clients\Rest\Model\GetTeamProjectsResponse.cs" />
+    <Compile Include="Clients\Rest\Model\GetWiqlResponse.cs" />
+    <Compile Include="Clients\Rest\Model\GetWorkItemsResponse.cs" />
+    <Compile Include="Clients\Rest\Model\GetWorkItemTypesResponse.cs" />
+    <Compile Include="Clients\Rest\TfsRestApi.cs" />
     <Compile Include="Legacy\VisualStudioOnline\ImportVsoArtifactAction.cs" />
     <Compile Include="Legacy\VisualStudioOnline\ImportVsoArtifactActionEditor.cs">
       <SubType>ASPXCodeBehind</SubType>
@@ -193,7 +193,7 @@
     <Compile Include="Legacy\VisualStudioOnline\QueueVsoBuildActionEditor.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Legacy\VisualStudioOnline\TfsRestIssue.cs" />
+    <Compile Include="Clients\Rest\TfsRestIssue.cs" />
     <Compile Include="Legacy\VisualStudioOnline\VsoArtifactImporter.cs" />
     <Compile Include="Legacy\VisualStudioOnline\VsoBuildImporter.cs" />
     <Compile Include="Legacy\VisualStudioOnline\VsoBuildImporterEditor.cs">

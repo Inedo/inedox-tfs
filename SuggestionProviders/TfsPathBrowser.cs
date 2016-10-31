@@ -9,6 +9,7 @@ using Inedo.BuildMaster.Extensibility.Credentials;
 using Inedo.BuildMaster.Web.Controls;
 using Inedo.BuildMaster.Web.Controls.Plans.ArgumentEditors;
 using Inedo.BuildMasterExtensions.TFS.Clients;
+using Inedo.BuildMasterExtensions.TFS.Clients.SourceControl;
 using Inedo.BuildMasterExtensions.TFS.Credentials;
 using Inedo.Diagnostics;
 

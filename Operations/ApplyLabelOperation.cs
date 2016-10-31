@@ -5,7 +5,7 @@ using Inedo.BuildMaster;
 using Inedo.BuildMaster.Extensibility;
 using Inedo.BuildMaster.Extensibility.Operations;
 using Inedo.BuildMaster.Web.Controls;
-using Inedo.BuildMasterExtensions.TFS.Clients;
+using Inedo.BuildMasterExtensions.TFS.Clients.SourceControl;
 using Inedo.BuildMasterExtensions.TFS.SuggestionProviders;
 using Inedo.Diagnostics;
 using Inedo.Documentation;
