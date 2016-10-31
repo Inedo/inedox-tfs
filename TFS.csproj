@@ -100,30 +100,30 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BuildDefinitionPicker.cs" />
-    <Compile Include="BuildImporter\TfsBuildImporter.cs" />
-    <Compile Include="BuildImporter\TfsBuildImporterEditor.cs">
+    <Compile Include="Legacy\BuildDefinitionPicker.cs" />
+    <Compile Include="Legacy\BuildImporter\TfsBuildImporter.cs" />
+    <Compile Include="Legacy\BuildImporter\TfsBuildImporterEditor.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="BuildImporter\TfsBuildImporterTemplate.cs" />
-    <Compile Include="Actions\CreateTfsBuildAction.cs" />
-    <Compile Include="Actions\CreateTfsBuildActionEditor.cs">
+    <Compile Include="Legacy\BuildImporter\TfsBuildImporterTemplate.cs" />
+    <Compile Include="Legacy\Actions\CreateTfsBuildAction.cs" />
+    <Compile Include="Legacy\Actions\CreateTfsBuildActionEditor.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Actions\CreateTfsBuildOutputArtifactActionEditor.cs">
+    <Compile Include="Legacy\Actions\CreateTfsBuildOutputArtifactActionEditor.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="BuildImporter\TfsBuildImporterTemplateEditor.cs">
+    <Compile Include="Legacy\BuildImporter\TfsBuildImporterTemplateEditor.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Actions\CreateTfsBuildOutputArtifactAction.cs" />
+    <Compile Include="Legacy\Actions\CreateTfsBuildOutputArtifactAction.cs" />
     <Compile Include="Clients\TfsSourcePath.cs" />
     <Compile Include="Clients\TfsSourceControlClient.cs" />
     <Compile Include="Clients\MappedWorkspace.cs" />
     <Compile Include="Clients\WorkspaceInfo.cs" />
     <Compile Include="Credentials\TfsCredentials.cs" />
     <Compile Include="IssueSources\TfsIssueSource.cs" />
-    <Compile Include="IVsoConnectionInfo.cs" />
+    <Compile Include="Legacy\IVsoConnectionInfo.cs" />
     <Compile Include="Legacy\ActionImporters\QueueVsoBuildImporter.cs" />
     <Compile Include="Legacy\ActionImporters\ImportVsoArtifactImporter.cs" />
     <Compile Include="ListVariableSources\TeamProjectNameVariableSource.cs" />
@@ -138,15 +138,15 @@
     <Compile Include="Operations\QueueVsoBuildOperation.cs" />
     <Compile Include="Operations\TfsOperation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Providers\RemoteTfs.cs">
+    <Compile Include="Legacy\Providers\RemoteTfs.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Providers\TfsIssueTrackingApplicationFilter.cs" />
-    <Compile Include="Providers\TfsIssueTrackingApplicationFilterEditor.cs">
+    <Compile Include="Legacy\Providers\TfsIssueTrackingApplicationFilter.cs" />
+    <Compile Include="Legacy\Providers\TfsIssueTrackingApplicationFilterEditor.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Providers\TfsIssueTrackingProvider.Legacy.cs" />
-    <Compile Include="Providers\TfsSourceControlContext.cs" />
+    <Compile Include="Legacy\Providers\TfsIssueTrackingProvider.Legacy.cs" />
+    <Compile Include="Legacy\Providers\TfsSourceControlContext.cs" />
     <Compile Include="SuggestionProviders\ArtifactNameSuggestionProvider.cs" />
     <Compile Include="SuggestionProviders\BuildNumberSuggestionProvider.cs" />
     <Compile Include="SuggestionProviders\BuildDefinitionNameSuggestionProvider.cs" />
@@ -154,53 +154,53 @@
     <Compile Include="SuggestionProviders\WorkItemTypeSuggestionProvider.cs" />
     <Compile Include="SuggestionProviders\IterationPathSuggestionProvider.cs" />
     <Compile Include="SuggestionProviders\TeamProjectNameSuggestionProvider.cs" />
-    <Compile Include="TeamProjectPicker.cs" />
-    <Compile Include="Providers\TfsCategory.cs" />
-    <Compile Include="Providers\TfsIssue.cs" />
-    <Compile Include="Providers\TfsIssueTrackingProvider.cs" />
-    <Compile Include="Providers\TfsIssueTrackingProviderEditor.cs">
+    <Compile Include="Legacy\TeamProjectPicker.cs" />
+    <Compile Include="Legacy\Providers\TfsCategory.cs" />
+    <Compile Include="Legacy\Providers\TfsIssue.cs" />
+    <Compile Include="Legacy\Providers\TfsIssueTrackingProvider.cs" />
+    <Compile Include="Legacy\Providers\TfsIssueTrackingProviderEditor.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Actions\TfsActionBase.cs" />
-    <Compile Include="TfsBuildInfo.cs" />
-    <Compile Include="TfsConfigurer.cs" />
-    <Compile Include="TfsConfigurerEditor.cs">
+    <Compile Include="Legacy\Actions\TfsActionBase.cs" />
+    <Compile Include="Legacy\TfsBuildInfo.cs" />
+    <Compile Include="Legacy\TfsConfigurer.cs" />
+    <Compile Include="Legacy\TfsConfigurerEditor.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Providers\TfsSourceControlProvider.cs" />
-    <Compile Include="Providers\TfsSourceControlProviderEditor.cs">
+    <Compile Include="Legacy\Providers\TfsSourceControlProvider.cs" />
+    <Compile Include="Legacy\Providers\TfsSourceControlProviderEditor.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="VariableFunctions\TfsDefaultServerNameVariableFunction.cs" />
-    <Compile Include="VisualStudioOnline\Model\Common.cs" />
-    <Compile Include="VisualStudioOnline\Model\Error.cs" />
-    <Compile Include="VisualStudioOnline\Model\GetBuildArtifactsResponse.cs" />
-    <Compile Include="VisualStudioOnline\Model\GetBuildDefinitionResponse.cs" />
-    <Compile Include="VisualStudioOnline\Model\GetBuildDefinitionsResponse.cs" />
-    <Compile Include="VisualStudioOnline\Model\GetBuildResponse.cs" />
-    <Compile Include="VisualStudioOnline\Model\GetBuildsResponse.cs" />
-    <Compile Include="VisualStudioOnline\Model\GetIterationsResponse.cs" />
-    <Compile Include="VisualStudioOnline\Model\GetTeamProjectsResponse.cs" />
-    <Compile Include="VisualStudioOnline\Model\GetWiqlResponse.cs" />
-    <Compile Include="VisualStudioOnline\Model\GetWorkItemsResponse.cs" />
-    <Compile Include="VisualStudioOnline\Model\GetWorkItemTypesResponse.cs" />
-    <Compile Include="VisualStudioOnline\TfsRestApi.cs" />
-    <Compile Include="VisualStudioOnline\ImportVsoArtifactAction.cs" />
-    <Compile Include="VisualStudioOnline\ImportVsoArtifactActionEditor.cs">
+    <Compile Include="Legacy\VisualStudioOnline\Model\Common.cs" />
+    <Compile Include="Legacy\VisualStudioOnline\Model\Error.cs" />
+    <Compile Include="Legacy\VisualStudioOnline\Model\GetBuildArtifactsResponse.cs" />
+    <Compile Include="Legacy\VisualStudioOnline\Model\GetBuildDefinitionResponse.cs" />
+    <Compile Include="Legacy\VisualStudioOnline\Model\GetBuildDefinitionsResponse.cs" />
+    <Compile Include="Legacy\VisualStudioOnline\Model\GetBuildResponse.cs" />
+    <Compile Include="Legacy\VisualStudioOnline\Model\GetBuildsResponse.cs" />
+    <Compile Include="Legacy\VisualStudioOnline\Model\GetIterationsResponse.cs" />
+    <Compile Include="Legacy\VisualStudioOnline\Model\GetTeamProjectsResponse.cs" />
+    <Compile Include="Legacy\VisualStudioOnline\Model\GetWiqlResponse.cs" />
+    <Compile Include="Legacy\VisualStudioOnline\Model\GetWorkItemsResponse.cs" />
+    <Compile Include="Legacy\VisualStudioOnline\Model\GetWorkItemTypesResponse.cs" />
+    <Compile Include="Legacy\VisualStudioOnline\TfsRestApi.cs" />
+    <Compile Include="Legacy\VisualStudioOnline\ImportVsoArtifactAction.cs" />
+    <Compile Include="Legacy\VisualStudioOnline\ImportVsoArtifactActionEditor.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="VisualStudioOnline\QueueVsoBuildAction.cs" />
-    <Compile Include="VisualStudioOnline\QueueVsoBuildActionEditor.cs">
+    <Compile Include="Legacy\VisualStudioOnline\QueueVsoBuildAction.cs" />
+    <Compile Include="Legacy\VisualStudioOnline\QueueVsoBuildActionEditor.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="VisualStudioOnline\TfsRestIssue.cs" />
-    <Compile Include="VisualStudioOnline\VsoArtifactImporter.cs" />
-    <Compile Include="VisualStudioOnline\VsoBuildImporter.cs" />
-    <Compile Include="VisualStudioOnline\VsoBuildImporterEditor.cs">
+    <Compile Include="Legacy\VisualStudioOnline\TfsRestIssue.cs" />
+    <Compile Include="Legacy\VisualStudioOnline\VsoArtifactImporter.cs" />
+    <Compile Include="Legacy\VisualStudioOnline\VsoBuildImporter.cs" />
+    <Compile Include="Legacy\VisualStudioOnline\VsoBuildImporterEditor.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="VisualStudioOnline\VsoBuildImporterTemplate.cs" />
-    <Compile Include="VisualStudioOnline\VsoBuildImporterTemplateEditor.cs">
+    <Compile Include="Legacy\VisualStudioOnline\VsoBuildImporterTemplate.cs" />
+    <Compile Include="Legacy\VisualStudioOnline\VsoBuildImporterTemplateEditor.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
   </ItemGroup>
@@ -229,7 +229,7 @@
       <Link>Microsoft.WITDataStore64.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <Content Include="TfsIssueTrackingApplicationFilterEditor.js">
+    <Content Include="Legacy\TfsIssueTrackingApplicationFilterEditor.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="packages.config" />
