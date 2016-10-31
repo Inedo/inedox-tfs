@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Inedo.BuildMaster.Artifacts;
+using Inedo.BuildMasterExtensions.TFS.Clients.Rest;
 using Inedo.Diagnostics;
 using Inedo.IO;
 

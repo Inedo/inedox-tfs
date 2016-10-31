@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using Inedo.BuildMaster;
 using Inedo.BuildMaster.Extensibility.BuildImporters;
 using Inedo.BuildMaster.Web.Controls.Extensions.BuildImporters;
+using Inedo.BuildMasterExtensions.TFS.Clients.Rest;
 using Inedo.Web.Controls;
 
 namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline

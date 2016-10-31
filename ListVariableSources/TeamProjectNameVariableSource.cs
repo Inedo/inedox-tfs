@@ -4,8 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Inedo.BuildMaster.Extensibility.Credentials;
 using Inedo.BuildMaster.Extensibility.ListVariableSources;
+using Inedo.BuildMasterExtensions.TFS.Clients.Rest;
 using Inedo.BuildMasterExtensions.TFS.Credentials;
-using Inedo.BuildMasterExtensions.TFS.VisualStudioOnline;
 using Inedo.Documentation;
 using Inedo.Serialization;
 

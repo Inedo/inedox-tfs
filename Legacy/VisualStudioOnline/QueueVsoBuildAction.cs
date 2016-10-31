@@ -7,6 +7,7 @@ using Inedo.BuildMaster;
 using Inedo.BuildMaster.Data;
 using Inedo.BuildMaster.Extensibility.Actions;
 using Inedo.BuildMaster.Web;
+using Inedo.BuildMasterExtensions.TFS.Clients.Rest;
 using Inedo.BuildMasterExtensions.TFS.Legacy.ActionImporters;
 using Inedo.Documentation;
 using Inedo.Serialization;
