@@ -22,7 +22,10 @@ namespace Inedo.BuildMasterExtensions.TFS.SuggestionProviders
 
             var api = new TfsRestApi(credentials);
             var types = await api.GetWorkItemTypesAsync(teamProject).ConfigureAwait(false);
-            return types.Select(i => i.name);
+
+            return from t in types
+                   orderby t.name
+                   select t.name;
         }
     }
 }

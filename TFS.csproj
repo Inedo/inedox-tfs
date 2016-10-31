@@ -117,6 +117,10 @@
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Actions\CreateTfsBuildOutputArtifactAction.cs" />
+    <Compile Include="Clients\TfsSourcePath.cs" />
+    <Compile Include="Clients\TfsSourceControlClient.cs" />
+    <Compile Include="Clients\MappedWorkspace.cs" />
+    <Compile Include="Clients\WorkspaceInfo.cs" />
     <Compile Include="Credentials\TfsCredentials.cs" />
     <Compile Include="IssueSources\TfsIssueSource.cs" />
     <Compile Include="IVsoConnectionInfo.cs" />
@@ -125,6 +129,9 @@
     <Compile Include="ListVariableSources\TeamProjectNameVariableSource.cs" />
     <Compile Include="ListVariableSources\BuildDefinitionNameVariableSource.cs" />
     <Compile Include="ListVariableSources\TfsBuildNumberVariableSource.cs" />
+    <Compile Include="Operations\ApplyLabelOperation.cs" />
+    <Compile Include="Operations\GetSourceOperation.cs" />
+    <Compile Include="Operations\RemoteTfsOperation.cs" />
     <Compile Include="Operations\UpdateWorkItemOperation.cs" />
     <Compile Include="Operations\CreateWorkItemOperation.cs" />
     <Compile Include="Operations\ImportVsoArtifactOperation.cs" />
@@ -143,6 +150,7 @@
     <Compile Include="SuggestionProviders\ArtifactNameSuggestionProvider.cs" />
     <Compile Include="SuggestionProviders\BuildNumberSuggestionProvider.cs" />
     <Compile Include="SuggestionProviders\BuildDefinitionNameSuggestionProvider.cs" />
+    <Compile Include="SuggestionProviders\TfsPathBrowser.cs" />
     <Compile Include="SuggestionProviders\WorkItemTypeSuggestionProvider.cs" />
     <Compile Include="SuggestionProviders\IterationPathSuggestionProvider.cs" />
     <Compile Include="SuggestionProviders\TeamProjectNameSuggestionProvider.cs" />
@@ -163,6 +171,7 @@
     <Compile Include="Providers\TfsSourceControlProviderEditor.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
+    <Compile Include="VariableFunctions\TfsDefaultServerNameVariableFunction.cs" />
     <Compile Include="VisualStudioOnline\Model\Common.cs" />
     <Compile Include="VisualStudioOnline\Model\Error.cs" />
     <Compile Include="VisualStudioOnline\Model\GetBuildArtifactsResponse.cs" />

@@ -1,13 +1,18 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
+using Inedo.Agents;
 using Inedo.BuildMaster.Extensibility;
+using Inedo.BuildMaster.Extensibility.Agents;
 using Inedo.BuildMaster.Extensibility.Credentials;
 using Inedo.BuildMaster.Extensibility.Operations;
 using Inedo.BuildMasterExtensions.TFS.Credentials;
 using Inedo.Documentation;
+using Inedo.IO;
 
 namespace Inedo.BuildMasterExtensions.TFS.Operations
 {
-    public abstract class TfsOperation : ExecuteOperation, IHasCredentials<TfsCredentials>, IVsoConnectionInfo
+    [Serializable]
+    public abstract class RemoteTfsOperation : RemoteExecuteOperation, IHasCredentials<TfsCredentials>
     {
         public abstract string CredentialName { get; set; }
 
@@ -38,5 +43,13 @@ namespace Inedo.BuildMasterExtensions.TFS.Operations
         [PlaceholderText("Use domain from credentials")]
         [MappedCredential(nameof(TfsCredentials.Domain))]
         public string Domain { get; set; }
+
+        protected string GetRootWorkspaceDiskPath()
+        {
+            using (var agent = BuildMasterAgent.CreateLocalAgent())
+            {
+                return PathEx.Combine(agent.GetService<IFileOperationsExecuter>().GetBaseWorkingDirectory(), "TfsWorkspaces");
+            }
+        }
     }
 }
