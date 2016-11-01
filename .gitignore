@@ -4,3 +4,8 @@ obj/*
 *.suo
 *.user
 /.vs/*
+/TFS/BuildMasterExtension/bin/Debug
+/TFS/BuildMasterExtension/obj/Debug
+/TFS/OtterExtension/bin/Debug
+/TFS/OtterExtension/obj/Debug
+/TFS/packages/Inedo.BuildMaster.SDK.5.6.0
