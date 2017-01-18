@@ -64,7 +64,7 @@ Tfs-GetSource(
             {
                 client.GetSource(
                     new TfsSourcePath(this.SourcePath),
-                    new WorkspaceInfo(this.WorkspaceName, this.WorkspaceDiskPath, this.GetRootWorkspaceDiskPath()), 
+                    new WorkspaceInfo(this.WorkspaceName, this.WorkspaceDiskPath, context.ResolvePath(@"~\TfsWorkspaces")), 
                     context.ResolvePath(this.DiskPath), 
                     this.Label
                 );
