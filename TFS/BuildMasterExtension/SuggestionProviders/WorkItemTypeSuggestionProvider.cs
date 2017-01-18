@@ -20,7 +20,7 @@ namespace Inedo.BuildMasterExtensions.TFS.SuggestionProviders
 
             var credentials = ResourceCredentials.Create<TfsCredentials>(credentialName);
 
-            var api = new TfsRestApi(credentials);
+            var api = new TfsRestApi(credentials, null);
             var types = await api.GetWorkItemTypesAsync(teamProject).ConfigureAwait(false);
 
             return from t in types

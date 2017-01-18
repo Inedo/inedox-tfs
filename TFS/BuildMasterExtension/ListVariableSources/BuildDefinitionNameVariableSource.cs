@@ -33,7 +33,7 @@ namespace Inedo.BuildMasterExtensions.TFS.ListVariableSources
         {
             var credentials = ResourceCredentials.Create<TfsCredentials>(this.CredentialName);
 
-            var api = new TfsRestApi(credentials);
+            var api = new TfsRestApi(credentials, null);
             var definitions = await api.GetBuildDefinitionsAsync(this.TeamProjectName).ConfigureAwait(false);
 
             return definitions.Select(d => d.name);

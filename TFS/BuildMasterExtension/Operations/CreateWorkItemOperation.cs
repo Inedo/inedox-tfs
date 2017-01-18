@@ -65,7 +65,7 @@ Create-WorkItem(
         {
             this.LogInformation("Creating work item in TFS...");
 
-            var client = new TfsRestApi(this);
+            var client = new TfsRestApi(this, this);
             try
             {
                 var result = await client.CreateWorkItemAsync(this.TeamProject, this.Type, this.Title, this.Description, this.IterationPath).ConfigureAwait(false);

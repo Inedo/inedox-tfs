@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,7 @@ using Inedo.BuildMaster.Web.Controls;
 using Inedo.BuildMasterExtensions.TFS.Clients.Rest;
 using Inedo.BuildMasterExtensions.TFS.Credentials;
 using Inedo.BuildMasterExtensions.TFS.SuggestionProviders;
+using Inedo.Diagnostics;
 using Inedo.Documentation;
 using Inedo.Serialization;
 
@@ -42,9 +44,11 @@ namespace Inedo.BuildMasterExtensions.TFS.IssueSources
 
         public override async Task<IEnumerable<IIssueTrackerIssue>> EnumerateIssuesAsync(IIssueSourceEnumerationContext context)
         {
+            context.Log.LogDebug("Enumerating TFS issue source...");
+
             var credentials = this.TryGetCredentials<TfsCredentials>();
-            var client = new TfsRestApi(credentials);
-            string wiql = this.GetWiql();
+            var client = new TfsRestApi(credentials, context.Log);
+            string wiql = this.GetWiql(context.Log);
 
             var workItems = await client.GetWorkItemsAsync(wiql).ConfigureAwait(false);
 
@@ -52,11 +56,16 @@ namespace Inedo.BuildMasterExtensions.TFS.IssueSources
                    select new TfsRestIssue(w);
         }
 
-        private string GetWiql()
+        private string GetWiql(ILogger log)
         {
             if (!string.IsNullOrEmpty(this.CustomWiql))
+            {
+                log.LogDebug("Using custom WIQL query to filter issues...");
                 return this.CustomWiql;
-            
+            }
+
+            log.LogDebug($"Constructing WIQL query for project '{this.TeamProject}' and iteration path '{this.IterationPath}'...");
+
             var buffer = new StringBuilder();
             buffer.Append("SELECT [System.Id] FROM WorkItems ");
 

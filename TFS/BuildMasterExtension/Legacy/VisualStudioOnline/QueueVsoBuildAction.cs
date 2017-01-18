@@ -66,7 +66,7 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
             if (string.IsNullOrEmpty(configurer.BaseUrl))
                 throw new InvalidOperationException("The base URL property of the TFS configurer must be set to queue a VS online build.");
 
-            var api = new TfsRestApi(configurer);
+            var api = new TfsRestApi(configurer, this);
 
             this.LogDebug("Finding VSO build definition...");
             var definition = api.GetBuildDefinitionsAsync(this.TeamProject).Result()

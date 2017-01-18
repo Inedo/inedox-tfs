@@ -30,7 +30,7 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
             {
                 var config = (TfsConfigurer)this.GetExtensionConfigurer();
 
-                var api = new TfsRestApi(config);
+                var api = new TfsRestApi(config, null);
 
                 var tfsBuild = api.GetBuildsAsync(
                     project: importer.TeamProject,

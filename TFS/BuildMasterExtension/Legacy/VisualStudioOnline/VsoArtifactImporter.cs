@@ -22,7 +22,7 @@ namespace Inedo.BuildMasterExtensions.TFS.VisualStudioOnline
             if (string.IsNullOrEmpty(teamProject))
                 throw new InvalidOperationException("A team project is required to import artifacts.");
 
-            var api = new TfsRestApi(connectionInfo);
+            var api = new TfsRestApi(connectionInfo, logger);
 
             logger.LogInformation($"Finding last successful build...");
 

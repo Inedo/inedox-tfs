@@ -58,7 +58,7 @@ Create-WorkItem(
         {
             this.LogInformation($"Updating work item (ID={this.Id}) in TFS...");
 
-            var client = new TfsRestApi(this);
+            var client = new TfsRestApi(this, this);
             try
             {
                 await client.UpdateWorkItemAsync(this.Id, this.Title, this.Description, this.IterationPath, this.State).ConfigureAwait(false);

@@ -54,7 +54,7 @@ namespace Inedo.BuildMasterExtensions.TFS.Operations
 
         public async override Task ExecuteAsync(IOperationExecutionContext context)
         {
-            var api = new TfsRestApi(this);
+            var api = new TfsRestApi(this, this);
 
             this.LogDebug("Finding VSO build definition...");
             var definitionResult = await api.GetBuildDefinitionsAsync(this.TeamProject);

@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
 using Inedo.BuildMasterExtensions.TFS.VisualStudioOnline.Model;
+using Inedo.Diagnostics;
 using Inedo.IO;
 
 namespace Inedo.BuildMasterExtensions.TFS.Clients.Rest
@@ -57,13 +58,15 @@ namespace Inedo.BuildMasterExtensions.TFS.Clients.Rest
     internal sealed class TfsRestApi
     {
         private IVsoConnectionInfo connectionInfo;
+        private ILogger log;
 
-        public TfsRestApi(IVsoConnectionInfo connectionInfo)
+        public TfsRestApi(IVsoConnectionInfo connectionInfo, ILogger log)
         {
             if (connectionInfo == null)
                 throw new ArgumentNullException(nameof(connectionInfo));
-
+            
             this.connectionInfo = connectionInfo;
+            this.log = log ?? Logger.Null;
         }
 
         public async Task<GetWorkItemResponse> CreateWorkItemAsync(string project, string workItemType, string title, string description, string iterationPath)
@@ -240,7 +243,9 @@ namespace Inedo.BuildMasterExtensions.TFS.Clients.Rest
             if (httpRequest != null)
                 httpRequest.UserAgent = "BuildMasterTFSExtension/" + typeof(TfsRestApi).Assembly.GetName().Version.ToString();
             request.Method = "GET";
-            
+
+            this.log.LogDebug($"Downloading TFS file from URL: {url}");
+
             this.SetCredentials(request);
 
             try
@@ -290,6 +295,9 @@ namespace Inedo.BuildMasterExtensions.TFS.Clients.Rest
                 httpRequest.UserAgent = "BuildMasterTFSExtension/" + typeof(TfsRestApi).Assembly.GetName().Version.ToString();
             request.ContentType = contentType;
             request.Method = method;
+
+            this.log.LogDebug($"Invoking TFS REST API {method} request ({contentType}) to URL: {url}");
+
             if (data != null)
             {
                 using (var requestStream = await request.GetRequestStreamAsync().ConfigureAwait(false))
@@ -330,7 +338,7 @@ namespace Inedo.BuildMasterExtensions.TFS.Clients.Rest
             if (!string.IsNullOrEmpty(this.connectionInfo.UserName))
             {
                 string fullName = string.IsNullOrEmpty(this.connectionInfo.Domain) ? this.connectionInfo.UserName : $"{this.connectionInfo.Domain}\\{this.connectionInfo.UserName}";
-
+                this.log.LogDebug($"Authenticating as '{fullName}'...");
                 request.Credentials = new NetworkCredential(fullName, this.connectionInfo.PasswordOrToken);
 
                 // local instances of TFS 2015 can return file:/// URLs which result in FileWebRequest instances that do not allow headers
@@ -338,6 +346,10 @@ namespace Inedo.BuildMasterExtensions.TFS.Clients.Rest
                 {
                     request.Headers[HttpRequestHeader.Authorization] = "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes(fullName + ":" + this.connectionInfo.PasswordOrToken));
                 }
+            }
+            else
+            {
+                this.log.LogDebug("No username specified, no authorization header will be sent.");
             }
         }
     }
