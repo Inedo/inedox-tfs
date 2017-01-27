@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 using Inedo.BuildMaster.Extensibility.Credentials;
 using Inedo.BuildMaster.Extensibility.ListVariableSources;
 using Inedo.BuildMaster.Web.Controls;
-using Inedo.BuildMasterExtensions.TFS.Clients.Rest;
 using Inedo.BuildMasterExtensions.TFS.Credentials;
-using Inedo.BuildMasterExtensions.TFS.SuggestionProviders;
 using Inedo.Documentation;
+using Inedo.Extensions.TFS.Clients.Rest;
+using Inedo.Extensions.TFS.SuggestionProviders;
 using Inedo.Serialization;
 
 namespace Inedo.BuildMasterExtensions.TFS.ListVariableSources

@@ -9,11 +9,12 @@ using Inedo.BuildMaster.Extensibility.IssueSources;
 using Inedo.BuildMaster.Extensibility.IssueTrackerConnections;
 using Inedo.BuildMaster.Web;
 using Inedo.BuildMaster.Web.Controls;
-using Inedo.BuildMasterExtensions.TFS.Clients.Rest;
 using Inedo.BuildMasterExtensions.TFS.Credentials;
 using Inedo.BuildMasterExtensions.TFS.SuggestionProviders;
 using Inedo.Diagnostics;
 using Inedo.Documentation;
+using Inedo.Extensions.TFS.Clients.Rest;
+using Inedo.Extensions.TFS.SuggestionProviders;
 using Inedo.Serialization;
 
 namespace Inedo.BuildMasterExtensions.TFS.IssueSources

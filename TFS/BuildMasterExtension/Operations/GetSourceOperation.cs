@@ -11,6 +11,7 @@ using Inedo.BuildMasterExtensions.TFS.Clients.SourceControl;
 using Inedo.BuildMasterExtensions.TFS.SuggestionProviders;
 using Inedo.Diagnostics;
 using Inedo.Documentation;
+using Inedo.Extensions.TFS.Operations;
 
 namespace Inedo.BuildMasterExtensions.TFS.Operations
 {

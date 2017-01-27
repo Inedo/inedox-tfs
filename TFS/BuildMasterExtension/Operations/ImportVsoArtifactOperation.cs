@@ -9,6 +9,9 @@ using Inedo.BuildMasterExtensions.TFS.SuggestionProviders;
 using Inedo.BuildMasterExtensions.TFS.VisualStudioOnline;
 using Inedo.Diagnostics;
 using Inedo.Documentation;
+using Inedo.Extensions.TFS;
+using Inedo.Extensions.TFS.Operations;
+using Inedo.Extensions.TFS.SuggestionProviders;
 
 namespace Inedo.BuildMasterExtensions.TFS.Operations
 {

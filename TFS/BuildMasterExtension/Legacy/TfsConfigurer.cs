@@ -4,6 +4,7 @@ using Inedo.Agents;
 using Inedo.BuildMaster.Extensibility.Agents;
 using Inedo.BuildMaster.Extensibility.Configurers.Extension;
 using Inedo.BuildMaster.Web;
+using Inedo.Extensions.TFS;
 using Inedo.Serialization;
 using Microsoft.TeamFoundation.Build.Client;
 using Microsoft.TeamFoundation.Server;

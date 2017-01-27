@@ -1,6 +1,7 @@
 ﻿using Inedo.BuildMaster.Extensibility.Operations;
 using Inedo.BuildMasterExtensions.TFS.Operations;
 using Inedo.BuildMasterExtensions.TFS.VisualStudioOnline;
+using Inedo.Extensions.TFS.Operations;
 
 namespace Inedo.BuildMasterExtensions.TFS.Legacy.ActionImporters
 {
