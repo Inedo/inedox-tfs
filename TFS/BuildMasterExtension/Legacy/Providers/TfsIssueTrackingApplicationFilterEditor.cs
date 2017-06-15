@@ -75,7 +75,7 @@ namespace Inedo.BuildMasterExtensions.TFS.Providers
         protected override void OnPreRender(EventArgs e)
         {
             this.IncludeClientResourceInPage(
-                new JavascriptResource("extension-resources/TFS/TfsIssueTrackingApplicationFilterEditor.js", InedoLibCR.select2)
+                new JavascriptResource("/extension-resources/TFS/Legacy/TfsIssueTrackingApplicationFilterEditor.js", InedoLibCR.select2)
             );
 
             base.OnPreRender(e);
