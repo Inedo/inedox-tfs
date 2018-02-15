@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2026
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildMasterExtension", "BuildMasterExtension\BuildMasterExtension.csproj", "{035CF878-0AE5-4249-A9DA-A9DF2EFE2B4D}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InedoExtension", "InedoExtension\InedoExtension.csproj", "{3881B967-4C6D-4268-861B-00757055B587}"
 EndProject
 Global

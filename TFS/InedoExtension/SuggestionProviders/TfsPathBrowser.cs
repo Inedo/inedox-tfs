@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Inedo.Extensibility;
-using Inedo.Extensibility.Agents;
 using Inedo.Extensibility.Credentials;
 using Inedo.Extensions.TFS.Clients.SourceControl;
 using Inedo.Extensions.TFS.Credentials;
@@ -46,26 +45,6 @@ namespace Inedo.Extensions.TFS.SuggestionProviders
             public string Password => AH.CoalesceString(this.config[nameof(this.Password)], AH.Unprotect(this.getCredentials.Value?.PasswordOrToken));
             public string Domain => AH.CoalesceString(this.config[nameof(this.Domain)], this.getCredentials.Value?.Domain);
             public int? ApplicationId => ((IBrowsablePathEditorContext)this.config).ProjectId;
-
-            public Agent CreateAgent()
-            {
-#warning FIX
-                throw new NotImplementedException();
-                //var vars = DB.Variables_GetVariablesAccessibleFromScope(
-                //    Variable_Name: "TfsDefaultServerName",
-                //    Application_Id: this.ApplicationId,
-                //    IncludeSystemVariables_Indicator: true
-                //);
-
-                //var variable = (from v in vars
-                //                orderby v.Application_Id != null ? 0 : 1
-                //                select v).FirstOrDefault();
-
-                //if (variable == null)
-                //    return BuildMasterAgent.CreateLocalAgent();
-                //else
-                //    return BuildMasterAgent.Create(InedoLib.UTF8Encoding.GetString(variable.Variable_Value));
-            }
 
             private TfsCredentials GetCredentials()
             {

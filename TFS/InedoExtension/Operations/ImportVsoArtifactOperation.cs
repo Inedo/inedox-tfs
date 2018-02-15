@@ -1,25 +1,23 @@
 ﻿using System.ComponentModel;
 using System.Threading.Tasks;
-using Inedo.BuildMaster;
-using Inedo.BuildMaster.Artifacts;
-using Inedo.BuildMaster.Extensibility;
-using Inedo.BuildMaster.Extensibility.Operations;
-using Inedo.BuildMaster.Web.Controls;
-using Inedo.BuildMasterExtensions.TFS.SuggestionProviders;
-using Inedo.BuildMasterExtensions.TFS.VisualStudioOnline;
 using Inedo.Diagnostics;
 using Inedo.Documentation;
+using Inedo.Extensibility;
+using Inedo.Extensibility.Operations;
 using Inedo.Extensions.TFS;
 using Inedo.Extensions.TFS.Operations;
 using Inedo.Extensions.TFS.SuggestionProviders;
+using Inedo.TFS.VisualStudioOnline;
+using Inedo.Web;
 
 namespace Inedo.BuildMasterExtensions.TFS.Operations
 {
     [DisplayName("Import Artifact from TFS2015 or VSO")]
     [Description("Downloads an artifact from the specified TFS server or Visual Studio Online and saves it to the artifact library.")]
     [ScriptAlias("Import-Artifact")]
-    [Tag(Tags.Artifacts)]
+    [Tag("artifacts")]
     [Tag("tfs")]
+    [AppliesTo(InedoProduct.BuildMaster)]
     public sealed class ImportVsoArtifactOperation : TfsOperation
     {
         [ScriptAlias("Credentials")]
@@ -28,25 +26,25 @@ namespace Inedo.BuildMasterExtensions.TFS.Operations
 
         [ScriptAlias("TeamProject")]
         [DisplayName("Team project")]
-        [SuggestibleValue(typeof(TeamProjectNameSuggestionProvider))]
+        [SuggestableValue(typeof(TeamProjectNameSuggestionProvider))]
         public string TeamProject { get; set; }
 
         [Required]
         [ScriptAlias("BuildDefinition")]
         [DisplayName("Build definition")]
-        [SuggestibleValue(typeof(BuildDefinitionNameSuggestionProvider))]
+        [SuggestableValue(typeof(BuildDefinitionNameSuggestionProvider))]
         public string BuildDefinition { get; set; }        
 
         [ScriptAlias("BuildNumber")]
         [DisplayName("Build number")]
         [PlaceholderText("latest")]
-        [SuggestibleValue(typeof(BuildNumberSuggestionProvider))]
+        [SuggestableValue(typeof(BuildNumberSuggestionProvider))]
         public string BuildNumber { get; set; }
 
         [Required]
         [ScriptAlias("ArtifactName")]
         [DisplayName("Artifact name")]
-        [SuggestibleValue(typeof(ArtifactNameSuggestionProvider))]
+        [SuggestableValue(typeof(ArtifactNameSuggestionProvider))]
         public string ArtifactName { get; set; }
 
         [Output]
@@ -62,11 +60,12 @@ namespace Inedo.BuildMasterExtensions.TFS.Operations
 
             this.TfsBuildNumber = await VsoArtifactImporter.DownloadAndImportAsync(
                 (IVsoConnectionInfo)this,
-                (ILogger)this,
+                this,
                 this.TeamProject,
                 this.BuildNumber,
                 this.BuildDefinition,
-                new ArtifactIdentifier((int)context.ApplicationId, context.ReleaseNumber, context.BuildNumber, context.DeployableId, this.ArtifactName)
+                context,
+                this.ArtifactName
             );
 
             this.LogInformation("Import complete.");

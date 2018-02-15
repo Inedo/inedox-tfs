@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Runtime.InteropServices;
 using System.Security;
 using Inedo.Documentation;
 using Inedo.Extensibility;
@@ -44,21 +43,6 @@ namespace Inedo.Extensions.TFS.Credentials
         }
 
         string IVsoConnectionInfo.TeamProjectCollectionUrl => this.TeamProjectCollection;
-
-        string IVsoConnectionInfo.PasswordOrToken
-        {
-            get
-            {
-                var ptr = Marshal.SecureStringToGlobalAllocUnicode(this.PasswordOrToken);
-                try
-                {
-                    return Marshal.PtrToStringUni(ptr);
-                }
-                finally
-                {
-                    Marshal.ZeroFreeGlobalAllocUnicode(ptr);
-                }
-            }
-        }
+        string IVsoConnectionInfo.PasswordOrToken => AH.Unprotect(this.PasswordOrToken);
     }
 }

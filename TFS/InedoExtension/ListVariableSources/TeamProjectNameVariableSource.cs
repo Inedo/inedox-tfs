@@ -2,14 +2,14 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using Inedo.BuildMaster.Extensibility.Credentials;
-using Inedo.BuildMaster.Extensibility.ListVariableSources;
-using Inedo.BuildMasterExtensions.TFS.Credentials;
 using Inedo.Documentation;
+using Inedo.Extensibility.Credentials;
+using Inedo.Extensibility.ListVariableSources;
 using Inedo.Extensions.TFS.Clients.Rest;
+using Inedo.Extensions.TFS.Credentials;
 using Inedo.Serialization;
 
-namespace Inedo.BuildMasterExtensions.TFS.ListVariableSources
+namespace Inedo.Extensions.TFS.ListVariableSources
 {
     [DisplayName("TFS Team Project")]
     [Description("Team projects from a specified TFS instance.")]
