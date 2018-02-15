@@ -1,12 +1,12 @@
-bmx-tfs
+TFS Extension
 =======
 
-TFS BuildMaster extension
+TFS integration for Inedo products.
 
 
 **License**
 
-Copyright (c) 2013 Inedo, LLC. All rights reserved.
+Copyright (c) 2018 Inedo, LLC. All rights reserved.
 
 http://inedo.com/buildmaster/extensions/TFS
 
