@@ -31,6 +31,10 @@ namespace Inedo.Extensions.TFS.IssueSources
         [SuggestableValue(typeof(IterationPathSuggestionProvider))]
         public string IterationPath { get; set; }
         [Persistent]
+        [DisplayName("Closed states")]
+        [Description("The state name used to determined if an issue is closed; when not specified, this defaults to Resolved,Closed,Done.")]
+        public string ClosedStates { get; set; } = "Resolved,Closed,Done";
+        [Persistent]
         [DisplayName("Custom WIQL")]
         [PlaceholderText("Use above fields")]
         [FieldEditMode(FieldEditMode.Multiline)]
@@ -48,9 +52,10 @@ namespace Inedo.Extensions.TFS.IssueSources
             string wiql = this.GetWiql(context.Log);
 
             var workItems = await client.GetWorkItemsAsync(wiql).ConfigureAwait(false);
+            var closedStates = this.ClosedStates.Split(',');
 
             return from w in workItems
-                   select new TfsRestIssue(w);
+                   select new TfsRestIssue(w, closedStates);
         }
 
         private string GetWiql(ILogSink log)
