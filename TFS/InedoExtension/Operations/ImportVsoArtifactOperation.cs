@@ -57,7 +57,7 @@ namespace Inedo.BuildMasterExtensions.TFS.Operations
         public async override Task ExecuteAsync(IOperationExecutionContext context)
         {
             this.LogInformation($"Importing {this.ArtifactName} artifact with build number \"{this.BuildNumber ?? "latest"}\" from TFS...");
-
+            
             this.TfsBuildNumber = await VsoArtifactImporter.DownloadAndImportAsync(
                 (IVsoConnectionInfo)this,
                 this,
