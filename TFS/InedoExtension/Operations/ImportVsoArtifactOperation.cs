@@ -12,8 +12,8 @@ using Inedo.Web;
 
 namespace Inedo.BuildMasterExtensions.TFS.Operations
 {
-    [DisplayName("Import Artifact from TFS2015 or VSO")]
-    [Description("Downloads an artifact from the specified TFS server or Visual Studio Online and saves it to the artifact library.")]
+    [DisplayName("Import Artifact from VSTS")]
+    [Description("Downloads an artifact from the specified Visual Studio Team Services server and saves it to the artifact library.")]
     [ScriptAlias("Import-Artifact")]
     [Tag("artifacts")]
     [Tag("tfs")]

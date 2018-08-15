@@ -12,8 +12,8 @@ using Inedo.Web;
 
 namespace Inedo.Extensions.TFS.Operations
 {
-    [DisplayName("Queue TFS 2015 / VSO Build")]
-    [Description("Queues a build in TFS 2015 or Visual Studio Online, optionally waiting for its completion.")]
+    [DisplayName("Queue VSTS Build")]
+    [Description("Queues a build in Visual Studio Team Services, optionally waiting for its completion.")]
     [ScriptAlias("Queue-Build")]
     [Tag("builds")]
     [Tag("tfs")]

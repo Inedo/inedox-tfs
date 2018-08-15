@@ -14,8 +14,8 @@ using Inedo.Web.Plans.ArgumentEditors;
 
 namespace Inedo.Extensions.TFS.Operations
 {
-    [DisplayName("Download Artifact from TFS2015 or VSO")]
-    [Description("Downloads an artifact from the specified TFS server or Visual Studio Online .")]
+    [DisplayName("Download Artifact from VSTS")]
+    [Description("Downloads an artifact from the specified Visual Studio Team Services server.")]
     [ScriptAlias("Download-Artifact")]
     [Tag("artifacts")]
     [Tag("tfs")]
