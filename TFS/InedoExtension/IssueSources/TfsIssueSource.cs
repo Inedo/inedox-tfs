@@ -17,6 +17,7 @@ namespace Inedo.Extensions.TFS.IssueSources
 {
     [DisplayName("TFS Issue Source")]
     [Description("Issue source for TFS.")]
+    [PersistFrom("Inedo.BuildMasterExtensions.TFS.IssueSources.TfsIssueSource,TFS")]
     public sealed class TfsIssueSource : IssueSource, IHasCredentials<TfsCredentials>
     {
         [Persistent]

@@ -1,6 +1,6 @@
 # inedox-tfs
 
-[![Build status](https://ci.appveyor.com/api/projects/status/cu3qmp04t1v2a8ke/branch/master?svg=true)](https://ci.appveyor.com/project/Inedo/inedox-tfs/branch/master)
+[![Build status](https://buildmaster.inedo.com/api/ci-badges/image?API_Key=badges&$ApplicationId=11)](https://buildmaster.inedo.com/api/ci-badges/link?API_Key=badges&$ApplicationId=11)
 
 Source Control and Issue Tracking integration for Team Foundation Server.
 
