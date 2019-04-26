@@ -34,6 +34,7 @@ namespace Inedo.Extensions.TFS.IssueSources
         [Persistent]
         [DisplayName("Closed states")]
         [Description("The state name used to determined if an issue is closed; when not specified, this defaults to Resolved,Closed,Done.")]
+        [DefaultValue("Resolved,Closed,Done")]
         public string ClosedStates { get; set; } = "Resolved,Closed,Done";
         [Persistent]
         [DisplayName("Custom WIQL")]
