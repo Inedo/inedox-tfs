@@ -1,8 +1,24 @@
-# inedox-tfs
+## Inedo TFS Extension
 
 [![Build status](https://buildmaster.inedo.com/api/ci-badges/image?API_Key=badges&$ApplicationId=11)](https://buildmaster.inedo.com/api/ci-badges/link?API_Key=badges&$ApplicationId=11)
 
-Source Control and Issue Tracking integration for Team Foundation Server.
+This extension enables BuildMaster and Otter to interact with Source Control and Issue Tracking integration in Team Foundation Services (TFS).
+
+## Extension Capabilities
+- Apply Label
+- Create / Update Work Item
+- Download / Import Artifact
+- Get Source
+- Import Artifact
+- Queue Build
+
+## Documentation
+Documentation for specific operations is available within BuildMaster or Otter once the desired extension is installed. Browse the Documentation page under the User Icon for more information.
+
+## Tutorials
+The following tutorial applies to BuildMaster v6.1 or later.
+- [Getting the latest code from TFS or Azure DevOps](https://inedo.com/support/documentation/buildmaster/builds/continuous-integration/source-control/azure-devops-tfs)
+
 
 ## Installation Instructions
 
