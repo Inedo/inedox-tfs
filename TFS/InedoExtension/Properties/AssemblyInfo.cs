@@ -14,3 +14,4 @@ using Inedo.Extensibility;
 [assembly: CLSCompliant(false)]
 
 [assembly: ScriptNamespace("TFS")]
+[assembly: AppliesTo(InedoProduct.BuildMaster)]
