@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Inedo.Web;
 
 namespace Inedo.Extensions.TFS.Clients.SourceControl
@@ -19,11 +20,21 @@ namespace Inedo.Extensions.TFS.Clients.SourceControl
             this.IsDirectory = isDirectory;
         }
 
+        public TfsSourcePath(string path, bool isDirectory, int changesetId, DateTime checkinDate)
+            : this(path, isDirectory)
+        {
+            this.ChangesetId = changesetId;
+            this.CheckinDate = checkinDate;
+        }
+
         public string AbsolutePath { get; }
         public bool? IsDirectory { get; }
 
         string IPathInfo.DisplayName => this.AbsolutePath.Split('/').LastOrDefault() ?? "";
         string IPathInfo.FullPath => this.AbsolutePath;
+
+        public int? ChangesetId { get; }
+        public DateTime? CheckinDate { get; }
 
         public override string ToString() => this.AbsolutePath;
     }

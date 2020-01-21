@@ -75,7 +75,7 @@ namespace Inedo.Extensions.TFS.Clients.SourceControl
             var result = from i in itemSet.Items
                          where i.ServerItem != path.AbsolutePath
                          where i.ItemType == ItemType.Folder
-                         select new TfsSourcePath(i.ServerItem, i.ItemType == ItemType.Folder);
+                         select new TfsSourcePath(i.ServerItem, i.ItemType == ItemType.Folder, i.ChangesetId, i.CheckinDate);
 
             return result;
         }
