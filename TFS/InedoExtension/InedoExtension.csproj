@@ -99,6 +99,7 @@
     <Compile Include="Clients\Rest\Model\GetBuildDefinitionsResponse.cs" />
     <Compile Include="Clients\Rest\Model\GetBuildResponse.cs" />
     <Compile Include="Clients\Rest\Model\GetBuildsResponse.cs" />
+    <Compile Include="Clients\Rest\Model\GetChangesetsResponse.cs" />
     <Compile Include="Clients\Rest\Model\GetIterationsResponse.cs" />
     <Compile Include="Clients\Rest\Model\GetTeamProjectsResponse.cs" />
     <Compile Include="Clients\Rest\Model\GetWiqlResponse.cs" />
@@ -127,6 +128,8 @@
     <Compile Include="Operations\TfsOperation.cs" />
     <Compile Include="Operations\UpdateWorkItemOperation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RepositoryMonitors\TfvcRepositoryCommit.cs" />
+    <Compile Include="RepositoryMonitors\TfvcRepositoryMonitor.cs" />
     <Compile Include="SuggestionProviders\ArtifactNameSuggestionProvider.cs" />
     <Compile Include="SuggestionProviders\BuildDefinitionNameSuggestionProvider.cs" />
     <Compile Include="SuggestionProviders\BuildNumberSuggestionProvider.cs" />
