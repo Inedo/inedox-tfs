@@ -23,6 +23,8 @@ namespace Inedo.Extensions.TFS.Clients.Rest
         public int? Top { get; set; }
         public string ResultFilter { get; set; }
         public string StatusFilter { get; set; }
+
+        public string SearchCriteriaItemPath { get; set; }
         
         public IEnumerable<int> Ids { get; set; }
         public string Timeframe { get; set; }
@@ -49,6 +51,8 @@ namespace Inedo.Extensions.TFS.Clients.Rest
                 buffer.AppendFormat("$timeframe={0}&", this.Timeframe);
             if (this.Expand != null)
                 buffer.AppendFormat("$expand={0}&", this.Expand);
+            if (this.SearchCriteriaItemPath != null)
+                buffer.AppendFormat("searchCriteria.itemPath={0}&", Uri.EscapeDataString(this.SearchCriteriaItemPath));
 
             return buffer.ToString().TrimEnd('?', '&');
         }
@@ -194,6 +198,14 @@ namespace Inedo.Extensions.TFS.Clients.Rest
             var definition = response.value.FirstOrDefault(d => string.Equals(d.name, name, StringComparison.OrdinalIgnoreCase));
 
             return definition;
+        }
+
+        public async Task<GetChangesetResponse[]> GetChangesetsAsync(string project, string path)
+        {
+            var query = new QueryString { Top = 1, SearchCriteriaItemPath = path };
+
+            var response = await this.InvokeAsync<GetChangesetsResponse>("GET", project, "tfvc/changesets", query).ConfigureAwait(false);
+            return response.value;
         }
 
         public async Task<GetBuildDefinitionResponse[]> GetBuildDefinitionsAsync(string project)
