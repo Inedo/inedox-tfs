@@ -8,7 +8,7 @@ namespace Inedo.Extensions.TFS.Clients.SourceControl
 {
     internal sealed class MappedWorkspace : IDisposable
     {
-        private ILogSink log;
+        private readonly ILogSink log;
         private bool disposed;
 
         private MappedWorkspace(Workspace workspace, string diskPath, bool deleteOnDispose, ILogSink log)

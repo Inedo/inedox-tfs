@@ -7,13 +7,15 @@ using Inedo.Diagnostics;
 using Inedo.IO;
 using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.VersionControl.Client;
+using Microsoft.VisualStudio.Services.Common;
+using WindowsCredential = Microsoft.VisualStudio.Services.Common.WindowsCredential;
 
 namespace Inedo.Extensions.TFS.Clients.SourceControl
 {
     internal sealed class TfsSourceControlClient : IDisposable
     {
-        private TfsTeamProjectCollection collection;
-        private ILogSink log;
+        private readonly TfsTeamProjectCollection collection;
+        private readonly ILogSink log;
 
         public TfsSourceControlClient(string projectCollectionUrl, string userName, string password, string domain, ILogSink log)
         {
@@ -25,11 +27,11 @@ namespace Inedo.Extensions.TFS.Clients.SourceControl
             }
             else
             {
-                TfsClientCredentials credentials;
+                VssCredentials credentials;
                 if (string.IsNullOrEmpty(domain))
-                    credentials = new TfsClientCredentials(new BasicAuthCredential(new NetworkCredential(userName, password)));
+                    credentials = new VssCredentials(new VssBasicCredential(userName, password));
                 else
-                    credentials = new TfsClientCredentials(new WindowsCredential(new NetworkCredential(userName, password, domain)));
+                    credentials = new VssCredentials(new WindowsCredential(new NetworkCredential(userName, password, domain)));
 
                 this.collection = new TfsTeamProjectCollection(uri, credentials);
             }
@@ -43,16 +45,14 @@ namespace Inedo.Extensions.TFS.Clients.SourceControl
 
             var versionControlServer = this.collection.GetService<VersionControlServer>();
 
-            using (var workspace = MappedWorkspace.Create(workspaceInfo, versionControlServer, sourcePath, this.log))
-            {
-                var versionSpec = label == null
-                    ? VersionSpec.Latest
-                    : VersionSpec.ParseSingleSpec("L" + label, versionControlServer.AuthorizedUser);
+            using var workspace = MappedWorkspace.Create(workspaceInfo, versionControlServer, sourcePath, this.log);
+            var versionSpec = label == null
+                ? VersionSpec.Latest
+                : VersionSpec.ParseSingleSpec("L" + label, versionControlServer.AuthorizedUser);
 
-                workspace.Workspace.Get(new GetRequest(new ItemSpec(sourcePath.AbsolutePath, RecursionType.Full), versionSpec), GetOptions.Overwrite);
+            workspace.Workspace.Get(new GetRequest(new ItemSpec(sourcePath.AbsolutePath, RecursionType.Full), versionSpec), GetOptions.Overwrite);
 
-                CopyNonTfsFiles(workspace.DiskPath, targetDirectory);
-            }
+            CopyNonTfsFiles(workspace.DiskPath, targetDirectory);
         }
 
         public void ApplyLabel(TfsSourcePath path, string label, string comment)

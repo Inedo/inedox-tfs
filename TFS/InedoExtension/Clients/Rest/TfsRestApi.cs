@@ -13,7 +13,7 @@ namespace Inedo.Extensions.TFS.Clients.Rest
 {
     internal sealed class QueryString
     {
-        public static QueryString Default = new QueryString();
+        public static QueryString Default = new();
 
         public string ApiVersion { get; set; } = "2.0";
         public string Expand { get; set; }
@@ -60,8 +60,8 @@ namespace Inedo.Extensions.TFS.Clients.Rest
 
     internal sealed class TfsRestApi
     {
-        private IVsoConnectionInfo connectionInfo;
-        private ILogSink log;
+        private readonly IVsoConnectionInfo connectionInfo;
+        private readonly ILogSink log;
 
         public TfsRestApi(IVsoConnectionInfo connectionInfo, ILogSink log)
         {
@@ -247,8 +247,7 @@ namespace Inedo.Extensions.TFS.Clients.Rest
         private async Task<Stream> DownloadStreamAsync(string url)
         {
             var request = WebRequest.Create(url);
-            var httpRequest = request as HttpWebRequest;
-            if (httpRequest != null)
+            if (request is HttpWebRequest httpRequest)
                 httpRequest.UserAgent = "BuildMasterTFSExtension/" + typeof(TfsRestApi).Assembly.GetName().Version.ToString();
             request.Method = "GET";
 
@@ -266,20 +265,18 @@ namespace Inedo.Extensions.TFS.Clients.Rest
                 if (ex.Response == null)
                     throw;
 
-                using (var responseStream = ex.Response.GetResponseStream())
+                using var responseStream = ex.Response.GetResponseStream();
+                string message;
+                try
                 {
-                    string message;
-                    try
-                    {
-                        message = new StreamReader(responseStream).ReadToEnd();
-                    }
-                    catch
-                    {
-                        throw ex;
-                    }
-
-                    throw new Exception(message, ex);
+                    message = new StreamReader(responseStream).ReadToEnd();
                 }
+                catch
+                {
+                    throw ex;
+                }
+
+                throw new Exception(message, ex);
             }
         }
 
@@ -303,11 +300,9 @@ namespace Inedo.Extensions.TFS.Clients.Rest
 
             if (data != null)
             {
-                using (var requestStream = await request.GetRequestStreamAsync().ConfigureAwait(false))
-                using (var writer = new StreamWriter(requestStream, InedoLib.UTF8Encoding))
-                {
-                    JsonSerializer.CreateDefault().Serialize(writer, data);
-                }
+                using var requestStream = await request.GetRequestStreamAsync().ConfigureAwait(false);
+                using var writer = new StreamWriter(requestStream, InedoLib.UTF8Encoding);
+                JsonSerializer.CreateDefault().Serialize(writer, data);
             }
 
             this.SetCredentials(request);
@@ -373,22 +368,20 @@ namespace Inedo.Extensions.TFS.Clients.Rest
             }
             catch
             {
-                using (var responseStream = ex.Response.GetResponseStream())
+                using var responseStream = ex.Response.GetResponseStream();
+                try
                 {
-                    try
-                    {
-                        string errorText = new StreamReader(responseStream).ReadToEnd();
-                        return new TfsRestException((int)response.StatusCode, errorText, ex);
-                    }
-                    catch
-                    {
-                        if (response.StatusCode == HttpStatusCode.Unauthorized || response.StatusCode == HttpStatusCode.Forbidden)
-                            return new TfsRestException((int)response.StatusCode, "Verify that the credentials used to connect are correct.", ex);
-                        if (response.StatusCode == HttpStatusCode.NotFound)
-                            return new TfsRestException(404, $"Verify that the URL in the operation or credentials is correct (resolved to '{url}').", ex);
+                    string errorText = new StreamReader(responseStream).ReadToEnd();
+                    return new TfsRestException((int)response.StatusCode, errorText, ex);
+                }
+                catch
+                {
+                    if (response.StatusCode == HttpStatusCode.Unauthorized || response.StatusCode == HttpStatusCode.Forbidden)
+                        return new TfsRestException((int)response.StatusCode, "Verify that the credentials used to connect are correct.", ex);
+                    if (response.StatusCode == HttpStatusCode.NotFound)
+                        return new TfsRestException(404, $"Verify that the URL in the operation or credentials is correct (resolved to '{url}').", ex);
 
-                        throw ex;
-                    }
+                    throw ex;
                 }
             }
         }
