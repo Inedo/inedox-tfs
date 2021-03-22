@@ -5,9 +5,9 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web.Script.Serialization;
 using Inedo.Diagnostics;
 using Inedo.Extensions.TFS.VisualStudioOnline.Model;
+using Newtonsoft.Json;
 
 namespace Inedo.Extensions.TFS.Clients.Rest
 {
@@ -294,8 +294,7 @@ namespace Inedo.Extensions.TFS.Clients.Rest
             string url = apiBaseUrl + relativeUrl + query.ToString();
 
             var request = WebRequest.Create(url);
-            var httpRequest = request as HttpWebRequest;
-            if (httpRequest != null)
+            if (request is HttpWebRequest httpRequest)
                 httpRequest.UserAgent = "BuildMasterTFSExtension/" + typeof(TfsRestApi).Assembly.GetName().Version.ToString();
             request.ContentType = contentType;
             request.Method = method;
@@ -307,7 +306,7 @@ namespace Inedo.Extensions.TFS.Clients.Rest
                 using (var requestStream = await request.GetRequestStreamAsync().ConfigureAwait(false))
                 using (var writer = new StreamWriter(requestStream, InedoLib.UTF8Encoding))
                 {
-                    writer.Write(new JavaScriptSerializer().Serialize(data));
+                    JsonSerializer.CreateDefault().Serialize(writer, data);
                 }
             }
 
@@ -315,10 +314,8 @@ namespace Inedo.Extensions.TFS.Clients.Rest
 
             try
             {
-                using (var response = await request.GetResponseAsync().ConfigureAwait(false))
-                {
-                    return DeserializeJson<T>(response);
-                }
+                using var response = await request.GetResponseAsync().ConfigureAwait(false);
+                return DeserializeJson<T>(response);
             }
             catch (WebException ex) when (ex.Response != null)
             {
@@ -328,13 +325,9 @@ namespace Inedo.Extensions.TFS.Clients.Rest
 
         internal static T DeserializeJson<T>(WebResponse response)
         {
-            using (var responseStream = response.GetResponseStream())
-            using (var reader = new StreamReader(responseStream))
-            {
-                var js = new JavaScriptSerializer();
-                string s = reader.ReadToEnd();
-                return js.Deserialize<T>(s);
-            }
+            using var responseStream = response.GetResponseStream();
+            using var reader = new JsonTextReader(new StreamReader(responseStream));
+            return JsonSerializer.CreateDefault().Deserialize<T>(reader);
         }
 
         private void SetCredentials(WebRequest request)
