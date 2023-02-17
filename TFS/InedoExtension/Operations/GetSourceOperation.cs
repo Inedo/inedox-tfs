@@ -1,14 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Text;
 using System.Threading.Tasks;
 using Inedo.Diagnostics;
 using Inedo.Documentation;
 using Inedo.Extensibility;
 using Inedo.Extensibility.Operations;
-using Inedo.Extensions.TFS.Clients.SourceControl;
-using Inedo.Extensions.TFS.SuggestionProviders;
-using Inedo.Web;
-using Inedo.Web.Plans.ArgumentEditors;
+using Inedo.IO;
 
 namespace Inedo.Extensions.TFS.Operations
 {
@@ -25,18 +24,16 @@ Tfs-GetSource(
 );
 ")]
     [Serializable]
-    public sealed class GetSourceOperation : RemoteTfsOperation
+    public sealed class GetSourceOperation : TfsOperation
     {
         [ScriptAlias("Credentials")]
         [DisplayName("Credentials")]
         public override string CredentialName { get; set; }
         [ScriptAlias("SourcePath")]
         [DisplayName("Source path")]
-        [BrowsablePath(typeof(TfsPathBrowser))]
         public string SourcePath { get; set; }
         [ScriptAlias("DiskPath")]
         [DisplayName("Export to directory")]
-        [FilePathEditor]
         [PlaceholderText("$WorkingDirectory")]
         public string DiskPath { get; set; }
         [ScriptAlias("Label")]
@@ -54,24 +51,24 @@ Tfs-GetSource(
         [PlaceholderText("BuildMaster managed")]
         public string WorkspaceDiskPath { get; set; }
 
-        protected override Task<object> RemoteExecuteAsync(IRemoteOperationExecutionContext context)
-        {
-            this.LogInformation($"Getting source from TFS {(string.IsNullOrEmpty(this.Label) ? "(latest)" : $"labeled '{this.Label}'")}...");
+//        protected override Task<object> RemoteExecuteAsync(IRemoteOperationExecutionContext context)
+//        {
+//            this.LogInformation($"Getting source from TFS {(string.IsNullOrEmpty(this.Label) ? "(latest)" : $"labeled '{this.Label}'")}...");
+//#warning TfsTiny get
+//            //using (var client = new TfsSourceControlClient(this.TeamProjectCollectionUrl, this.UserName, this.PasswordOrToken, this.Domain, null))
+//            //{
+//            //    client.GetSource(
+//            //        new TfsSourcePath(this.SourcePath),
+//            //        new WorkspaceInfo(this.WorkspaceName, this.WorkspaceDiskPath, context.ResolvePath(@"~\TfsWorkspaces")), 
+//            //        context.ResolvePath(this.DiskPath), 
+//            //        this.Label
+//            //    );
+//            //}
 
-            using (var client = new TfsSourceControlClient(this.TeamProjectCollectionUrl, this.UserName, this.PasswordOrToken, this.Domain, this))
-            {
-                client.GetSource(
-                    new TfsSourcePath(this.SourcePath),
-                    new WorkspaceInfo(this.WorkspaceName, this.WorkspaceDiskPath, context.ResolvePath(@"~\TfsWorkspaces")), 
-                    context.ResolvePath(this.DiskPath), 
-                    this.Label
-                );
-            }
+//            this.LogInformation("Get TFS source complete.");
 
-            this.LogInformation("Get TFS source complete.");
-
-            return Complete;
-        }
+//            return Complete;
+//        }
 
         protected override ExtendedRichDescription GetDescription(IOperationConfiguration config)
         {
@@ -79,6 +76,23 @@ Tfs-GetSource(
                new RichDescription("Get TFS Source"),
                new RichDescription("from ", new Hilite(config[nameof(this.SourcePath)]), " to ", new Hilite(config[nameof(this.DiskPath)]))
            );
+        }
+
+        public override async Task ExecuteAsync(IOperationExecutionContext context)
+        {
+            this.LogInformation($"Getting source from TFS {(string.IsNullOrEmpty(this.Label) ? "(latest)" : $"labeled '{this.Label}'")}...");
+
+            var args = new List<string>();
+            if (!string.IsNullOrWhiteSpace(this.SourcePath))
+                args.Add($"--source=\"{this.SourcePath}\"");
+            args.Add($"--workspace=\"{(!string.IsNullOrWhiteSpace(this.WorkspaceDiskPath) ? this.WorkspaceDiskPath : PathEx.Combine(context.ResolvePath(@"~\TfsWorkspaces"), this.WorkspaceName))}\"");
+            args.Add($"--target=\"{context.ResolvePath(this.DiskPath)}\"");
+            if(!string.IsNullOrWhiteSpace(this.Label))
+                args.Add($"--label=\"{this.Label}\"");
+            var result = await this.ExecuteCommandAsync(context, "get", args.ToArray());
+            if (result.ExitCode != 0)
+                this.LogError("Failed to get source");
+            this.LogInformation("Get TFS source complete.");
         }
     }
 }

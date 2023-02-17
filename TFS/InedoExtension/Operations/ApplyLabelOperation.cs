@@ -5,9 +5,6 @@ using Inedo.Diagnostics;
 using Inedo.Documentation;
 using Inedo.Extensibility;
 using Inedo.Extensibility.Operations;
-using Inedo.Extensions.TFS.Clients.SourceControl;
-using Inedo.Extensions.TFS.SuggestionProviders;
-using Inedo.Web;
 
 namespace Inedo.Extensions.TFS.Operations
 {
@@ -24,14 +21,13 @@ Tfs-ApplyLabel(
 );
 ")]
     [Serializable]
-    public sealed class ApplyLabelOperation : RemoteTfsOperation
+    public sealed class ApplyLabelOperation : TfsOperation
     {
         [ScriptAlias("Credentials")]
         [DisplayName("Credentials")]
         public override string CredentialName { get; set; }
         [ScriptAlias("SourcePath")]
         [DisplayName("Source path")]
-        [BrowsablePath(typeof(TfsPathBrowser))]
         public string SourcePath { get; set; }
         [Required]
         [ScriptAlias("Label")]
@@ -42,19 +38,24 @@ Tfs-ApplyLabel(
         [PlaceholderText("Label applied by BuildMaster")]
         public string Comment { get; set; }
 
-        protected override Task<object> RemoteExecuteAsync(IRemoteOperationExecutionContext context)
+        public override Task ExecuteAsync(IOperationExecutionContext context)
         {
-            this.LogInformation($"Apply label '{this.Label}' to '{this.SourcePath}'...");
-
-            using (var client = new TfsSourceControlClient(this.TeamProjectCollectionUrl, this.UserName, this.PasswordOrToken, this.Domain, this))
-            {
-                client.ApplyLabel(new TfsSourcePath(this.SourcePath), this.Label, AH.CoalesceString(this.Comment, "Label applied by BuildMaster"));
-            }
-
-            this.LogInformation("Label applied.");
-
-            return Complete;
+            throw new NotImplementedException();
         }
+
+        //        protected override Task<object> RemoteExecuteAsync(IRemoteOperationExecutionContext context)
+        //        {
+        //            this.LogInformation($"Apply label '{this.Label}' to '{this.SourcePath}'...");
+        //#warning TfsTiny label
+        //            //using (var client = new TfsSourceControlClient(this.TeamProjectCollectionUrl, this.UserName, this.PasswordOrToken, this.Domain, null))
+        //            //{
+        //            //    client.ApplyLabel(new TfsSourcePath(this.SourcePath), this.Label, AH.CoalesceString(this.Comment, "Label applied by BuildMaster"));
+        //            //}
+
+        //            this.LogInformation("Label applied.");
+
+        //            return Complete;
+        //        }
 
         protected override ExtendedRichDescription GetDescription(IOperationConfiguration config)
         {

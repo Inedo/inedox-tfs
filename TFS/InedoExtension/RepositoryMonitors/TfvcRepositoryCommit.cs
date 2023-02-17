@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using Inedo.ExecutionEngine;
-using Inedo.Extensibility.RepositoryMonitors;
+using Inedo.Documentation;
+using Inedo.Extensibility.ResourceMonitors;
 using Inedo.Serialization;
 
 namespace Inedo.Extensions.TFS.RepositoryMonitors
 {
     [Serializable]
-    internal sealed class TfvcRepositoryCommit : RepositoryCommit
+    public sealed class TfvcRepositoryCommit : ResourceMonitorState
     {
         [Persistent]
         public int? ChangeSetId { get; set; }
@@ -15,7 +14,7 @@ namespace Inedo.Extensions.TFS.RepositoryMonitors
         [Persistent]
         public string Error { get; set; }
 
-        public override bool Equals(RepositoryCommit other)
+        public override bool Equals(ResourceMonitorState other)
         {
             if (!(other is TfvcRepositoryCommit tfvcCommit))
                 return false;
@@ -24,16 +23,8 @@ namespace Inedo.Extensions.TFS.RepositoryMonitors
         }
         public override int GetHashCode() => this.ChangeSetId.GetHashCode();
 
-        public override string GetFriendlyDescription() => this.Error ?? this.ToString();
+        public override RichDescription GetDescription() => new(this.ChangeSetId?.ToString() ?? string.Empty);
 
         public override string ToString() => this.ChangeSetId.ToString();
-
-        public override IReadOnlyDictionary<RuntimeVariableName, RuntimeValue> GetRuntimeVariables()
-        {
-            return new Dictionary<RuntimeVariableName, RuntimeValue>()
-            {
-                [new RuntimeVariableName("ChangeSetId", RuntimeValueType.Scalar)] = this.ChangeSetId.ToString()
-            };
-        }
     }
 }

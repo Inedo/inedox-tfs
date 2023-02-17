@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net452</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <OutputType>Library</OutputType>
     <RootNamespace>Inedo.Extensions.TFS</RootNamespace>
     <AssemblyName>TFS</AssemblyName>
@@ -8,7 +8,12 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Inedo.SDK" Version="1.4.0" />
-    <PackageReference Include="Microsoft.TeamFoundationServer.ExtendedClient" Version="16.153.0" />
+    <PackageReference Include="Inedo.SDK" Version="2.2.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="TfsTiny\" />
+    <Content Include="TfsTiny\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 </Project>

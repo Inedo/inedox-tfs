@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Security;
+using System.Threading;
 using System.Threading.Tasks;
 using Inedo.Documentation;
-using Inedo.Extensibility.Credentials;
-using Inedo.Extensibility.RepositoryMonitors;
-using Inedo.Extensions.TFS.Clients.Rest;
+using Inedo.Extensibility.ResourceMonitors;
+using Inedo.Extensions.Credentials;
 using Inedo.Extensions.TFS.Credentials;
 using Inedo.Serialization;
 using Inedo.Web;
@@ -16,11 +13,8 @@ namespace Inedo.Extensions.TFS.RepositoryMonitors
 {
     [DisplayName("TFVC")]
     [Description("Monitors a TFVC repository for new check-ins.")]
-    public sealed class TfvcRepositoryMonitor : RepositoryMonitor
+    public sealed class TfvcRepositoryMonitor : ResourceMonitor<TfvcRepositoryCommit, TfsSecureResource>, IMissingPersistentPropertyHandler
     {
-        [Persistent]
-        [DisplayName("Credentials")]
-        public string CredentialName { get; set; }
 
         [Required]
         [Persistent]
@@ -29,62 +23,40 @@ namespace Inedo.Extensions.TFS.RepositoryMonitors
         public string ProjectName { get; set; }
 
         [Persistent]
-        [DisplayName("Paths")]
+        [DisplayName("Path")]
         [PlaceholderText("$/")]
-        [Description("A newline-separated list of paths (e.g. $/Path/To/Source) to monitor for changes. Leave empty to monitor from the root path $/")]
+        [Description("A TFVC path (e.g. $/Path/To/Source) to monitor for changes. Leave empty to monitor from the root path $/")]
         [FieldEditMode(FieldEditMode.Multiline)]
-        public string[] SourcePaths { get; set; }
+        public string SourcePath { get; set; }
 
-        [Persistent]
-        [Category("Connection")]
-        [DisplayName("Team project collection URL")]
-        [PlaceholderText("Use project collection URL from credentials")]
-        public string TeamProjectCollectionUrl { get; set; }
-
-        [Persistent]
-        [DisplayName("User name")]
-        [Category("Connection")]
-        [PlaceholderText("Use user name from credentials")]
-        public string UserName { get; set; }
-
-        [Persistent(Encrypted = true)]
-        [Category("Connection")]
-        [DisplayName("Password/token")]
-        [FieldEditMode(FieldEditMode.Password)]
-        [PlaceholderText("Use password from credentials")]
-        public SecureString PasswordOrToken { get; set; }
-
-        [Persistent]
-        [Category("Connection")]
-        [DisplayName("Domain")]
-        [PlaceholderText("Use domain from credentials")]
-        public string Domain { get; set; }
-
-        public override async Task<IReadOnlyDictionary<string, RepositoryCommit>> GetCurrentCommitsAsync(IRepositoryMonitorContext context)
+        public async override Task<IReadOnlyDictionary<string, ResourceMonitorState>> GetCurrentStatesAsync(IResourceMonitorContext context, CancellationToken cancellationToken)
         {
-            var conn = new ConnectionInfo(this.CredentialName, this.UserName, this.PasswordOrToken, this.TeamProjectCollectionUrl, this.Domain);
-            var client = new TfsRestApi(conn, null);
+            var dic = new Dictionary<string, ResourceMonitorState>();
+            var r = (TfsSecureResource)context.Resource;
+            var c = r.GetCredentials(context) as UsernamePasswordCredentials;
 
-            var dic = new Dictionary<string, RepositoryCommit>();
+#warning TfsTine list
+            //var conn = new ConnectionInfo(c.UserName, c.Password, r.TeamProjectCollection, null);
+            //var client = new TfsRestApi(conn, null);
 
-            var paths = (this.SourcePaths == null || this.SourcePaths.Length == 0) ? new[] { "$/" } : this.SourcePaths;
+            //var paths = (this.SourcePaths == null || this.SourcePaths.Length == 0) ? new[] { "$/" } : this.SourcePaths;
 
-            foreach (string path in paths) 
-            {
-                try
-                {
-                    var checkins = await client.GetChangesetsAsync(this.ProjectName, path);
+            //foreach (string path in paths)
+            //{
+            //    try
+            //    {
+            //        var checkins = await client.GetChangesetsAsync(this.ProjectName, path);
 
-                    dic.Add(path, new TfvcRepositoryCommit { ChangeSetId = checkins.FirstOrDefault()?.changesetId });
-                }
-                catch (Exception ex)
-                {
-                    string message = "An error occurred attempting to determine latest change set: " + ex.Message;
-                    dic.Add(path, new TfvcRepositoryCommit { Error = message });
-                }
-            }
+            //        dic.Add(path, new TfvcRepositoryCommit { ChangeSetId = checkins.FirstOrDefault()?.changesetId });
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        string message = "An error occurred attempting to determine latest change set: " + ex.Message;
+            //        dic.Add(path, new TfvcRepositoryCommit { Error = message });
+            //    }
+            //}
 
-            return dic;            
+            return dic;
         }
 
         public override RichDescription GetDescription()
@@ -95,22 +67,17 @@ namespace Inedo.Extensions.TFS.RepositoryMonitors
             );
         }
 
-        private sealed class ConnectionInfo : IVsoConnectionInfo
+        void IMissingPersistentPropertyHandler.OnDeserializedMissingProperties(IReadOnlyDictionary<string, string> missingProperties)
         {
-            public ConnectionInfo(string credentialName, string username, SecureString password, string projectCollectionUrl, string domain)
-            {
-                var creds = ResourceCredentials.TryCreate<TfsCredentials>(credentialName);
-
-                this.UserName = username ?? creds?.UserName;
-                this.PasswordOrToken = AH.Unprotect(password ?? creds?.PasswordOrToken);
-                this.Domain = domain ?? creds?.Domain;
-                this.TeamProjectCollectionUrl = projectCollectionUrl ?? creds?.TeamProjectCollection;
-            }
-
-            public string UserName { get; }
-            public string PasswordOrToken { get; }
-            public string Domain { get; }
-            public string TeamProjectCollectionUrl { get; }
+            //if (missingProperties.ContainsKey("SvnExePath"))
+            //    _ = missingProperties["SvnExePath"];
+            if (missingProperties.ContainsKey("CredentialName"))
+                _ = missingProperties["CredentialName"];
+            if (missingProperties.ContainsKey("TeamProjectCollectionUrl"))
+                _ = missingProperties["TeamProjectCollectionUrl"];
+            //
         }
+
+        
     }
 }
