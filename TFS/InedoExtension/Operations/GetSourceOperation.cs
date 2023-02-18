@@ -51,30 +51,16 @@ Tfs-GetSource(
         [PlaceholderText("BuildMaster managed")]
         public string WorkspaceDiskPath { get; set; }
 
-//        protected override Task<object> RemoteExecuteAsync(IRemoteOperationExecutionContext context)
-//        {
-//            this.LogInformation($"Getting source from TFS {(string.IsNullOrEmpty(this.Label) ? "(latest)" : $"labeled '{this.Label}'")}...");
-//#warning TfsTiny get
-//            //using (var client = new TfsSourceControlClient(this.TeamProjectCollectionUrl, this.UserName, this.PasswordOrToken, this.Domain, null))
-//            //{
-//            //    client.GetSource(
-//            //        new TfsSourcePath(this.SourcePath),
-//            //        new WorkspaceInfo(this.WorkspaceName, this.WorkspaceDiskPath, context.ResolvePath(@"~\TfsWorkspaces")), 
-//            //        context.ResolvePath(this.DiskPath), 
-//            //        this.Label
-//            //    );
-//            //}
-
-//            this.LogInformation("Get TFS source complete.");
-
-//            return Complete;
-//        }
-
         protected override ExtendedRichDescription GetDescription(IOperationConfiguration config)
         {
             return new ExtendedRichDescription(
                new RichDescription("Get TFS Source"),
-               new RichDescription("from ", new Hilite(config[nameof(this.SourcePath)]), " to ", new Hilite(config[nameof(this.DiskPath)]))
+               new RichDescription(
+                   "from ", 
+                    new Hilite(string.IsNullOrWhiteSpace(config[nameof(this.SourcePath)]) ? "$/" : config[nameof(this.SourcePath)]), 
+                    " to ", 
+                    new Hilite(string.IsNullOrWhiteSpace(config[nameof(this.DiskPath)]) ? "the Working Directory" : config[nameof(this.DiskPath)])
+                )
            );
         }
 

@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using Inedo.Diagnostics;
 using Inedo.Documentation;
 using Inedo.Extensibility;
 using Inedo.Extensibility.Operations;
+using Inedo.IO;
 
 namespace Inedo.Extensions.TFS.Operations
 {
@@ -38,24 +40,23 @@ Tfs-ApplyLabel(
         [PlaceholderText("Label applied by BuildMaster")]
         public string Comment { get; set; }
 
-        public override Task ExecuteAsync(IOperationExecutionContext context)
+        public override async Task ExecuteAsync(IOperationExecutionContext context)
         {
-            throw new NotImplementedException();
+            this.LogInformation($"Apply label '{this.Label}' to '{AH.NullIf(this.SourcePath, string.Empty) ?? "$/"}'...");
+            var args = new List<string>();
+            if (!string.IsNullOrWhiteSpace(this.SourcePath))
+                args.Add($"--source=\"{this.SourcePath}\"");
+            
+            if (!string.IsNullOrWhiteSpace(this.Label))
+                args.Add($"--label=\"{this.Label}\"");
+
+            args.Add($"--comment=\"{AH.CoalesceString(this.Comment, "Label applied by BuildMaster").Replace("\"", @"\""")}\"");
+
+            var result = await this.ExecuteCommandAsync(context, "label", args.ToArray());
+            if (result.ExitCode != 0)
+                this.LogError("Failed apply label");
+            this.LogInformation("Label applied.");
         }
-
-        //        protected override Task<object> RemoteExecuteAsync(IRemoteOperationExecutionContext context)
-        //        {
-        //            this.LogInformation($"Apply label '{this.Label}' to '{this.SourcePath}'...");
-        //#warning TfsTiny label
-        //            //using (var client = new TfsSourceControlClient(this.TeamProjectCollectionUrl, this.UserName, this.PasswordOrToken, this.Domain, null))
-        //            //{
-        //            //    client.ApplyLabel(new TfsSourcePath(this.SourcePath), this.Label, AH.CoalesceString(this.Comment, "Label applied by BuildMaster"));
-        //            //}
-
-        //            this.LogInformation("Label applied.");
-
-        //            return Complete;
-        //        }
 
         protected override ExtendedRichDescription GetDescription(IOperationConfiguration config)
         {

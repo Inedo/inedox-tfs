@@ -88,8 +88,28 @@ namespace Inedo.Extensions.TFS.Operations
                 var outputLines = new List<string>();
                 var errorLines = new List<string>();
 
-                process.OutputDataReceived += (s, e) => { if (e?.Data != null) outputLines.Add(e.Data); };
-                process.ErrorDataReceived += (s, e) => { if (e?.Data != null) errorLines.Add(e.Data); };
+                process.OutputDataReceived += (s, e) => { 
+                    if (e?.Data != null) { 
+                        outputLines.Add(e.Data);
+                        if (e.Data.StartsWith("INFO:"))
+                            this.LogInformation(e.Data);
+                        else if (e.Data.StartsWith("DEBUG:"))
+                            this.LogDebug(e.Data);
+                        else if (e.Data.StartsWith("WARN:"))
+                            this.LogWarning(e.Data);
+                        else if (e.Data.StartsWith("ERROR:"))
+                            this.LogError(e.Data);
+                        else
+                            this.LogInformation(e.Data);
+                    }
+                };
+                process.ErrorDataReceived += (s, e) => {
+                    if (e?.Data != null)
+                    {
+                        errorLines.Add(e.Data);
+                        this.LogError(e.Data);
+                    }
+                };
 
                 process.Start();
 
@@ -98,8 +118,6 @@ namespace Inedo.Extensions.TFS.Operations
                 this.LogDebug($"Finished executing TfsTiny.exe {command}");
                 return new TfsTinyExecutionResult(process.ExitCode ?? -1, outputLines, errorLines);
             }
-
-
         }
 
         public sealed class TfsTinyExecutionResult

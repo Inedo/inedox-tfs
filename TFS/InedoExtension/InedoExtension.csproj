@@ -10,10 +10,12 @@
   <ItemGroup>
     <PackageReference Include="Inedo.SDK" Version="2.2.0" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="TfsTiny\" />
-    <Content Include="TfsTiny\**\*">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
+  <Target Name="PostBuild" AfterTargets="PreBuildEvent">
+    <ItemGroup>
+      <Folder Include="TfsTiny\" />
+      <Content Include="TfsTiny\**\*">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+  </Target>
 </Project>

@@ -68,7 +68,7 @@ namespace Inedo.TFS
 
             var source = inputArgs.Named.TryGetValue("source", out var s) ? s : "$/";
             var target = inputArgs.Named.TryGetValue("target", out var t) ? t : "\\TfsOut";
-            var workspace = inputArgs.Named.TryGetValue("workspace", out var w) ? t : "\\TfsWorkSpace";
+            var workspace = inputArgs.Named.TryGetValue("workspace", out var w) ? w : "\\TfsWorkSpace";
             
 
             using (var client = new TfsSourceControlClient(
@@ -218,15 +218,27 @@ namespace Inedo.TFS
         {
             if (message.Level == MessageLevel.Error)
             {
-                Console.Error.WriteLine($"{message.Level}: {message.Message}");
+                Console.Error.WriteLine($"{getLogLevel(message.Level)}{message.Message}");
                 if (!string.IsNullOrWhiteSpace(message.Details))
-                    Console.Error.WriteLine($"{message.Level}: {message.Details}");
+                    Console.Error.WriteLine($"{getLogLevel(message.Level)}{message.Details}");
             }
             else
             {
-                Console.WriteLine($"{message.Level}: {message.Message}");
+                Console.WriteLine($"{getLogLevel(message.Level)}{message.Message}");
                 if (!string.IsNullOrWhiteSpace(message.Details))
-                    Console.WriteLine($"{message.Level}: {message.Details}");
+                    Console.WriteLine($"{getLogLevel(message.Level)}{message.Details}");
+            }
+
+            string getLogLevel(MessageLevel level)
+            {
+                return level switch
+                {
+                    MessageLevel.Debug => "DEBUG: ",
+                    MessageLevel.Information => "INFO: ",
+                    MessageLevel.Warning => "WARN: ",
+                    MessageLevel.Error => "ERROR: ",
+                    _ => string.Empty
+                };
             }
         }
     }
