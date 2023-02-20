@@ -20,7 +20,6 @@ namespace Inedo.Extensions.TFS.RepositoryMonitors
     [Description("Monitors a TFVC repository for new check-ins.")]
     public sealed class TfvcRepositoryMonitor : ResourceMonitor<TfvcRepositoryCommit, TfsSecureResource>
     {
-
         [Required]
         [Persistent]
         [DisplayName("Project")]
