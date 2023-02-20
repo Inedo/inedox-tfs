@@ -39,8 +39,9 @@ namespace Inedo.TFS
                     }
 
                     var name = trimmed.Substring(0, equalsIndex);
-                    var value = equalsIndex < trimmed.Length - 1 ? trimmed.Substring(equalsIndex + 1) : default;
-                    options.Add(name.ToString(), AH.NullIf(value.ToString().Trim(), string.Empty));
+                    var value = (equalsIndex < trimmed.Length - 1 ? trimmed.Substring(equalsIndex + 1) : default).Trim();
+
+                    options.Add(name.ToString(), string.IsNullOrWhiteSpace(value) ? null : value);
                 }
                 catch (ArgumentException)
                 {

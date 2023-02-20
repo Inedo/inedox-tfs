@@ -57,15 +57,15 @@ namespace Inedo.Extensions.TFS.Operations
             if (this.quoted)
                 return this.arg == null
                     ? '"' + this.val.Replace("\"", @"\""") + '"'
-                    : $"{arg}:{('"' + this.val.Replace("\"", @"\""") + '"')}";
+                    : $"{arg}={('"' + this.val.Replace("\"", @"\""") + '"')}";
             else
-                return this.arg == null ? this.val : $"{arg}:{val}";
+                return this.arg == null ? this.val : $"{arg}={val}";
         }
 
         public string ToSensitiveString()
         {
             if (this.sensitive)
-                return this.arg == null ? "(hidden)" : $"{arg}:\"(hidden)\"";
+                return this.arg == null ? "(hidden)" : $"{arg}=\"(hidden)\"";
             else
                 return this.ToString();
         }

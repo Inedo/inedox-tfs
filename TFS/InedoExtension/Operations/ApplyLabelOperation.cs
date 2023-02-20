@@ -62,7 +62,7 @@ Tfs-ApplyLabel(
         {
             return new ExtendedRichDescription(
                 new RichDescription("Apply Label ", new Hilite(config[nameof(this.Label)])),
-                new RichDescription("to ", new Hilite(config[nameof(this.SourcePath)]))
+                new RichDescription("to ", new Hilite(string.IsNullOrWhiteSpace(config[nameof(this.SourcePath)]) ? "$/" : config[nameof(this.SourcePath)]))
             );
         }
     }

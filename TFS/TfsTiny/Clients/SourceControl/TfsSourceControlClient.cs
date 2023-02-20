@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using Inedo.Diagnostics;
-using Inedo.IO;
 using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Microsoft.VisualStudio.Services.Common;
@@ -71,21 +70,21 @@ namespace Inedo.TFS.Clients.SourceControl
 
         private static void CopyNonTfsFiles(string sourceDir, string targetDir)
         {
-            if (!DirectoryEx.Exists(sourceDir))
+            if (!Directory.Exists(sourceDir))
                 return;
 
-            DirectoryEx.Create(targetDir);
+            Directory.CreateDirectory(targetDir);
 
             var sourceDirInfo = new DirectoryInfo(sourceDir);
 
             foreach (var file in sourceDirInfo.GetFiles())
             {
-                file.CopyTo(PathEx.Combine(targetDir, file.Name), true);
+                file.CopyTo(Path.Combine(targetDir, file.Name), true);
             }
 
             foreach (var subDir in sourceDirInfo.GetDirectories().Where(d => d.Name != "$tf"))
             {
-                CopyNonTfsFiles(subDir.FullName, PathEx.Combine(targetDir, subDir.Name));
+                CopyNonTfsFiles(subDir.FullName, Path.Combine(targetDir, subDir.Name));
             }
         }
     }

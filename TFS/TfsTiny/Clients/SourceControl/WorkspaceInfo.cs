@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using Inedo.Diagnostics;
-using Inedo.IO;
 
 namespace Inedo.TFS.Clients.SourceControl
 {
@@ -19,7 +18,7 @@ namespace Inedo.TFS.Clients.SourceControl
         public string ResolveWorkspaceDiskPath(ILogSink log)
         {
             log?.LogDebug("Workspace directory: " + this.WorkspacePath);
-            return string.IsNullOrWhiteSpace(this.Name) ? this.WorkspacePath : PathEx.Combine(this.WorkspacePath, this.Name);
+            return string.IsNullOrWhiteSpace(this.Name) ? this.WorkspacePath : Path.Combine(this.WorkspacePath, this.Name);
         }
     }
 }
