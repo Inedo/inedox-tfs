@@ -1,7 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using Inedo.TFS.TfsTiny;
+using Inedo.Diagnostics;
+using Inedo.IO;
 using Microsoft.TeamFoundation.VersionControl.Client;
 
 namespace Inedo.TFS.Clients.SourceControl
@@ -33,7 +34,7 @@ namespace Inedo.TFS.Clients.SourceControl
             if (this.DeleteOnDispose)
             {
                 this.log?.LogDebug("Deleting contents of: " + this.DiskPath);
-                Directory.Delete(this.DiskPath, true);
+                DirectoryEx.Delete(this.DiskPath);
 
                 try
                 {
@@ -80,7 +81,7 @@ namespace Inedo.TFS.Clients.SourceControl
             if (!workspace.IsLocalPathMapped(diskPath))
             {
                 log?.LogDebug($"Local path is not mapped, creating mapping to \"{diskPath}\"...");
-                Directory.Delete(diskPath);
+                DirectoryEx.Delete(diskPath);
                 workspace.Map(sourcePath.AbsolutePath, diskPath);
             }
 
@@ -102,7 +103,7 @@ namespace Inedo.TFS.Clients.SourceControl
 
             log?.LogDebug($"Creating disk path '{diskPath}'...");
 
-            Directory.CreateDirectory(diskPath);
+            DirectoryEx.Create(diskPath);
 
             log?.LogDebug("Mapping workspace to disk path...");
             workspace.Map(sourcePath.AbsolutePath, diskPath);

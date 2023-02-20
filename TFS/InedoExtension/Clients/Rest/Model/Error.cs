@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Inedo.TFS.VisualStudioOnline.Model
+namespace Inedo.Extensions.TFS.VisualStudioOnline.Model
 {
     public class Error
     {

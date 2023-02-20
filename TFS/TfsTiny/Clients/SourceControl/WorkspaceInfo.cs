@@ -1,34 +1,25 @@
 ﻿using System.IO;
-using Inedo.TFS.TfsTiny;
+using Inedo.Diagnostics;
+using Inedo.IO;
 
 namespace Inedo.TFS.Clients.SourceControl
 {
     public sealed class WorkspaceInfo
     {
-        public WorkspaceInfo(string name, string overriddenDiskPath, string rootWorkspacesDirectory)
+        public WorkspaceInfo(string workspacePath, string name)
         {
+            this.WorkspacePath = workspacePath;
             this.Name = name;
-            this.OverriddenDiskPath = overriddenDiskPath;
-            this.RootWorkspacesDirectory = rootWorkspacesDirectory;
         }
 
         public string Name { get; set; }
-        public string OverriddenDiskPath { get; }
-        public string RootWorkspacesDirectory { get; }
+
+        public string WorkspacePath { get; }
 
         public string ResolveWorkspaceDiskPath(ILogSink log)
         {
-            if (!string.IsNullOrEmpty(this.OverriddenDiskPath))
-            {
-                log?.LogDebug("Overridden workspace directory specified: " + this.OverriddenDiskPath);
-                return this.OverriddenDiskPath;
-            }
-            else
-            {
-                string diskPath = Path.Combine(this.RootWorkspacesDirectory, this.Name);
-                log?.LogDebug("Using workspace path: " + diskPath);
-                return diskPath;
-            }
+            log?.LogDebug("Workspace directory: " + this.WorkspacePath);
+            return string.IsNullOrWhiteSpace(this.Name) ? this.WorkspacePath : PathEx.Combine(this.WorkspacePath, this.Name);
         }
     }
 }

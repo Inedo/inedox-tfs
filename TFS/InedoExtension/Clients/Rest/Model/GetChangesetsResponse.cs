@@ -10,7 +10,7 @@
 
 using System;
 
-namespace Inedo.TFS.VisualStudioOnline.Model
+namespace Inedo.Extensions.TFS.VisualStudioOnline.Model
 {
     class GetChangesetsResponse
     {

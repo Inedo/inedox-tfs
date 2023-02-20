@@ -43,14 +43,14 @@ Tfs-ApplyLabel(
         public override async Task ExecuteAsync(IOperationExecutionContext context)
         {
             this.LogInformation($"Apply label '{this.Label}' to '{AH.NullIf(this.SourcePath, string.Empty) ?? "$/"}'...");
-            var args = new List<string>();
+            var args = new List<TfsArg>();
             if (!string.IsNullOrWhiteSpace(this.SourcePath))
-                args.Add($"--source=\"{this.SourcePath}\"");
+                args.Add(new ("--source", this.SourcePath, true, false));
             
             if (!string.IsNullOrWhiteSpace(this.Label))
-                args.Add($"--label=\"{this.Label}\"");
+                args.Add(new ("--label", this.Label, true, false));
 
-            args.Add($"--comment=\"{AH.CoalesceString(this.Comment, "Label applied by BuildMaster").Replace("\"", @"\""")}\"");
+            args.Add(new("--comment", AH.CoalesceString(this.Comment, "Label applied by BuildMaster"), true, false));
 
             var result = await this.ExecuteCommandAsync(context, "label", args.ToArray());
             if (result.ExitCode != 0)

@@ -1,15 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Remoting.Contexts;
-using System.Security;
 using System.Threading.Tasks;
-using Inedo.TFS.Clients.Rest;
 using Inedo.TFS.Clients.SourceControl;
 using Inedo.TFS.TfsTiny;
-using Inedo.TFS.VisualStudioOnline.Model;
-using Microsoft.TeamFoundation.VersionControl.Client;
-using Newtonsoft.Json;
 
 namespace Inedo.TFS
 {
@@ -30,7 +22,6 @@ namespace Inedo.TFS
                 {
                     "get" => GetSourceAsync(inputArgs),
                     "label" => LabelSourceAsync(inputArgs),
-                    "list" => ListChangesAsync(inputArgs),
                     "help" => WriteUsageAsync(),
                     _ => throw new ConsoleException($"Invalid command: {inputArgs.Positional[0]}")
                 });
@@ -46,19 +37,6 @@ namespace Inedo.TFS
 
         private static Task GetSourceAsync(InputArgs inputArgs)
         {
-            /*
-             * params needed:
-             * - url
-             * - username
-             * - password
-             * - domain
-             * - source
-             * - workspace
-             * - target
-             * - label
-             */
-
-
             if (!inputArgs.Named.TryGetValue("url", out var url))
                 throw new ConsoleException("Missing parameter --url");
             if (!inputArgs.Named.TryGetValue("username", out var username))
@@ -69,7 +47,6 @@ namespace Inedo.TFS
             var source = inputArgs.Named.TryGetValue("source", out var s) ? s : "$/";
             var target = inputArgs.Named.TryGetValue("target", out var t) ? t : "\\TfsOut";
             var workspace = inputArgs.Named.TryGetValue("workspace", out var w) ? w : "\\TfsWorkSpace";
-            
 
             using (var client = new TfsSourceControlClient(
                 url,
@@ -82,7 +59,7 @@ namespace Inedo.TFS
 
                 client.GetSource(
                     new TfsSourcePath(source),
-                    new Clients.SourceControl.WorkspaceInfo(null, workspace, null),
+                    new WorkspaceInfo(workspace, inputArgs.Named.TryGetValue("workspace-name")),
                     target ?? "\\",
                     inputArgs.Named.TryGetValue("label")
                 );
@@ -93,16 +70,6 @@ namespace Inedo.TFS
 
         private static Task LabelSourceAsync(InputArgs inputArgs)
         {
-            /*
-             * params needed:
-             * - url
-             * - username
-             * - password
-             * - domain
-             * - source
-             * - label
-             * - comment
-             */
             if (!inputArgs.Named.TryGetValue("url", out var url))
                 throw new ConsoleException("Missing parameter --url");
             if (!inputArgs.Named.TryGetValue("username", out var username))
@@ -130,116 +97,13 @@ namespace Inedo.TFS
             return Task.CompletedTask;
         }
 
-        private static async Task ListChangesAsync(InputArgs inputArgs)
-        {
-            /*
-             * params needed:
-             * - url
-             * - username
-             * - password
-             * - domain
-             * -source
-             * -project
-             */
-
-            if (!inputArgs.Named.TryGetValue("url", out var url))
-                throw new ConsoleException("Missing parameter --url");
-            if (!inputArgs.Named.TryGetValue("username", out var username))
-                throw new ConsoleException("Missing parameter --username");
-            if (!inputArgs.Named.TryGetValue("password", out var password))
-                throw new ConsoleException("Missing parameter --password");
-            if (!inputArgs.Named.TryGetValue("project", out var project))
-                throw new ConsoleException("Missing parameter --project");
-
-
-            var source = inputArgs.Named.TryGetValue("source", out var s) ? s : "$/";
-
-            var conn = new ConnectionInfo(username, password, url, inputArgs.Named.TryGetValue("domain"));
-            var client = new TfsRestApi(conn, ConsoleLogSink.Instance);
-            var dic = new Dictionary<string, TfsCommitStatus>();
-
-            try
-            {
-                var checkins = await client.GetChangesetsAsync(project, source);
-
-                dic.Add(source, new TfsCommitStatus { ChangeSetId = checkins.FirstOrDefault()?.changesetId });
-            }
-            catch (Exception ex)
-            {
-                string message = "An error occurred attempting to determine latest change set: " + ex.Message;
-                dic.Add(source, new TfsCommitStatus { Error = message });
-            }
-            Console.WriteLine($"OUTPUT: {JsonConvert.SerializeObject(dic)}");
-        }
-
         private static Task WriteUsageAsync()
         {
-#warning finish these
-            Console.WriteLine("Usage:get --url=<> --username=<> --password=<> [--domain=<>] [--source=<>] [--workspace=<>] [--target=<>] [--label=<>]");
+            Console.WriteLine("Usage: get --url=<URL of Azure DevOps instance> --username=<Azure DevOps user name > --password=<Azure DevOps Password or PAT> [--domain=<User's domain>] [--source=<path in TFVC repository>] [--workspace=<Workspace folder>] [--workspace-name=<Workspace name>] [--target=<location to save checked out files>] [--label=<Label to check out at>]");
+            Console.WriteLine("Usage: label --url=<URL of Azure DevOps instance> --username=<Azure DevOps user name > --password=<Azure DevOps Password or PAT> [--domain=<User's domain>] [--source=<path in TFVC repository>] [--label=<label name to apply>] [--comment=<comment message for label>]");
             return Task.CompletedTask;
         }
 
         
-    }
-
-    public class ConnectionInfo : IVsoConnectionInfo
-    {
-        public ConnectionInfo(string username, string password, string projectCollectionUrl, string domain)
-        {
-
-            this.UserName = username;
-            this.PasswordOrToken = password;
-            this.Domain = domain;
-            this.TeamProjectCollectionUrl = projectCollectionUrl;
-        }
-
-        public string UserName { get; }
-        public string PasswordOrToken { get; }
-        public string Domain { get; }
-        public string TeamProjectCollectionUrl { get; }
-    }
-
-    public class TfsCommitStatus
-    {
-        public int? ChangeSetId { get; set; }
-        public string Error { get; set; }
-    }
-
-    public class ConsoleLogSink : ILogSink
-    {
-        private ConsoleLogSink()
-        {
-
-        }
-
-        public static ConsoleLogSink Instance => new ConsoleLogSink();
-
-        public void Log(IMessage message)
-        {
-            if (message.Level == MessageLevel.Error)
-            {
-                Console.Error.WriteLine($"{getLogLevel(message.Level)}{message.Message}");
-                if (!string.IsNullOrWhiteSpace(message.Details))
-                    Console.Error.WriteLine($"{getLogLevel(message.Level)}{message.Details}");
-            }
-            else
-            {
-                Console.WriteLine($"{getLogLevel(message.Level)}{message.Message}");
-                if (!string.IsNullOrWhiteSpace(message.Details))
-                    Console.WriteLine($"{getLogLevel(message.Level)}{message.Details}");
-            }
-
-            string getLogLevel(MessageLevel level)
-            {
-                return level switch
-                {
-                    MessageLevel.Debug => "DEBUG: ",
-                    MessageLevel.Information => "INFO: ",
-                    MessageLevel.Warning => "WARN: ",
-                    MessageLevel.Error => "ERROR: ",
-                    _ => string.Empty
-                };
-            }
-        }
     }
 }

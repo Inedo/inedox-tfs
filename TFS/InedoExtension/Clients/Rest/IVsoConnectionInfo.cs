@@ -1,4 +1,4 @@
-﻿namespace Inedo.TFS
+﻿namespace Inedo.Extensions.TFS.Clients.Rest
 {
     public interface IVsoConnectionInfo
     {

@@ -68,13 +68,18 @@ Tfs-GetSource(
         {
             this.LogInformation($"Getting source from TFS {(string.IsNullOrEmpty(this.Label) ? "(latest)" : $"labeled '{this.Label}'")}...");
 
-            var args = new List<string>();
+            var args = new List<TfsArg>();
             if (!string.IsNullOrWhiteSpace(this.SourcePath))
-                args.Add($"--source=\"{this.SourcePath}\"");
-            args.Add($"--workspace=\"{(!string.IsNullOrWhiteSpace(this.WorkspaceDiskPath) ? this.WorkspaceDiskPath : PathEx.Combine(context.ResolvePath(@"~\TfsWorkspaces"), this.WorkspaceName))}\"");
-            args.Add($"--target=\"{context.ResolvePath(this.DiskPath)}\"");
+                args.Add(new ("--source", this.SourcePath, true, false));
+
+            args.Add(new("--workspace", !string.IsNullOrWhiteSpace(this.WorkspaceDiskPath) ? this.WorkspaceDiskPath : context.ResolvePath(@"~\TfsWorkspaces"), true, false));
+            if(!string.IsNullOrWhiteSpace(this.WorkspaceName))
+                args.Add(new("--workspace-name", this.WorkspaceName, true, false));
+            
+
+            args.Add(new("--target", context.ResolvePath(this.DiskPath), true, false));
             if(!string.IsNullOrWhiteSpace(this.Label))
-                args.Add($"--label=\"{this.Label}\"");
+                args.Add(new ("--label", this.Label, true, false));
             var result = await this.ExecuteCommandAsync(context, "get", args.ToArray());
             if (result.ExitCode != 0)
                 this.LogError("Failed to get source");

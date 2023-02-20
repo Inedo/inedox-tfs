@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using Inedo.TFS.TfsTiny;
+using Inedo.Diagnostics;
+using Inedo.IO;
 using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Microsoft.VisualStudio.Services.Common;
@@ -64,21 +64,6 @@ namespace Inedo.TFS.Clients.SourceControl
             var results = versionControlService.CreateLabel(versionControlLabel, new[] { new LabelItemSpec(new ItemSpec(path.AbsolutePath, RecursionType.Full), VersionSpec.Latest, false) }, LabelChildOption.Replace);
         }
 
-        //public IEnumerable<TfsSourcePath> EnumerateChildSourcePaths(TfsSourcePath path)
-        //{
-        //    this.collection.EnsureAuthenticated();
-
-        //    var sourceControl = this.collection.GetService<VersionControlServer>();
-        //    var itemSet = sourceControl.GetItems(path.AbsolutePath, RecursionType.OneLevel);
-
-        //    var result = from i in itemSet.Items
-        //                 where i.ServerItem != path.AbsolutePath
-        //                 where i.ItemType == ItemType.Folder
-        //                 select new TfsSourcePath(i.ServerItem, i.ItemType == ItemType.Folder);
-
-        //    return result;
-        //}
-
         public void Dispose()
         {
             this.collection?.Dispose();
@@ -86,21 +71,21 @@ namespace Inedo.TFS.Clients.SourceControl
 
         private static void CopyNonTfsFiles(string sourceDir, string targetDir)
         {
-            if (!Directory.Exists(sourceDir))
+            if (!DirectoryEx.Exists(sourceDir))
                 return;
 
-            Directory.CreateDirectory(targetDir);
+            DirectoryEx.Create(targetDir);
 
             var sourceDirInfo = new DirectoryInfo(sourceDir);
 
             foreach (var file in sourceDirInfo.GetFiles())
             {
-                file.CopyTo(Path.Combine(targetDir, file.Name), true);
+                file.CopyTo(PathEx.Combine(targetDir, file.Name), true);
             }
 
             foreach (var subDir in sourceDirInfo.GetDirectories().Where(d => d.Name != "$tf"))
             {
-                CopyNonTfsFiles(subDir.FullName, Path.Combine(targetDir, subDir.Name));
+                CopyNonTfsFiles(subDir.FullName, PathEx.Combine(targetDir, subDir.Name));
             }
         }
     }

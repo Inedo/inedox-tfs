@@ -51,13 +51,12 @@ namespace Inedo.Extensions.TFS.Operations
         [PlaceholderText("Use domain from credentials")]
         public string Domain { get; set; }
 
-#warning change to a better argument builder
-        protected async Task<TfsTinyExecutionResult> ExecuteCommandAsync(IOperationExecutionContext context, string command, params string[] arguments)
+        protected async Task<TfsTinyExecutionResult> ExecuteCommandAsync(IOperationExecutionContext context, string command, params TfsArg[] arguments)
         {
             this.LogDebug($"Executing TfsTiny.exe {command}");
             var executer = context.Agent.GetService<IRemoteProcessExecuter>();
-            var argBuilder = new StringBuilder();
-            argBuilder.Append(command).Append(" ");
+            var argBuilder = new TfsArgumentBuilder();
+            argBuilder.Append(command);
 
             UsernamePasswordCredentials credentials = null;
             TfsSecureResource resource = null;
@@ -67,13 +66,12 @@ namespace Inedo.Extensions.TFS.Operations
                 credentials = (UsernamePasswordCredentials)resource.GetCredentials(context);
             }
 
-            argBuilder.Append($"--url={(this.TeamProjectCollectionUrl ?? resource?.TeamProjectCollectionUrl)} ");
-            argBuilder.Append($"--username={(this.UserName ?? credentials?.UserName)} ");
-            argBuilder.Append($"--password={(this.PasswordOrToken ?? AH.Unprotect(credentials?.Password))} ");
+            argBuilder.AppendQuoted("--url", this.TeamProjectCollectionUrl ?? resource?.TeamProjectCollectionUrl);
+            argBuilder.Append("--username", this.UserName ?? credentials?.UserName);
+            argBuilder.AppendSensitive("--password", this.PasswordOrToken ?? AH.Unprotect(credentials?.Password));
             if (!string.IsNullOrWhiteSpace(this.Domain))
-                argBuilder.Append($"--domain={this.Domain} ");
-
-            argBuilder.Append(string.Join(' ', arguments));
+                argBuilder.Append("--domain", this.Domain);
+            argBuilder.AddRange(arguments);
 
             var startInfo = new RemoteProcessStartInfo
             {
@@ -82,7 +80,7 @@ namespace Inedo.Extensions.TFS.Operations
                 WorkingDirectory = context.WorkingDirectory
             };
             this.LogDebug("Working directory: " + startInfo.WorkingDirectory);
-            //this.LogDebug("Executing: " + startInfo.FileName + " " + arguments.ToSensitiveString());
+            this.LogDebug("Executing: " + startInfo.FileName + " " + argBuilder.ToSensitiveString());
             using (var process = executer.CreateProcess(startInfo))
             {
                 var outputLines = new List<string>();
@@ -134,14 +132,14 @@ namespace Inedo.Extensions.TFS.Operations
             public IList<string> ErrorLines { get; }
         }
 
-        private static string GetEmbeddedTfsTinyExePath(Agent agent)
+        public static string GetEmbeddedTfsTinyExePath(Agent agent)
         {
             var executer = agent.GetService<IRemoteMethodExecuter>();
             string assemblyDir = executer.InvokeFunc(GetAgentProviderAssemblyDirectory);
             var fileOps = agent.GetService<IFileOperationsExecuter>();
             return fileOps.CombinePath(assemblyDir, "TfsTiny", "TfsTiny.exe");
         }
-        private static string GetAgentProviderAssemblyDirectory()
+        public static string GetAgentProviderAssemblyDirectory()
         {
             return PathEx.GetDirectoryName(typeof(TfsOperation).Assembly.Location);
         }

@@ -8,6 +8,7 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="InedoLib" Version="957.0.3" />
     <PackageReference Include="Microsoft.TeamFoundationServer.ExtendedClient" Version="16.153.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />  
   </ItemGroup>
@@ -17,8 +18,6 @@
       <DestinationFile Include="@(SourceFile->'$(SolutionDir)InedoExtension\TfsTiny\%(RecursiveDir)%(Filename)%(Extension)')" />
     </ItemGroup>
 
-    <Copy SourceFiles="@(SourceFile)"
-          DestinationFiles="@(DestinationFile)"
-          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(SourceFile)" DestinationFiles="@(DestinationFile)" SkipUnchangedFiles="true" />
   </Target>
 </Project>
