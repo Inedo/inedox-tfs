@@ -6,7 +6,8 @@ using Inedo.Diagnostics;
 using Inedo.Documentation;
 using Inedo.Extensibility;
 using Inedo.Extensibility.Operations;
-using Inedo.IO;
+using Inedo.Extensions.TFS.Credentials;
+using Inedo.Web;
 
 namespace Inedo.Extensions.TFS.Operations
 {
@@ -17,7 +18,7 @@ namespace Inedo.Extensions.TFS.Operations
     [Example(@"
 # labels the current application's path with the current package number
 Tfs-ApplyLabel(
-    Credentials: Hdars-Tfs,
+    From: Hdars-Tfs,
     SourcePath: `$/$ApplicationName,
     Label: BM-$ReleaseName-$PackageNumber
 );
@@ -25,9 +26,11 @@ Tfs-ApplyLabel(
     [Serializable]
     public sealed class ApplyLabelOperation : TfsOperation
     {
+        [ScriptAlias("From")]
         [ScriptAlias("Credentials")]
-        [DisplayName("Credentials")]
-        public override string CredentialName { get; set; }
+        [DisplayName("From TFS Resource")]
+        [SuggestableValue(typeof(SecureResourceSuggestionProvider<TfsSecureResource>))]
+        public override string ResourceName { get; set; }
         [ScriptAlias("SourcePath")]
         [DisplayName("Source path")]
         public string SourcePath { get; set; }

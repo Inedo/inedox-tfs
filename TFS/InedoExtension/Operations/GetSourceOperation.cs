@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Text;
 using System.Threading.Tasks;
 using Inedo.Diagnostics;
 using Inedo.Documentation;
 using Inedo.Extensibility;
 using Inedo.Extensibility.Operations;
-using Inedo.IO;
+using Inedo.Extensions.TFS.Credentials;
+using Inedo.Web;
 
 namespace Inedo.Extensions.TFS.Operations
 {
@@ -18,7 +18,7 @@ namespace Inedo.Extensions.TFS.Operations
     [Example(@"
 # checkout a remote repository locally
 Tfs-GetSource(
-    Credentials: Hdars-Tfs,
+    From: Hdars-Tfs,
     SourcePath: `$/HdarsApp,
     DiskPath: ~\Sources
 );
@@ -26,9 +26,11 @@ Tfs-GetSource(
     [Serializable]
     public sealed class GetSourceOperation : TfsOperation
     {
+        [ScriptAlias("From")]
         [ScriptAlias("Credentials")]
-        [DisplayName("Credentials")]
-        public override string CredentialName { get; set; }
+        [DisplayName("From TFS Resource")]
+        [SuggestableValue(typeof(SecureResourceSuggestionProvider<TfsSecureResource>))]
+        public override string ResourceName { get; set; }
         [ScriptAlias("SourcePath")]
         [DisplayName("Source path")]
         public string SourcePath { get; set; }

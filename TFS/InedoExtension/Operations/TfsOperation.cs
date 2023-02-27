@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Net.Http.Headers;
-using System.Text;
 using System.Threading.Tasks;
 using Inedo.Agents;
 using Inedo.Diagnostics;
 using Inedo.Documentation;
 using Inedo.Extensibility;
 using Inedo.Extensibility.Agents;
-using Inedo.Extensibility.Credentials;
 using Inedo.Extensibility.Operations;
 using Inedo.Extensibility.SecureResources;
 using Inedo.Extensions.Credentials;
@@ -25,7 +22,7 @@ namespace Inedo.Extensions.TFS.Operations
         {
         }
 
-        public abstract string CredentialName { get; set; }
+        public abstract string ResourceName { get; set; }
 
         [Category("Connection/Identity")]
         [ScriptAlias("Url")]
@@ -60,9 +57,9 @@ namespace Inedo.Extensions.TFS.Operations
 
             UsernamePasswordCredentials credentials = null;
             TfsSecureResource resource = null;
-            if (!string.IsNullOrEmpty(this.CredentialName))
+            if (!string.IsNullOrEmpty(this.ResourceName))
             {
-                resource = (TfsSecureResource)SecureResource.TryCreate(this.CredentialName, context);
+                resource = (TfsSecureResource)SecureResource.TryCreate(this.ResourceName, context);
                 credentials = (UsernamePasswordCredentials)resource.GetCredentials(context);
             }
 
