@@ -43,15 +43,26 @@ namespace Inedo.TFS.Clients.SourceControl
             this.collection.EnsureAuthenticated();
 
             var versionControlServer = this.collection.GetService<VersionControlServer>();
-
+            if (verbose)
+            {
+                this.log.LogDebug("Creating workspace...");
+            }
             using var workspace = MappedWorkspace.Create(workspaceInfo, versionControlServer, sourcePath, this.log);
             var versionSpec = label == null
                 ? VersionSpec.Latest
                 : VersionSpec.ParseSingleSpec("L" + label, versionControlServer.AuthorizedUser);
-
+            if (verbose)
+            {
+                this.log.LogDebug("Workspace created");
+                this.log.LogDebug("Pulling source...");
+            }
             workspace.Workspace.Get(new GetRequest(new ItemSpec(sourcePath.AbsolutePath, RecursionType.Full), versionSpec), GetOptions.Overwrite);
-
+            if (verbose)
+                this.log.LogDebug($"Copying source to target directory \"{targetDirectory}\"...");
             CopyNonTfsFiles(workspace.DiskPath, targetDirectory, verbose);
+            if (verbose)
+                this.log.LogDebug($"Copied to target directory");
+
         }
 
         public void ApplyLabel(TfsSourcePath path, string label, string comment)
