@@ -72,7 +72,15 @@ namespace Inedo.TFS.Clients.SourceControl
             var versionControlService = this.collection.GetService<VersionControlServer>();
 
             var versionControlLabel = new VersionControlLabel(versionControlService, label, versionControlService.AuthorizedUser, path.AbsolutePath, comment);
-            var results = versionControlService.CreateLabel(versionControlLabel, new[] { new LabelItemSpec(new ItemSpec(path.AbsolutePath, RecursionType.Full), VersionSpec.Latest, false) }, LabelChildOption.Replace);
+            var results = versionControlService.CreateLabel(versionControlLabel, new[] { new LabelItemSpec(new ItemSpec(path.AbsolutePath, RecursionType.Full), VersionSpec.Latest, false) }, LabelChildOption.Replace, out Failure[] failures);
+            foreach(var failure in failures)
+            {
+                log.LogError(failure.GetFormattedMessage());
+            }
+            foreach (var result in results)
+            {
+                this.log.LogDebug($"{result.Status} \"{result.Label}\" on the scope \"{result.Scope}\".");
+            }
         }
 
         public void Dispose()
