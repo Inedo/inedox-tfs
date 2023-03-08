@@ -59,8 +59,8 @@ namespace Inedo.TFS
 
                 client.GetSource(
                     new TfsSourcePath(source),
-                    new WorkspaceInfo(workspace, inputArgs.Named.TryGetValue("workspace-name")),
-                    target ?? "\\",
+                    new WorkspaceInfo(workspace?.TrimEnd('\\'), inputArgs.Named.TryGetValue("workspace-name")),
+                    target?.TrimEnd('\\') ?? "\\",
                     inputArgs.Named.TryGetValue("label"),
                     inputArgs.Named.ContainsKey("v")
                 );

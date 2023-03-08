@@ -74,12 +74,12 @@ Tfs-GetSource(
             if (!string.IsNullOrWhiteSpace(this.SourcePath))
                 args.Add(new ("--source", this.SourcePath, true, false));
 
-            args.Add(new("--workspace", !string.IsNullOrWhiteSpace(this.WorkspaceDiskPath) ? this.WorkspaceDiskPath : context.ResolvePath(@"~\TfsWorkspaces"), true, false));
+            args.Add(new("--workspace", (!string.IsNullOrWhiteSpace(this.WorkspaceDiskPath) ? this.WorkspaceDiskPath : context.ResolvePath(@"~\TfsWorkspaces"))?.TrimEnd('\\'), true, false));
             if(!string.IsNullOrWhiteSpace(this.WorkspaceName))
                 args.Add(new("--workspace-name", this.WorkspaceName, true, false));
             
 
-            args.Add(new("--target", context.ResolvePath(this.DiskPath), true, false));
+            args.Add(new("--target", context.ResolvePath(this.DiskPath)?.TrimEnd('\\'), true, false));
             if(!string.IsNullOrWhiteSpace(this.Label))
                 args.Add(new ("--label", this.Label, true, false));
             var result = await this.ExecuteCommandAsync(context, "get", args.ToArray());
