@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Inedo.TFS.Clients.SourceControl;
 using Inedo.TFS.TfsTiny;
@@ -57,13 +58,15 @@ namespace Inedo.TFS
             ))
             {
 
-                client.GetSource(
+                var changeSet = client.GetSource(
                     new TfsSourcePath(source),
                     new WorkspaceInfo(workspace?.TrimEnd('\\'), inputArgs.Named.TryGetValue("workspace-name")),
                     target?.TrimEnd('\\') ?? "\\",
                     inputArgs.Named.TryGetValue("label"),
                     inputArgs.Named.ContainsKey("v")
                 );
+
+                Console.WriteLine($"ChangeSet: {changeSet}");
             }
 
             return Task.CompletedTask;
@@ -91,7 +94,8 @@ namespace Inedo.TFS
                 client.ApplyLabel(
                     new TfsSourcePath(source),
                     inputArgs.Named.TryGetValue("label"),
-                    inputArgs.Named.TryGetValue("comment") ?? "Label applied by BuildMaster"
+                    inputArgs.Named.TryGetValue("comment") ?? "Label applied by BuildMaster",
+                    inputArgs.Named.TryGetValue("changeset", out var changeSet) ? changeSet : null
                 );
             }
 
@@ -104,7 +108,7 @@ namespace Inedo.TFS
             Console.WriteLine(string.Empty);
             Console.WriteLine("Usage: get --url=<URL of Azure DevOps instance> --username=<Azure DevOps user name > --password=<Azure DevOps Password or PAT> [--domain=<User's domain>] [--source=<path in TFVC repository>] [--workspace=<Workspace folder>] [--workspace-name=<Workspace name>] [--target=<location to save checked out files>] [--label=<Label to check out at>] [--v (enables verbose output)]");
             Console.WriteLine(string.Empty);
-            Console.WriteLine("Usage: label --url=<URL of Azure DevOps instance> --username=<Azure DevOps user name > --password=<Azure DevOps Password or PAT> [--domain=<User's domain>] [--source=<path in TFVC repository>] [--label=<label name to apply>] [--comment=<comment message for label>]");
+            Console.WriteLine("Usage: label --url=<URL of Azure DevOps instance> --username=<Azure DevOps user name > --password=<Azure DevOps Password or PAT> [--domain=<User's domain>] [--source=<path in TFVC repository>] [--label=<label name to apply>] [--comment=<comment message for label>] [--changeset=<change set id>]");
             return Task.CompletedTask;
         }
 

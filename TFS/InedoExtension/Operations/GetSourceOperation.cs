@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 using Inedo.Diagnostics;
 using Inedo.Documentation;
@@ -52,6 +53,11 @@ Tfs-GetSource(
         [DisplayName("Workspace disk path")]
         [PlaceholderText("BuildMaster managed")]
         public string WorkspaceDiskPath { get; set; }
+        [Output]
+        [ScriptAlias("ChangeSet")]
+        [DisplayName("Change Set")]
+        [PlaceholderText("eg. $ChangeSet")]
+        public string ChangeSet { get; set; }
 
         protected override ExtendedRichDescription GetDescription(IOperationConfiguration config)
         {
@@ -83,6 +89,7 @@ Tfs-GetSource(
             if(!string.IsNullOrWhiteSpace(this.Label))
                 args.Add(new ("--label", this.Label, true, false));
             var result = await this.ExecuteCommandAsync(context, "get", args.ToArray());
+            this.ChangeSet = result.OutputLines.Where(l => l.StartsWith("ChangeSet: ", StringComparison.OrdinalIgnoreCase)).FirstOrDefault()?.Substring(11).Trim();
             if (result.ExitCode != 0)
                 this.LogError("Failed to get source");
             this.LogInformation("Get TFS source complete.");

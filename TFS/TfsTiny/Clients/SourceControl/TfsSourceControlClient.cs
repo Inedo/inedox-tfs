@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Runtime.CompilerServices;
 using Inedo.Diagnostics;
 using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.VersionControl.Client;
@@ -38,7 +37,7 @@ namespace Inedo.TFS.Clients.SourceControl
             this.log = log;
         }
 
-        public void GetSource(TfsSourcePath sourcePath, WorkspaceInfo workspaceInfo, string targetDirectory, string label = null, bool verbose = false)
+        public string GetSource(TfsSourcePath sourcePath, WorkspaceInfo workspaceInfo, string targetDirectory, string label = null, bool verbose = false)
         {
             this.collection.EnsureAuthenticated();
 
@@ -56,23 +55,35 @@ namespace Inedo.TFS.Clients.SourceControl
                 this.log.LogDebug("Workspace created");
                 this.log.LogDebug("Pulling source...");
             }
-            workspace.Workspace.Get(new GetRequest(new ItemSpec(sourcePath.AbsolutePath, RecursionType.Full), versionSpec), GetOptions.Overwrite);
+            var status = workspace.Workspace.Get(new GetRequest(new ItemSpec(sourcePath.AbsolutePath, RecursionType.Full), versionSpec), GetOptions.Overwrite);
+            var items = workspace.Workspace.VersionControlServer.GetItems(sourcePath.AbsolutePath, versionSpec, RecursionType.Full);
+            var version = items.Items.Length > 0 ? items.Items.Max(i => i.ChangesetId) : (int?)null;
+
             if (verbose)
                 this.log.LogDebug($"Copying source to target directory \"{targetDirectory}\"...");
             CopyNonTfsFiles(workspace.DiskPath, targetDirectory, verbose);
             if (verbose)
                 this.log.LogDebug($"Copied to target directory");
 
+            return version?.ToString();
         }
 
-        public void ApplyLabel(TfsSourcePath path, string label, string comment)
+        public void ApplyLabel(TfsSourcePath path, string label, string comment, string changeset)
         {
             this.collection.EnsureAuthenticated();
 
             var versionControlService = this.collection.GetService<VersionControlServer>();
-
             var versionControlLabel = new VersionControlLabel(versionControlService, label, versionControlService.AuthorizedUser, path.AbsolutePath, comment);
-            var results = versionControlService.CreateLabel(versionControlLabel, new[] { new LabelItemSpec(new ItemSpec(path.AbsolutePath, RecursionType.Full), VersionSpec.Latest, false) }, LabelChildOption.Replace, out Failure[] failures);
+            var results = versionControlService.CreateLabel(
+                versionControlLabel, 
+                new[] { new LabelItemSpec(
+                    new ItemSpec(path.AbsolutePath, RecursionType.Full), 
+                    (string.IsNullOrWhiteSpace(changeset) ? VersionSpec.Latest : WorkspaceVersionSpec.ParseSingleSpec(FormatChangeSet(changeset), versionControlService.AuthorizedUser)), 
+                    false
+                ) }, 
+                LabelChildOption.Replace, 
+                out Failure[] failures
+            );
             foreach(var failure in failures)
             {
                 log.LogError(failure.GetFormattedMessage());
@@ -81,6 +92,13 @@ namespace Inedo.TFS.Clients.SourceControl
             {
                 this.log.LogDebug($"{result.Status} \"{result.Label}\" on the scope \"{result.Scope}\".");
             }
+        }
+
+        private string FormatChangeSet(string changeSet)
+        {
+            if (changeSet?.StartsWith("C") ?? true)
+                return changeSet;
+            return $"C{changeSet}";
         }
 
         public void Dispose()

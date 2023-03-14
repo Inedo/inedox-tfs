@@ -42,6 +42,10 @@ Tfs-ApplyLabel(
         [DisplayName("Comment")]
         [PlaceholderText("Label applied by BuildMaster")]
         public string Comment { get; set; }
+        [ScriptAlias("ChangeSet")]
+        [DisplayName("Change Set")]
+        [PlaceholderText("Latest")]
+        public string ChangeSet { get; set; }
 
         public override async Task ExecuteAsync(IOperationExecutionContext context)
         {
@@ -54,6 +58,9 @@ Tfs-ApplyLabel(
                 args.Add(new ("--label", this.Label, true, false));
 
             args.Add(new("--comment", AH.CoalesceString(this.Comment, "Label applied by BuildMaster"), true, false));
+
+            if (!string.IsNullOrWhiteSpace(this.ChangeSet))
+                args.Add(new("--changeset", this.ChangeSet, false, false));
 
             var result = await this.ExecuteCommandAsync(context, "label", args.ToArray());
             if (result.ExitCode != 0)
