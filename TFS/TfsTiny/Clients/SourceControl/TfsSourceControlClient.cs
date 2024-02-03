@@ -46,26 +46,28 @@ namespace Inedo.TFS.Clients.SourceControl
             {
                 this.log.LogDebug("Creating workspace...");
             }
-            using var workspace = MappedWorkspace.Create(workspaceInfo, versionControlServer, sourcePath, this.log);
-            var versionSpec = label == null
-                ? VersionSpec.Latest
-                : VersionSpec.ParseSingleSpec("L" + label, versionControlServer.AuthorizedUser);
-            if (verbose)
+            using (var workspace = MappedWorkspace.Create(workspaceInfo, versionControlServer, sourcePath, this.log))
             {
-                this.log.LogDebug("Workspace created");
-                this.log.LogDebug("Pulling source...");
+                var versionSpec = label == null
+                    ? VersionSpec.Latest
+                    : VersionSpec.ParseSingleSpec("L" + label, versionControlServer.AuthorizedUser);
+                if (verbose)
+                {
+                    this.log.LogDebug("Workspace created");
+                    this.log.LogDebug("Pulling source...");
+                }
+                var status = workspace.Workspace.Get(new GetRequest(new ItemSpec(sourcePath.AbsolutePath, RecursionType.Full), versionSpec), GetOptions.Overwrite);
+                var items = workspace.Workspace.VersionControlServer.GetItems(sourcePath.AbsolutePath, versionSpec, RecursionType.Full);
+                var version = items.Items.Length > 0 ? items.Items.Max(i => i.ChangesetId) : (int?)null;
+
+                if (verbose)
+                    this.log.LogDebug($"Copying source to target directory \"{targetDirectory}\"...");
+                CopyNonTfsFiles(workspace.DiskPath, targetDirectory, verbose);
+                if (verbose)
+                    this.log.LogDebug($"Copied to target directory");
+
+                return version?.ToString();
             }
-            var status = workspace.Workspace.Get(new GetRequest(new ItemSpec(sourcePath.AbsolutePath, RecursionType.Full), versionSpec), GetOptions.Overwrite);
-            var items = workspace.Workspace.VersionControlServer.GetItems(sourcePath.AbsolutePath, versionSpec, RecursionType.Full);
-            var version = items.Items.Length > 0 ? items.Items.Max(i => i.ChangesetId) : (int?)null;
-
-            if (verbose)
-                this.log.LogDebug($"Copying source to target directory \"{targetDirectory}\"...");
-            CopyNonTfsFiles(workspace.DiskPath, targetDirectory, verbose);
-            if (verbose)
-                this.log.LogDebug($"Copied to target directory");
-
-            return version?.ToString();
         }
 
         public void ApplyLabel(TfsSourcePath path, string label, string comment, string changeset)

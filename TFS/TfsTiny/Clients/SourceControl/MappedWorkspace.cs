@@ -33,7 +33,22 @@ namespace Inedo.TFS.Clients.SourceControl
             if (this.DeleteOnDispose)
             {
                 this.log?.LogDebug("Deleting contents of: " + this.DiskPath);
-                Directory.Delete(this.DiskPath, true);
+                var retry = 0;
+                while (retry < 3)
+                {
+                    try
+                    {
+                        Directory.Delete(this.DiskPath, true);
+                        retry = 3;
+                    }
+                    catch(Exception e) {
+                        retry++;
+                        if (retry < 3)
+                            this.log?.LogWarning($"Error deleting contents \"{e.Message}\", retrying...");
+                        else
+                            this.log?.LogError($"Failed to delete contents {e.Message}", e);
+                    }
+                }
 
                 try
                 {
