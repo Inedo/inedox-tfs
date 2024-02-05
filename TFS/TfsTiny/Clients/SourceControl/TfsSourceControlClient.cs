@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using Inedo.Diagnostics;
+using Inedo.IO;
 using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Microsoft.VisualStudio.Services.Common;
@@ -110,29 +111,31 @@ namespace Inedo.TFS.Clients.SourceControl
 
         private void CopyNonTfsFiles(string sourceDir, string targetDir, bool verbose)
         {
-            if (!Directory.Exists(sourceDir))
+            if (!DirectoryEx.Exists(sourceDir))
                 return;
             if (verbose)
                 this.log.LogDebug($"Creating target directory \"{targetDir}\"");
-            Directory.CreateDirectory(targetDir);
+            DirectoryEx.Create(targetDir);
 
             var sourceDirInfo = new DirectoryInfo(sourceDir);
 
             foreach (var file in sourceDirInfo.GetFiles())
             {
-                var targetFile = Path.Combine(targetDir, file.Name);
+                var targetFile = PathEx.Combine(targetDir, file.Name);
                 if (verbose)
                     this.log.LogDebug($"Copying file \"{file.FullName}\" to \"{targetFile}\"");
-                file.CopyTo(targetFile, true);
+                
+                FileEx.Copy(file.FullName, targetFile, true);
             }
 
             foreach (var subDir in sourceDirInfo.GetDirectories().Where(d => d.Name != "$tf"))
             {
-                var targetSubDir = Path.Combine(targetDir, subDir.Name);
+                var targetSubDir = PathEx.Combine(targetDir, subDir.Name);
                 if (verbose)
                     this.log.LogDebug($"Copying contents of \"{subDir.FullName}\" to \"{targetSubDir}\"");
                 CopyNonTfsFiles(subDir.FullName, targetSubDir, verbose);
             }
+
         }
     }
 }

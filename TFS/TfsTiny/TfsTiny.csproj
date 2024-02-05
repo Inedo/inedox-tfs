@@ -14,8 +14,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="InedoLib">
-      <HintPath>..\InedoLib950.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\InedoLib950\InedoLib.dll</HintPath>
     </Reference>
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
