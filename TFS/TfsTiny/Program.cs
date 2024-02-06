@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
+using System.Reflection;
 using System.Threading.Tasks;
 using Inedo.TFS.Clients.SourceControl;
 using Inedo.TFS.TfsTiny;
@@ -10,6 +10,13 @@ namespace Inedo.TFS
     {
         public static async Task<int> Main(string[] args)
         {
+            AppDomain.CurrentDomain.AssemblyResolve += (s,e) =>
+            {
+                if (e.Name.StartsWith("InedoLib,"))
+                    return Assembly.LoadFrom("InedoLib950.dll");
+                return null;
+            };
+
             try
             {
                 var inputArgs = InputArgs.Parse(args);
@@ -109,9 +116,7 @@ namespace Inedo.TFS
             Console.WriteLine("Usage: get --url=<URL of Azure DevOps instance> --username=<Azure DevOps user name > --password=<Azure DevOps Password or PAT> [--domain=<User's domain>] [--source=<path in TFVC repository>] [--workspace=<Workspace folder>] [--workspace-name=<Workspace name>] [--target=<location to save checked out files>] [--label=<Label to check out at>] [--v (enables verbose output)]");
             Console.WriteLine(string.Empty);
             Console.WriteLine("Usage: label --url=<URL of Azure DevOps instance> --username=<Azure DevOps user name > --password=<Azure DevOps Password or PAT> [--domain=<User's domain>] [--source=<path in TFVC repository>] [--label=<label name to apply>] [--comment=<comment message for label>] [--changeset=<change set id>]");
-            return Task.CompletedTask;
+            return InedoLib.CompletedTask;
         }
-
-        
     }
 }
