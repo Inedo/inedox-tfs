@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using Inedo.TFS.Clients.SourceControl;
@@ -13,7 +14,10 @@ namespace Inedo.TFS
             AppDomain.CurrentDomain.AssemblyResolve += (s,e) =>
             {
                 if (e.Name.StartsWith("InedoLib,"))
-                    return Assembly.LoadFrom("InedoLib950.dll");
+                {
+                    var myPath = Path.GetDirectoryName(typeof(Program).Assembly.Location);
+                    return Assembly.LoadFrom(Path.Combine(myPath, "InedoLib950.dll"));
+                }
                 return null;
             };
 
