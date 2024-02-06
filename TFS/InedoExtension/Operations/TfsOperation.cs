@@ -57,17 +57,29 @@ namespace Inedo.Extensions.TFS.Operations
 
             UsernamePasswordCredentials credentials = null;
             TfsSecureResource resource = null;
+            string username = null, domain = null;
             if (!string.IsNullOrEmpty(this.ResourceName))
             {
                 resource = (TfsSecureResource)SecureResource.TryCreate(this.ResourceName, context);
                 credentials = (UsernamePasswordCredentials)resource.GetCredentials(context);
+                username = credentials?.UserName;
+                if (username?.Contains('\\') == true)
+                {
+                    var parts = username.Split('\\');
+                    if (parts.Length == 2)
+                    {
+                        this.LogDebug("Username contains a \\; using that to split domain parameter");
+                        domain = parts[0];
+                        username = parts[1];
+                    }
+                }
             }
 
             argBuilder.AppendQuoted("--url", this.TeamProjectCollectionUrl ?? resource?.TeamProjectCollectionUrl);
-            argBuilder.Append("--username", this.UserName ?? credentials?.UserName);
+            argBuilder.Append("--username", this.UserName ?? username);
             argBuilder.AppendSensitive("--password", this.PasswordOrToken ?? AH.Unprotect(credentials?.Password));
-            if (!string.IsNullOrWhiteSpace(this.Domain))
-                argBuilder.Append("--domain", this.Domain);
+            if (!string.IsNullOrWhiteSpace(this.Domain ?? domain))
+                argBuilder.Append("--domain", this.Domain ?? domain);
             argBuilder.AddRange(arguments);
 
             var startInfo = new RemoteProcessStartInfo
