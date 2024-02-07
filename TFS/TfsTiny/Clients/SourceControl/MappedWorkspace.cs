@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Inedo.Diagnostics;
+using Inedo.IO;
 using Microsoft.TeamFoundation.VersionControl.Client;
 
 namespace Inedo.TFS.Clients.SourceControl
@@ -32,8 +34,27 @@ namespace Inedo.TFS.Clients.SourceControl
 
             if (this.DeleteOnDispose)
             {
-                this.log?.LogDebug("Deleting contents of: " + this.DiskPath);
-                Directory.Delete(this.DiskPath, true);
+                var retry = 0;
+                while (retry < 3)
+                {
+                    try
+                    {
+                        this.log?.LogDebug("Deleting contents of: " + this.DiskPath);
+                        DirectoryEx.Delete(this.DiskPath);
+                        retry = 3;
+                    }
+                    catch(Exception e) 
+                    {
+                        retry++;
+                        if (retry < 3)
+                        {
+                            this.log?.LogWarning($"Error deleting contents \"{e.Message}\", retrying after {retry * 1000}s...");
+                            Thread.Sleep(retry * 1000);
+                        }
+                        else
+                            this.log?.LogError($"Failed to delete contents {e.Message}", e);
+                    }
+                }
 
                 try
                 {
@@ -80,7 +101,7 @@ namespace Inedo.TFS.Clients.SourceControl
             if (!workspace.IsLocalPathMapped(diskPath))
             {
                 log?.LogDebug($"Local path is not mapped, creating mapping to \"{diskPath}\"...");
-                Directory.Delete(diskPath, true);
+                DirectoryEx.Delete(diskPath);
                 workspace.Map(sourcePath.AbsolutePath, diskPath);
             }
 
@@ -102,7 +123,7 @@ namespace Inedo.TFS.Clients.SourceControl
 
             log?.LogDebug($"Creating disk path '{diskPath}'...");
 
-            Directory.CreateDirectory(diskPath);
+            DirectoryEx.Create(diskPath);
 
             log?.LogDebug("Mapping workspace to disk path...");
             workspace.Map(sourcePath.AbsolutePath, diskPath);
