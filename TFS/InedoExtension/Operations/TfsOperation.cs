@@ -60,7 +60,7 @@ namespace Inedo.Extensions.TFS.Operations
             string username = null, domain = null;
             if (!string.IsNullOrEmpty(this.ResourceName))
             {
-                resource = (TfsSecureResource)SecureResource.TryCreate(this.ResourceName, context);
+                resource = (TfsSecureResource)SecureResource.TryCreate(SecureResourceType.General, this.ResourceName, context);
                 credentials = (UsernamePasswordCredentials)resource.GetCredentials(context);
                 username = credentials?.UserName;
                 if (username?.Contains('\\') == true)
